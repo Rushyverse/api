@@ -1,15 +1,9 @@
-name: Check
+name: Check-Dependabot
 
 on:
-  push:
-    branches-ignore:
+  pull_request_target:
+    branches:
       - 'dependabot-**'
-    paths-ignore:
-      - '**.md'
-
-concurrency:
-  group: check-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
