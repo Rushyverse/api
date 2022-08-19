@@ -14,31 +14,39 @@ repositories {
     }
 }
 
+val coroutineVersion: String by project
+val loggingVersion: String by project
+val koinVersion: String by project
+val mccoroutineVersion: String by project
+val paperVersion: String by project
+val junitVersion: String by project
+val mockkVersion: String by project
+val slf4jVersion: String by project
+
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.2")
-    implementation("io.github.microutils:kotlin-logging:2.1.21")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutineVersion")
+    implementation("io.github.microutils:kotlin-logging:$loggingVersion")
 
-    implementation("io.insert-koin:koin-core:3.2.0")
-    implementation("io.insert-koin:koin-logger-slf4j:3.2.0")
+    implementation("io.insert-koin:koin-core:$koinVersion")
+    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:2.2.0")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:2.2.0")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
+    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
 
-    compileOnly("io.papermc.paper:paper-api:1.19-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
     testImplementation(kotlin("test-junit5"))
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
-    testImplementation("io.insert-koin:koin-test:3.2.0") {
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+    testImplementation("io.insert-koin:koin-test:$koinVersion") {
         exclude("org.jetbrains.kotlin", "kotlin-test-junit")
     }
-    testImplementation("io.mockk:mockk:1.12.2")
-    testImplementation("org.slf4j:slf4j-api:2.0.0-alpha6")
-    testImplementation("org.slf4j:slf4j-simple:2.0.0-alpha6")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.slf4j:slf4j-api:$slf4jVersion")
+    testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
 }
 
 kotlin {
