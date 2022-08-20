@@ -51,9 +51,6 @@ dependencies {
 
 kotlin {
     explicitApi = org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode.Strict
-    jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
-    }
 
     sourceSets {
         all {
@@ -69,6 +66,10 @@ kotlin {
 val dokkaOutputDir = "${rootProject.projectDir}/dokka"
 
 tasks {
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
     test {
         useJUnitPlatform()
     }
