@@ -95,6 +95,11 @@ val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory")
     delete(dokkaOutputDir)
 }
 
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
 val javadocJar = tasks.register<Jar>("javadocJar") {
     dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
     archiveClassifier.set("javadoc")
@@ -108,6 +113,7 @@ publishing {
 
         create<MavenPublication>(project.name) {
             shadow.component(this)
+            artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
             pom {
