@@ -86,17 +86,12 @@ tasks {
     }
 
     shadowJar {
-        archiveFileName.set("${project.name}.jar")
+        archiveClassifier.set("")
     }
 }
 
 val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
     delete(dokkaOutputDir)
-}
-
-val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
-    from(sourceSets.main.get().allSource)
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {
@@ -111,7 +106,7 @@ publishing {
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
         create<MavenPublication>(project.name) {
-            from(components["kotlin"])
+            shadow.component(this)
             artifact(javadocJar.get())
 
             pom {
