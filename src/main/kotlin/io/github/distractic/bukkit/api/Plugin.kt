@@ -31,8 +31,12 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         registerListener { VillagerListener(this) }
     }
 
-    protected open fun modulePlugin(): Module = loadModule(id) {
+    protected inline fun <reified T: Plugin> modulePlugin(): Module = loadModule(id) {
         single { this@Plugin }
+        single { this@Plugin as T }
+    }
+
+    protected fun moduleClients(): Module = loadModule(id) {
         single { ClientManagerImpl() } bind ClientManager::class
     }
 
