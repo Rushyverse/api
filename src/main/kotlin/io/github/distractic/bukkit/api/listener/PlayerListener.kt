@@ -57,6 +57,6 @@ public class PlayerListener(private val plugin: Plugin) : Listener {
     public suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         val client = clients.removeClient(player) ?: return
-        client.cancel(SilentCancellationException("The player ${player.uniqueId} left"))
+        client.cancel(SilentCancellationException("The player ${player.name} (${player.uniqueId}) left"))
     }
 }
