@@ -1,7 +1,9 @@
 package io.github.distractic.bukkit.api.extension
 
 import io.github.distractic.bukkit.api.schedule.SchedulerTask
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
@@ -27,7 +29,10 @@ import kotlin.time.Duration
  * For example, when using `withContext(NonCancellable) { ... }` there is no change in dispatcher and
  * this call will not be cancelled neither on entry to the block inside `withContext` nor on exit from it.
  */
-public suspend inline fun <T> withScopeContext(scope: CoroutineScope, noinline block: suspend CoroutineScope.() -> T): T {
+public suspend inline fun <T> withScopeContext(
+    scope: CoroutineScope,
+    noinline block: suspend CoroutineScope.() -> T
+): T {
     return withContext(scope.coroutineContext, block)
 }
 

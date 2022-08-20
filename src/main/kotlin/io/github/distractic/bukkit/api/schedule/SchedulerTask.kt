@@ -114,9 +114,10 @@ public class SchedulerTask(
      * @param body Lambda function.
      * @return Task created.
      */
-    public suspend fun add(id: String = UUID.randomUUID().toString(), body: suspend Task.() -> Unit): Task = mutex.withLock {
-        addUnsafe(id, body)
-    }
+    public suspend fun add(id: String = UUID.randomUUID().toString(), body: suspend Task.() -> Unit): Task =
+        mutex.withLock {
+            addUnsafe(id, body)
+        }
 
     /**
      * Add a new body should be executed in the scheduler.
@@ -139,7 +140,11 @@ public class SchedulerTask(
      * @param body Lambda function.
      * @return Task created.
      */
-    public suspend fun addAt(index: Int, id: String = UUID.randomUUID().toString(), body: suspend Task.() -> Unit): Task =
+    public suspend fun addAt(
+        index: Int,
+        id: String = UUID.randomUUID().toString(),
+        body: suspend Task.() -> Unit
+    ): Task =
         mutex.withLock { addAtUnsafe(index, id, body) }
 
     /**

@@ -21,7 +21,8 @@ public fun CommandSender.sendMessageError(message: String): Unit = sendMessage(t
  * @return `true` if the sender has all permission, `false` otherwise.
  */
 @Suppress("NOTHING_TO_INLINE")
-public inline fun CommandSender.hasPermissions(vararg permissions: String): Boolean = permissions.all(this::hasPermission)
+public inline fun CommandSender.hasPermissions(vararg permissions: String): Boolean =
+    permissions.all(this::hasPermission)
 
 /**
  * Verify if a sender has several permissions.
@@ -31,4 +32,5 @@ public inline fun CommandSender.hasPermissions(vararg permissions: String): Bool
  * @return `true` if the sender has all permission, `false` otherwise.
  */
 @Suppress("NOTHING_TO_INLINE")
-public inline fun CommandSender.hasPermissions(permissions: Iterable<String>): Boolean = permissions.all(this::hasPermission)
+public inline fun CommandSender.hasPermissions(permissions: Iterable<String>): Boolean =
+    permissions.all(this::hasPermission)

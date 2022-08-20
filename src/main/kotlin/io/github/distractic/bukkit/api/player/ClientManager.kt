@@ -29,7 +29,8 @@ public suspend inline fun <reified T : Client> ClientManager.getTypedClientOrNul
  * @param key Key to find a client.
  * @return The client linked to a player, `null` if not found.
  */
-public suspend inline fun <reified T : Client> ClientManager.getTypedClientOrNull(key: String): T? = getClientOrNull(key) as T?
+public suspend inline fun <reified T : Client> ClientManager.getTypedClientOrNull(key: String): T? =
+    getClientOrNull(key) as T?
 
 /**
  * Manage the existing client present in the server.

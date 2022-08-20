@@ -42,7 +42,7 @@ public class ClientManagerImpl : ClientManager {
     override suspend fun getClient(player: Player): Client = getClient(getKey(player))
 
     override suspend fun getClient(key: String): Client =
-            getClientOrNull(key) ?: throw ClientNotFoundException("No client is linked to the name [$key]")
+        getClientOrNull(key) ?: throw ClientNotFoundException("No client is linked to the name [$key]")
 
     override suspend fun getClientOrNull(player: Player): Client? = getClientOrNull(getKey(player))
 

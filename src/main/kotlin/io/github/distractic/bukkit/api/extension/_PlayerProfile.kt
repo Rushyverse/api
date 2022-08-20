@@ -25,4 +25,5 @@ public inline fun PlayerProfile.setTextures(skin: String, signature: String? = n
  * @return The property with the name, `null` otherwise.
  */
 @Suppress("NOTHING_TO_INLINE")
-public inline fun PlayerProfile.getTexturesProperty(): ProfileProperty? = properties.find { it.name == PROPERTY_TEXTURES }
+public inline fun PlayerProfile.getTexturesProperty(): ProfileProperty? =
+    properties.find { it.name == PROPERTY_TEXTURES }
