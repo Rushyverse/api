@@ -39,18 +39,12 @@ public class ClientManagerImpl : ClientManager {
         _clients.remove(getKey(player))
     }
 
-    override suspend fun getClient(player: Player): Client = mutex.withLock {
-        getClient(getKey(player))
-    }
+    override suspend fun getClient(player: Player): Client = getClient(getKey(player))
 
     override suspend fun getClient(key: String): Client =
-        mutex.withLock {
             getClientOrNull(key) ?: throw ClientNotFoundException("No client is linked to the name [$key]")
-        }
 
-    override suspend fun getClientOrNull(player: Player): Client? = mutex.withLock {
-        getClientOrNull(getKey(player))
-    }
+    override suspend fun getClientOrNull(player: Player): Client? = getClientOrNull(getKey(player))
 
     override suspend fun getClientOrNull(key: String): Client? = mutex.withLock {
         _clients[key]
@@ -61,9 +55,7 @@ public class ClientManagerImpl : ClientManager {
      * @param p Player that has the key
      * @return The key for the Map
      */
-    private suspend fun getKey(p: Player): String = mutex.withLock {
-        p.name
-    }
+    private fun getKey(p: Player): String = p.name
 
     /**
      * Check if a client is linked to a player.
