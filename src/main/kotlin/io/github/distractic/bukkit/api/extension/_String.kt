@@ -4,39 +4,13 @@
 package io.github.distractic.bukkit.api.extension
 
 import org.bukkit.ChatColor
+import java.math.BigInteger
 import java.util.*
 
 /**
  * Length of the value of UUID.
  */
 public const val UUID_SIZE: Int = 36
-
-/**
- * First index of the dash.
- */
-public const val UUID_INDEX_FIRST_DASH: Int = 8
-
-/**
- * Second index of the dash.
- */
-public const val UUID_INDEX_SECOND_DASH: Int = 13
-
-/**
- * Third index of the dash.
- */
-public const val UUID_INDEX_THIRD_DASH: Int = 18
-
-/**
- * Fourth index of the dash.
- */
-public const val UUID_INDEX_FOURTH_DASH: Int = 23
-
-/**
- * Array containing all indexes of dashes.
- * @return Array with all indexes.
- */
-private fun uuidDashIndexes(): Array<Int> =
-    arrayOf(UUID_INDEX_FIRST_DASH, UUID_INDEX_SECOND_DASH, UUID_INDEX_THIRD_DASH, UUID_INDEX_FOURTH_DASH)
 
 /**
  * Apply the coloration of Bukkit
@@ -125,15 +99,6 @@ public fun String.toUUID(): UUID {
         return toUUIDStrict()
     }
 
-    val dashIndexes = uuidDashIndexes()
-    // Without dash
-    if (length == UUID_SIZE - dashIndexes.size) {
-        return StringBuilder(this).apply {
-            for (dashIndex in dashIndexes) {
-                insert(dashIndex, '-')
-            }
-        }.toString().toUUIDStrict()
-    }
-
-    throw IllegalArgumentException("Invalid UUID string: $this")
+    val idHex = BigInteger(this, 16)
+    return UUID(idHex.shiftRight(64).toLong(), idHex.toLong())
 }
