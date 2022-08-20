@@ -28,7 +28,7 @@ public inline fun BukkitRunnable(crossinline task: BukkitRunnable.() -> Unit): B
  */
 public suspend inline fun <T> onPrimaryThread(
     plugin: Plugin,
-    noinline block: CoroutineScope.() -> T
+    noinline block: suspend CoroutineScope.() -> T
 ): T = withContext(plugin.minecraftDispatcher, block)
 
 /**
@@ -39,5 +39,5 @@ public suspend inline fun <T> onPrimaryThread(
  */
 public suspend inline fun <T> onAsyncThread(
     plugin: Plugin,
-    noinline block: CoroutineScope.() -> T
+    noinline block: suspend CoroutineScope.() -> T
 ): T = withContext(plugin.asyncDispatcher, block)
