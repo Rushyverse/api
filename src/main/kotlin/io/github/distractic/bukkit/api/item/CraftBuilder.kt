@@ -85,9 +85,9 @@ public class CraftBuilder {
      * @param material Item type.
      * @return The item created from the material.
      */
-    public fun set(vararg positions: CraftSlot, material: Material): ItemStack {
+    public fun set(positions: Array<CraftSlot>, material: Material): ItemStack {
         return ItemStack(material).also {
-            set(*positions, item = it)
+            set(positions, item = it)
         }
     }
 
@@ -97,10 +97,10 @@ public class CraftBuilder {
      * @param builder Item builder.
      * @return The item built from the builder.
      */
-    public inline fun set(vararg positions: CraftSlot, builder: ItemStack.() -> Unit): ItemStack {
+    public inline fun set(positions: Array<CraftSlot>, builder: ItemStack.() -> Unit): ItemStack {
         contract { callsInPlace(builder, InvocationKind.EXACTLY_ONCE) }
         return item(builder).also {
-            set(*positions, item = it)
+            set(positions, item = it)
         }
     }
 
@@ -109,7 +109,7 @@ public class CraftBuilder {
      * @param positions Positions of the item.
      * @param item Item.
      */
-    public fun set(vararg positions: CraftSlot, item: ItemStack) {
+    public fun set(positions: Array<CraftSlot>, item: ItemStack) {
         positions.forEach {
             craft[it.index.toInt()] = item
         }
