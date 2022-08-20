@@ -82,7 +82,6 @@ tasks {
     }
 
     dokkaHtml.configure {
-        dependsOn(clean)
         outputDirectory.set(file(dokkaOutputDir))
     }
 
@@ -93,6 +92,11 @@ tasks {
 
 val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
     delete(dokkaOutputDir)
+}
+
+val sourcesJar by tasks.registering(Jar::class) {
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {
@@ -107,7 +111,9 @@ publishing {
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
         create<MavenPublication>(project.name) {
-            artifact(javadocJar)
+            from(components["kotlin"])
+            artifact(javadocJar.get())
+
             pom {
                 name.set(project.name)
                 description.set(project.description)
