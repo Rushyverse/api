@@ -3,7 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "1.7.10"
     id("org.jetbrains.dokka") version "1.7.10"
     id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("net.researchgate.release") version "3.0.0"
+    id("net.researchgate.release") version "3.0.1"
     `maven-publish`
 }
 
