@@ -111,8 +111,17 @@ public class CraftBuilder {
      */
     public fun set(positions: Array<CraftSlot>, item: ItemStack) {
         positions.forEach {
-            craft[it.index.toInt()] = item
+            set(it, item)
         }
+    }
+
+    /**
+     * Define the item stack at a position on the craft table.
+     * @param position Position of the item.
+     * @param item Item.
+     */
+    public fun set(position: CraftSlot, item: ItemStack) {
+        craft[position.index.toInt()] = item
     }
 
     /**

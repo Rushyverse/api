@@ -24,7 +24,7 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     override suspend fun onEnableAsync() {
         super.onEnableAsync()
 
-        CraftContext.startKoin(id) { }
+        CraftContext.startKoin(id)
         moduleBukkit()
 
         registerListener { PlayerListener(this) }

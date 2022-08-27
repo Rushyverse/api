@@ -1,0 +1,131 @@
+package io.github.distractic.bukkit.api.listener
+
+import io.github.distractic.bukkit.api.AbstractKoinTest
+import io.github.distractic.bukkit.api.player.Client
+import io.github.distractic.bukkit.api.player.ClientManager
+import io.github.distractic.bukkit.api.player.ClientManagerImpl
+import io.github.distractic.bukkit.api.player.exception.ClientAlreadyExistsException
+import io.github.distractic.bukkit.api.utils.getRandomString
+import io.mockk.every
+import io.mockk.mockk
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.test.runTest
+import net.kyori.adventure.text.Component
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
+import java.util.*
+import kotlin.test.*
+
+class PlayerListenerTest : AbstractKoinTest() {
+
+    lateinit var clientManager: ClientManager
+
+    private lateinit var listener: PlayerListener
+
+    @BeforeTest
+    override fun onBefore() {
+        super.onBefore()
+        clientManager = ClientManagerImpl()
+        loadTestModule {
+            single { clientManager }
+        }
+        listener = PlayerListener(plugin)
+    }
+
+    @Test
+    fun `contains no clients when instance is created`() {
+        assertTrue { clientManager.clients.isEmpty() }
+    }
+
+    @Nested
+    @DisplayName("Player join")
+    inner class PlayerJoin {
+
+        private lateinit var event: PlayerJoinEvent
+        private lateinit var player: Player
+
+        @BeforeTest
+        fun onBefore() {
+            player = createPlayerMock()
+            event = createEvent(player)
+        }
+
+        @Test
+        fun `create and save a new client`() = runTest {
+            val client = createClient(player)
+            every { plugin.createClient(any()) } returns client
+
+            listener.onJoin(event)
+
+            val clients = clientManager.clients
+            assertEquals(1, clients.size)
+            assertTrue { clientManager.contains(player) }
+            assertEquals(client, clients.values.first())
+
+            val otherPlayer = createPlayerMock()
+            val otherEvent = createEvent(otherPlayer)
+
+            val otherClient = createClient(otherPlayer)
+            every { plugin.createClient(otherPlayer) } returns otherClient
+
+            listener.onJoin(otherEvent)
+            assertEquals(2, clients.size)
+            assertTrue { clientManager.contains(player) && clientManager.contains(otherPlayer) }
+            clients.values.containsAll(listOf(client, otherClient))
+        }
+
+        @Test
+        fun `try to store a client with the same name but already exists and keep first instance`() = runTest {
+            val client = createClient(player)
+            every { plugin.createClient(player) } returns client
+
+            listener.onJoin(event)
+            assertThrows<ClientAlreadyExistsException> {
+                listener.onJoin(event)
+            }
+        }
+
+        private fun createEvent(player: Player): PlayerJoinEvent {
+            return PlayerJoinEvent(player, mockk<Component>())
+        }
+    }
+
+    @Nested
+    @DisplayName("Player leave")
+    inner class PlayerLeave {
+
+        @Test
+        fun `client linked to the player is removed and cancelled`() = runTest {
+            val player = createPlayerMock()
+            val client = Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Main + SupervisorJob()))
+            clientManager.put(player, client)
+            listener.onQuit(createEvent(player))
+
+            assertEquals(0, clientManager.clients.size)
+            assertFalse { client.isActive }
+        }
+
+        private fun createEvent(player: Player): PlayerQuitEvent {
+            return PlayerQuitEvent(player, mockk<Component>(), PlayerQuitEvent.QuitReason.DISCONNECTED)
+        }
+
+    }
+
+    private fun createPlayerMock(): Player {
+        val name = getRandomString()
+        val player = mockk<Player>(name)
+        every { player.name } returns name
+        every { player.uniqueId } returns UUID.randomUUID()
+        return player
+    }
+
+    private fun createClient(player: Player) =
+        Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Default + SupervisorJob()))
+}

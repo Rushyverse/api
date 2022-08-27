@@ -95,10 +95,12 @@ public fun String.toUUIDOrNull(): UUID? = try {
  */
 @Throws(IllegalArgumentException::class)
 public fun String.toUUID(): UUID {
+    val length = this.length
     if (length == UUID_SIZE) {
         return toUUIDStrict()
+    } else if (length == UUID_SIZE - 4) { // -4 because of dashes
+        val idHex = BigInteger(this, 16)
+        return UUID(idHex.shiftRight(64).toLong(), idHex.toLong())
     }
-
-    val idHex = BigInteger(this, 16)
-    return UUID(idHex.shiftRight(64).toLong(), idHex.toLong())
+    throw IllegalArgumentException("Invalid UUID format: $this")
 }

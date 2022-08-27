@@ -37,7 +37,12 @@ public object CraftContext {
     /**
      * [Koin] instanced linked to an app id.
      */
-    private val koins: MutableMap<String, Pair<KoinApplication, Koin?>> = mutableMapOf()
+    private val _koins: MutableMap<String, Pair<KoinApplication, Koin?>> = mutableMapOf()
+
+    /**
+     * [Koin] instanced linked to an app id.
+     */
+    public val koins: Map<String, Pair<KoinApplication, Koin?>> = _koins
 
     /**
      * Gets the [Koin] instance for an app.
@@ -52,13 +57,13 @@ public object CraftContext {
      * @param id App id to find the dedicated koin instance.
      * @return Koin?
      */
-    public fun getOrNull(id: String): Koin? = koins[id]?.second
+    public fun getOrNull(id: String): Koin? = _koins[id]?.second
 
     /** Closes and removes the current [Koin] instance. */
     public fun stopKoin(id: String): Unit = synchronized(this) {
-        val koinInstance = koins[id] ?: return@synchronized
+        val koinInstance = _koins[id] ?: return@synchronized
         koinInstance.second?.close()
-        koins -= id
+        _koins -= id
     }
 
     /**
@@ -68,9 +73,8 @@ public object CraftContext {
      *
      * @throws KoinAppAlreadyStartedException The [KoinApplication] has already been instantiated.
      */
-    public fun startKoin(id: String, appDeclaration: KoinAppDeclaration): KoinApplication = synchronized(this) {
-        val koinApplication = KoinApplication.init()
-        appDeclaration(koinApplication)
+    public fun startKoin(id: String, appDeclaration: KoinAppDeclaration = {}): KoinApplication = synchronized(this) {
+        val koinApplication = KoinApplication.init().apply(appDeclaration)
         return@synchronized startKoin(id, koinApplication)
     }
 
@@ -100,7 +104,7 @@ public object CraftContext {
             throw KoinAppAlreadyStartedException("Koin Application has already been started for id [$id]")
         }
 
-        koins[id] = koinApplication to koinApplication.koin
+        _koins[id] = koinApplication to koinApplication.koin
     }
 
     /**
@@ -109,7 +113,7 @@ public object CraftContext {
      * @param module The module to load.
      */
     public fun loadKoinModules(id: String, module: Module): Unit = synchronized(this) {
-        get(id).loadModules(listOf(module))
+        loadKoinModules(id, listOf(module))
     }
 
     /**
@@ -127,7 +131,7 @@ public object CraftContext {
      * @param module The module to unload.
      */
     public fun unloadKoinModules(id: String, module: Module): Unit = synchronized(this) {
-        get(id).unloadModules(listOf(module))
+        unloadKoinModules(id, listOf(module))
     }
 
     /**

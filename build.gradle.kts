@@ -39,6 +39,8 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
     testImplementation(kotlin("test-junit5"))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutineVersion")
+    testImplementation("io.papermc.paper:paper-api:$paperVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion") {
@@ -58,6 +60,7 @@ kotlin {
                 optIn("kotlin.RequiresOptIn")
                 optIn("kotlin.ExperimentalStdlibApi")
                 optIn("kotlin.contracts.ExperimentalContracts")
+                optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }
         }
     }

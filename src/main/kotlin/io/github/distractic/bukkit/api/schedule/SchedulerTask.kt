@@ -24,7 +24,7 @@ private val log = KotlinLogging.logger { }
  */
 public class SchedulerTask(
     coroutineScope: CoroutineScope,
-    private var delay: Duration,
+    public var delay: Duration,
     private var delayBefore: Boolean = false,
     private var stopWhenNoTask: Boolean = true
 ) : AbstractScheduler(coroutineScope) {
@@ -37,7 +37,7 @@ public class SchedulerTask(
      */
     public inner class Task(
         public val id: String = UUID.randomUUID().toString(),
-        private val parent: SchedulerTask,
+        public val parent: SchedulerTask,
         public val body: suspend Task.() -> Unit
     ) {
 
@@ -59,7 +59,7 @@ public class SchedulerTask(
     private var nextTaskIndex = 0
 
     private val _tasks = ArrayList<Task>()
-    private val tasks: List<Task> = _tasks
+    public val tasks: List<Task> = _tasks
 
     private val mutex = Mutex()
 

@@ -4,12 +4,14 @@ import io.github.distractic.bukkit.api.extension.minMax
 import io.github.distractic.bukkit.api.world.exception.WorldDifferentException
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.block.Block
 
 /**
  * Represents an area in a minecraft world.
- * @property startPosition Position with minimal coordinate's value.
- * @property endPosition Position with maximal coordinate's value.
+ * @property startLocation Position with minimal coordinate's value.
+ * @property endLocation Position with maximal coordinate's value.
+ * @property world World where the cuboid is applied.
  */
 public class Cuboid(location1: Location, location2: Location) {
 
@@ -39,8 +41,15 @@ public class Cuboid(location1: Location, location2: Location) {
         }
     }
 
-    public val startPosition: Location
-    public val endPosition: Location
+    public val startLocation: Location
+    public val endLocation: Location
+
+    public var world: World?
+        get() = startLocation.world
+        set(value) {
+            startLocation.world = value
+            endLocation.world = value
+        }
 
     init {
         val world1 = location1.world
@@ -52,8 +61,8 @@ public class Cuboid(location1: Location, location2: Location) {
         val (minX, maxX) = minMax(location1.x, location2.x)
         val (minY, maxY) = minMax(location1.y, location2.y)
         val (minZ, maxZ) = minMax(location1.z, location2.z)
-        startPosition = Location(world1, minX, minY, minZ)
-        endPosition = Location(world1, maxX, maxY, maxZ)
+        startLocation = Location(world1, minX, minY, minZ)
+        endLocation = Location(world1, maxX, maxY, maxZ)
     }
 
     /**
@@ -62,22 +71,22 @@ public class Cuboid(location1: Location, location2: Location) {
      * @param location Location.
      * @return `true` if the location is between bounds, `false` otherwise.
      */
-    public operator fun contains(location: Location): Boolean = location.world == startPosition.world
-            && location.x in startPosition.x..endPosition.x
-            && location.y in startPosition.y..endPosition.y
-            && location.z in startPosition.z..endPosition.z
+    public operator fun contains(location: Location): Boolean = location.world == startLocation.world
+            && location.x in startLocation.x..endLocation.x
+            && location.y in startLocation.y..endLocation.y
+            && location.z in startLocation.z..endLocation.z
 
     /**
      * Create an iterator to iterate on all locations present in the area.
      * @return Iterator of location.
      */
     public fun locationSequence(): Sequence<Location> = sequence {
-        val world = startPosition.world
-        for (x in startPosition.blockX..endPosition.blockX) {
+        val world = startLocation.world
+        for (x in startLocation.blockX..endLocation.blockX) {
             val xDouble = x.toDouble()
-            for (y in startPosition.blockY..endPosition.blockY) {
+            for (y in startLocation.blockY..endLocation.blockY) {
                 val yDouble = y.toDouble()
-                for (z in startPosition.blockZ..endPosition.blockZ) {
+                for (z in startLocation.blockZ..endLocation.blockZ) {
                     yield(Location(world, xDouble, yDouble, z.toDouble()))
                 }
             }
