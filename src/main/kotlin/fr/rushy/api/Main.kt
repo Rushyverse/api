@@ -12,6 +12,8 @@ public class Main {
 
     public companion object {
 
+        private const val DEFAULT_PORT = 25565
+
         @JvmStatic
         public fun main(args: Array<String>) {
             val minecraftServer = MinecraftServer.init()
@@ -24,7 +26,7 @@ public class Main {
             val globalEventHandler = MinecraftServer.getGlobalEventHandler()
             handlePlayerLoginEvent(globalEventHandler, instanceContainer)
 
-            val port = args.getOrElse(0) { "25565" }.toInt()
+            val port = args.getOrNull(0)?.toIntOrNull() ?: DEFAULT_PORT
             minecraftServer.start("0.0.0.0", port)
         }
 
