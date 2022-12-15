@@ -58,33 +58,32 @@ tasks {
         delete(dokkaOutputDir)
     }
 
+    val deleteDokkaOutputDir by register<Delete>("deleteDokkaOutputDirectory") {
+        group = "documentation"
+        delete(dokkaOutputDir)
+    }
+
     dokkaHtml.configure {
-        dependsOn(clean)
+        dependsOn(deleteDokkaOutputDir)
         outputDirectory.set(file(dokkaOutputDir))
     }
 }
 
+val sourcesJar by tasks.registering(Jar::class) {
+    group = "build"
+    archiveClassifier.set("sources")
+    from(sourceSets.main.get().allSource)
+}
+
+val javadocJar = tasks.register<Jar>("javadocJar") {
+    group = "documentation"
+    dependsOn(tasks.dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaOutputDir)
+}
+
 publishing {
     val projectName = project.name
-
-    tasks.dokkaHtml {
-        outputDirectory.set(file(dokkaOutputDir))
-    }
-
-    val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
-        delete(dokkaOutputDir)
-    }
-
-    val sourcesJar by tasks.registering(Jar::class) {
-        archiveClassifier.set("sources")
-        from(sourceSets.main.get().allSource)
-    }
-
-    val javadocJar = tasks.register<Jar>("javadocJar") {
-        dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
-        archiveClassifier.set("javadoc")
-        from(dokkaOutputDir)
-    }
 
     publications {
         val projectOrganizationPath = "Rushyverse/$projectName"
@@ -93,6 +92,7 @@ publishing {
         create<MavenPublication>(projectName) {
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
+
             pom {
                 name.set(projectName)
                 description.set(project.description)
