@@ -1,7 +1,9 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.20"
+    kotlin("jvm") version "1.7.22"
+    kotlin("plugin.serialization") version "1.7.22"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.jetbrains.dokka") version "1.7.20"
     `maven-publish`
 }
@@ -11,20 +13,26 @@ repositories {
     maven("https://jitpack.io")
 }
 
-val minestomVersion: String by project
-val loggingVersion: String by project
-val mockkVersion: String by project
-
 dependencies {
+    val minestomVersion = "809d9516b2"
+    val loggingVersion = "3.0.4"
+    val mockkVersion = "1.13.3"
+    val coroutinesCoreVersion = "1.6.4"
+    val kotlinSerializationVersion = "1.4.1"
+
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
     implementation("com.github.Minestom.Minestom:Minestom:$minestomVersion")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
 
     // Logging information
     implementation("io.github.microutils:kotlin-logging:$loggingVersion")
 
     testImplementation(kotlin("test-junit5"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesCoreVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.Minestom.Minestom:testing:$minestomVersion")
 }
@@ -46,12 +54,16 @@ kotlin {
 val dokkaOutputDir = "${rootProject.projectDir}/dokka"
 
 tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
     test {
         useJUnitPlatform()
     }
 
-    withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+    build {
+        dependsOn(shadowJar)
     }
 
     clean {
@@ -66,6 +78,10 @@ tasks {
     dokkaHtml.configure {
         dependsOn(deleteDokkaOutputDir)
         outputDirectory.set(file(dokkaOutputDir))
+    }
+
+    shadowJar {
+        archiveClassifier.set("")
     }
 }
 
@@ -90,6 +106,7 @@ publishing {
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
         create<MavenPublication>(projectName) {
+            shadow.component(this)
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 

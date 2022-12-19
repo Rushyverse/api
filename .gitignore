@@ -228,3 +228,7 @@ gradle-app.setting
 # End of https://www.toptal.com/developers/gitignore/api/intellij,eclipse,kotlin,gradle
 
 dokka/
+# In case of someone execute the server in IDE
+*.conf
+world/
+extensions/
