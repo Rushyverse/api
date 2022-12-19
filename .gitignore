@@ -229,6 +229,6 @@ gradle-app.setting
 
 dokka/
 # In case of someone execute the server in IDE
-*.conf
-world/
-extensions/
+./*.conf
+./world/
+./extensions/
