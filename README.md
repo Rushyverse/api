@@ -1,4 +1,4 @@
-# API
+_# API
 
 This project allows to create a Minestom server easily in Kotlin. It provides a lot of features to create a Minecraft server.
 
@@ -43,20 +43,22 @@ dependencies {
 ### Maven
 
 ```xml
-<repositories>
-  <repository>
-    <id>jitpack</id>
-    <url>https://jitpack.io</url>
-  </repository>
-</repositories>
+<project>
+    <repositories>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
-<dependencies>
-  <dependency>
-      <groupId>com.github.Rushyverse</groupId>
-      <artifactId>api</artifactId>
-      <version>{version}</version>
-  </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.Rushyverse</groupId>
+            <artifactId>api</artifactId>
+            <version>{version}</version>
+        </dependency>
+    </dependencies>
+</project>
 ```
 
 ### Local modification
@@ -100,20 +102,22 @@ dependencies {
 ### Maven
 
 ```xml
-<repositories>
-    <repository>
-        <id>mavenLocal</id>
-        <url>file://${user.home}/.m2/repository</url>
-    </repository>
-</repositories>
+<project>
+    <repositories>
+        <repository>
+            <id>mavenLocal</id>
+            <url>file://${user.home}/.m2/repository</url>
+        </repository>
+    </repositories>
 
-<dependencies>
-  <dependency>
-      <groupId>com.github.Rushyverse</groupId>
-      <artifactId>api</artifactId>
-      <version>{version}</version>
-  </dependency>
-</dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.github.Rushyverse</groupId>
+            <artifactId>api</artifactId>
+            <version>{version}</version>
+        </dependency>
+    </dependencies>
+</project>
 ```
 
 ## Usage
@@ -124,26 +128,42 @@ To create a server, you need to create a class that extends `RushyServer` and ov
 and configuration classes to load the configuration of the server.
 
 ***Configuration classes***
+
+The interfaces for configuration are located in this [package](src/main/kotlin/fr/rushy/api/configuration/IConfiguration.kt).
+
 ```kotlin
 import fr.rushy.api.configuration.IConfiguration
 import fr.rushy.api.configuration.IServerConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-@Suppress("PROVIDED_RUNTIME_TOO_LOW") // https://github.com/Kotlin/kotlinx.serialization/issues/993
 @Serializable
 data class MyConfiguration(
     @SerialName("server")
     override val server: MyServerConfiguration
 ) : IConfiguration
 
-@Suppress("PROVIDED_RUNTIME_TOO_LOW")
 @Serializable
 data class MyServerConfiguration(
     override val port: Int,
     override val world: String
 ) : IServerConfiguration
 ```
+
+If when you start your application, you have an error like this:
+
+**Your current kotlinx.serialization core version is too low, while current Kotlin compiler plugin 1.7.22 requires at least 1.0-M1-SNAPSHOT. Please update your kotlinx.serialization runtime dependency.**
+
+You need to suppress the warning by adding `@Suppress("PROVIDED_RUNTIME_TOO_LOW")` on the class.
+
+````kotlin
+@Suppress("PROVIDED_RUNTIME_TOO_LOW") // https://github.com/Kotlin/kotlinx.serialization/issues/993
+@Serializable
+data class MyConfiguration(
+    @SerialName("server")
+    override val server: MyServerConfiguration
+) : IConfiguration
+````
 
 ***Server class***
 ```kotlin
@@ -159,7 +179,9 @@ class MyServer(private val configurationPath: String?) : RushyServer() {
     }
     
     override fun start() {
-        start<MyConfiguration>(configurationPath) {
+        start<MyConfiguration>(configurationPath) { 
+            // this = MyConfiguration
+            // it = InstanceContainer
             // Configure your server here
         }
     }
@@ -178,5 +200,29 @@ server {
   port = 25565
   world = "world"
 }
+```
 
+If in the working directory (where you launch the server) the configuration file will be created if it doesn't exist.
+However, the world folder must be added manually.
 
+_The method `start` takes a string as parameter. This string is the path to the configuration file. If the string is null, the configuration file will be searched in the working directory._
+
+## Build
+
+To build the project, you need to use the gradle app ([gradlew.bat](gradlew.bat) for windows
+and [gradlew](gradlew) for linux).
+`gradlew` is a wrapper to run gradle command without install it on our computer.
+
+````shell
+gradlew shadowJar
+````
+
+The jar will be created in the [dedicated folder](build/libs).
+
+### Test
+
+The code is tested using JUnit and can be executed using the following command:
+
+```bash
+gradlew test
+```_
