@@ -5,8 +5,8 @@ import io.github.rushyverse.api.command.GiveCommand
 import io.github.rushyverse.api.command.KickCommand
 import io.github.rushyverse.api.command.StopCommand
 import io.github.rushyverse.api.configuration.IConfiguration
-import io.github.rushyverse.api.configuration.IServerConfiguration
 import io.github.rushyverse.api.translation.ResourceBundleTranslationsProvider
+import io.github.rushyverse.api.translation.SupportedLanguage
 import io.github.rushyverse.api.translation.TranslationsProvider
 import io.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import io.github.rushyverse.api.utils.workingDirectory
@@ -54,23 +54,21 @@ public abstract class RushyServer {
         val minecraftServer = MinecraftServer.init()
         val instanceManager = MinecraftServer.getInstanceManager()
         val instanceContainer = instanceManager.createInstanceContainer()
-        loadWorld(config.server, instanceContainer)
+        val serverConfig = config.server
+        loadWorld(serverConfig.world, instanceContainer)
 
         init(config, instanceContainer)
 
-        minecraftServer.start("0.0.0.0", config.server.port)
+        minecraftServer.start("0.0.0.0", serverConfig.port)
     }
 
     /**
-     * With the [serverConfig], retrieve the file of the world and load it in the [instanceContainer].
-     * @param serverConfig Configuration of the minestom server.
+     * With the [worldFolder], retrieve the file of the world and load it in the [instanceContainer].
+     * @param worldFolder World folder.
      * @param instanceContainer Instance container of the server.
      */
-    protected open fun loadWorld(
-        serverConfig: IServerConfiguration,
-        instanceContainer: InstanceContainer
-    ) {
-        val anvilWorld = File(workingDirectory, serverConfig.world)
+    protected open fun loadWorld(worldFolder: String, instanceContainer: InstanceContainer) {
+        val anvilWorld = File(workingDirectory, worldFolder)
         if (!anvilWorld.isDirectory) {
             throw FileSystemException(
                 anvilWorld,
@@ -92,7 +90,7 @@ public abstract class RushyServer {
     }
 
     /**
-     * Create a translation provider to provide translations for the [supported languages][fr.rushy.api.translation.SupportedLanguage].
+     * Create a translation provider to provide translations for the [supported languages][SupportedLanguage].
      * @return New translation provider.
      */
     protected open fun createTranslationsProvider(bundles: Iterable<String>): TranslationsProvider {
