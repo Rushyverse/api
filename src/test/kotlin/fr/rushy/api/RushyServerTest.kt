@@ -16,9 +16,10 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-object TestServer : RushyServer() {
-    override fun main(args: Array<String>) {
-        start<TestConfiguration>(args.firstOrNull()) {
+class TestServer(private val configuration: String? = null) : RushyServer() {
+
+    override fun start() {
+        start<TestConfiguration>(configuration) {
             registerCommands()
         }
     }
@@ -45,7 +46,7 @@ class RushyServerTest : AbstractTest() {
         @Test
         fun `should create a configuration file if it doesn't exist`() {
             assertThrows<IOException> {
-                TestServer.main(emptyArray())
+                TestServer().start()
             }
             val configurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
             assertTrue { configurationFile.isFile }
@@ -63,7 +64,7 @@ class RushyServerTest : AbstractTest() {
             configurationToHoconFile(configuration, configurationFile)
 
             val exception = assertThrows<FileSystemException> {
-                TestServer.main(arrayOf(configurationFile.absolutePath))
+                TestServer(configurationFile.absolutePath).start()
             }
             assertEquals(configuration.server.world, exception.file.name)
         }
@@ -81,7 +82,7 @@ class RushyServerTest : AbstractTest() {
 
             copyWorldInTmpDirectory(configuration)
 
-            TestServer.main(arrayOf(configurationFile.absolutePath))
+            TestServer(configurationFile.absolutePath).start()
 
             // If no exception is thrown, the world is loaded
             assertTrue { MinecraftServer.isStarted() }
@@ -98,7 +99,7 @@ class RushyServerTest : AbstractTest() {
         @Test
         fun `should load all commands`() {
             copyWorldInTmpDirectory()
-            TestServer.main(emptyArray())
+            TestServer().start()
 
             val commandManager = MinecraftServer.getCommandManager()
             assertContentEquals(

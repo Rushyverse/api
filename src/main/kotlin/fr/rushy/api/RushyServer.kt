@@ -34,10 +34,9 @@ public abstract class RushyServer {
     }
 
     /**
-     * Entrypoint of the application.
-     * @param args Application's arguments.
+     * Start the minecraft server.
      */
-    public abstract fun main(args: Array<String>)
+    public abstract fun start()
 
     /**
      * Initialize the server and start it using the given (or default) configuration.
