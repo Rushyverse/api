@@ -4,7 +4,7 @@ package fr.rushy.api.configuration
 
 import fr.rushy.api.AbstractTest
 import fr.rushy.api.TestConfiguration
-import fr.rushy.api.configuration.Configuration.Companion.getOrCreateConfigurationFile
+import fr.rushy.api.configuration.IConfiguration.Companion.getOrCreateConfigurationFile
 import fr.rushy.api.utils.randomString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -23,7 +23,7 @@ class ConfigurationTest : AbstractTest() {
 
     @Test
     fun `name of default configuration file is correct`() = runTest {
-        assertEquals("server.conf", Configuration.DEFAULT_CONFIG_FILE_NAME)
+        assertEquals("server.conf", IConfiguration.DEFAULT_CONFIG_FILE_NAME)
     }
 
     @Nested
@@ -41,7 +41,7 @@ class ConfigurationTest : AbstractTest() {
 
             @Test
             fun `should return the default config file without edit it`() = runTest {
-                createConfigFileAndCheckIfFound(Configuration.DEFAULT_CONFIG_FILE_NAME) {
+                createConfigFileAndCheckIfFound(IConfiguration.DEFAULT_CONFIG_FILE_NAME) {
                     getOrCreateConfigurationFile()
                 }
             }
@@ -84,7 +84,7 @@ class ConfigurationTest : AbstractTest() {
                 val configurationFile = getOrCreateConfigurationFile()
                 assertTrue { configurationFile.isFile }
 
-                val expectedConfigurationFile = fileOfTmpDirectory(Configuration.DEFAULT_CONFIG_FILE_NAME)
+                val expectedConfigurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
                 assertEquals(expectedConfigurationFile, configurationFile)
 
                 inputStreamOfDefaultConfiguration().bufferedReader().use {
@@ -99,14 +99,14 @@ class ConfigurationTest : AbstractTest() {
             fun `should create default configuration and read it`() = runTest {
                 val configurationFile = getOrCreateConfigurationFile()
 
-                val configuration = Configuration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
+                val configuration = IConfiguration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
                 assertEquals(expectedDefaultConfiguration, configuration)
             }
 
             @Test
             fun `should throw exception if file not found`() = runTest {
                 assertThrows<MissingFieldException> {
-                    Configuration.readHoconConfigurationFile<TestConfiguration>(getRandomFileInTmpDirectory())
+                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(getRandomFileInTmpDirectory())
                 }
             }
 
@@ -117,7 +117,7 @@ class ConfigurationTest : AbstractTest() {
                 file.writeText("server { }")
 
                 assertThrows<MissingFieldException> {
-                    Configuration.readHoconConfigurationFile<TestConfiguration>(file)
+                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(file)
                 }
             }
         }
@@ -126,6 +126,6 @@ class ConfigurationTest : AbstractTest() {
     }
 
     private fun inputStreamOfDefaultConfiguration() =
-        Configuration::class.java.classLoader.getResourceAsStream(Configuration.DEFAULT_CONFIG_FILE_NAME)
+        IConfiguration::class.java.classLoader.getResourceAsStream(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
             ?: error("Unable to find default configuration file in server resources")
 }

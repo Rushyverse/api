@@ -4,7 +4,7 @@ import fr.rushy.api.command.GamemodeCommand
 import fr.rushy.api.command.GiveCommand
 import fr.rushy.api.command.KickCommand
 import fr.rushy.api.command.StopCommand
-import fr.rushy.api.configuration.Configuration
+import fr.rushy.api.configuration.IConfiguration
 import fr.rushy.api.utils.randomString
 import net.minestom.server.MinecraftServer
 import org.junit.jupiter.api.Nested
@@ -29,7 +29,14 @@ class RushyServerTest : AbstractTest() {
     @AfterTest
     override fun onAfter() {
         super.onAfter()
-        MinecraftServer.stopCleanly()
+        if (MinecraftServer.process() != null) {
+            MinecraftServer.stopCleanly()
+        }
+    }
+
+    @Test
+    fun `should have the correct bundle name`() {
+        assertEquals("api", RushyServer.API_BUNDLE_NAME)
     }
 
     @Nested
@@ -40,10 +47,10 @@ class RushyServerTest : AbstractTest() {
             assertThrows<IOException> {
                 TestServer.main(emptyArray())
             }
-            val configurationFile = fileOfTmpDirectory(Configuration.DEFAULT_CONFIG_FILE_NAME)
+            val configurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
             assertTrue { configurationFile.isFile }
 
-            val configuration = Configuration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
+            val configuration = IConfiguration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
             assertEquals(expectedDefaultConfiguration, configuration)
         }
 

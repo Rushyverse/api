@@ -1,8 +1,9 @@
 package fr.rushy.api
 
-import fr.rushy.api.configuration.Configuration
-import fr.rushy.api.configuration.ServerConfiguration
+import fr.rushy.api.configuration.IConfiguration
+import fr.rushy.api.configuration.IServerConfiguration
 import fr.rushy.api.utils.getAvailablePort
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.hocon.Hocon
 import org.junit.jupiter.api.io.TempDir
@@ -13,7 +14,14 @@ import kotlin.test.BeforeTest
 @Serializable
 data class TestConfiguration(
     override val server: ServerConfiguration
-) : Configuration
+) : IConfiguration
+
+@SerialName("server")
+@Serializable
+data class ServerConfiguration(
+    override val port: Int,
+    override val world: String
+) : IServerConfiguration
 
 abstract class AbstractTest {
 
