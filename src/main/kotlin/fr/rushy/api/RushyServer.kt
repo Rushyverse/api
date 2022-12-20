@@ -4,8 +4,8 @@ import fr.rushy.api.command.GamemodeCommand
 import fr.rushy.api.command.GiveCommand
 import fr.rushy.api.command.KickCommand
 import fr.rushy.api.command.StopCommand
-import fr.rushy.api.configuration.Configuration
-import fr.rushy.api.configuration.ServerConfiguration
+import fr.rushy.api.configuration.IConfiguration
+import fr.rushy.api.configuration.IServerConfiguration
 import fr.rushy.api.translation.ResourceBundleTranslationsProvider
 import fr.rushy.api.translation.TranslationsProvider
 import fr.rushy.api.translation.registerResourceBundleForSupportedLocales
@@ -21,15 +21,30 @@ import java.util.*
 
 public val logger: KLogger = KotlinLogging.logger { }
 
+/**
+ * Abstract implementation of Minecraft server.
+ */
 public abstract class RushyServer {
 
     public companion object {
+        /**
+         * Name of the bundle for API.
+         */
         public const val API_BUNDLE_NAME: String = "api"
     }
 
+    /**
+     * Entrypoint of the application.
+     * @param args Application's arguments.
+     */
     public abstract fun main(args: Array<String>)
 
-    public inline fun <reified T : Configuration> start(
+    /**
+     * Initialize the server and start it using the given (or default) configuration.
+     * @param configurationPath Path of the configuration file in working directory.
+     * @param init Initialization function with the configuration loaded and the world container.
+     */
+    protected inline fun <reified T : IConfiguration> start(
         configurationPath: String? = null,
         init: T.(InstanceContainer) -> Unit
     ) {
@@ -52,8 +67,8 @@ public abstract class RushyServer {
      * @param serverConfig Configuration of the minestom server.
      * @param instanceContainer Instance container of the server.
      */
-    public open fun loadWorld(
-        serverConfig: ServerConfiguration,
+    protected open fun loadWorld(
+        serverConfig: IServerConfiguration,
         instanceContainer: InstanceContainer
     ) {
         val anvilWorld = File(workingDirectory, serverConfig.world)
@@ -72,16 +87,16 @@ public abstract class RushyServer {
      * @param configFile Path of the configuration file.
      * @return The configuration of the server.
      */
-    public inline fun <reified T> loadConfiguration(configFile: String?): T {
-        val configurationFile = Configuration.getOrCreateConfigurationFile(configFile)
-        return Configuration.readHoconConfigurationFile(configurationFile)
+    protected inline fun <reified T> loadConfiguration(configFile: String?): T {
+        val configurationFile = IConfiguration.getOrCreateConfigurationFile(configFile)
+        return IConfiguration.readHoconConfigurationFile(configurationFile)
     }
 
     /**
      * Create a translation provider to provide translations for the [supported languages][fr.rushy.api.translation.SupportedLanguage].
      * @return New translation provider.
      */
-    public open fun createTranslationsProvider(bundles: Iterable<String>): TranslationsProvider {
+    protected open fun createTranslationsProvider(bundles: Iterable<String>): TranslationsProvider {
         return ResourceBundleTranslationsProvider().apply {
             registerResourceBundleForSupportedLocales(API_BUNDLE_NAME, ResourceBundle::getBundle)
             bundles.forEach { registerResourceBundleForSupportedLocales(it, ResourceBundle::getBundle) }
@@ -90,8 +105,9 @@ public abstract class RushyServer {
 
     /**
      * Register all commands.
+     * @param manager Command manager of the server.
      */
-    public open fun registerCommands(manager: CommandManager = MinecraftServer.getCommandManager()) {
+    protected open fun registerCommands(manager: CommandManager = MinecraftServer.getCommandManager()) {
         manager.register(StopCommand())
         manager.register(KickCommand())
         manager.register(GiveCommand())

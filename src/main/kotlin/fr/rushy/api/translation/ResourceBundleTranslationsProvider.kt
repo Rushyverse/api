@@ -28,7 +28,7 @@ public open class ResourceBundleTranslationsProvider : TranslationsProvider() {
     private val bundles: MutableMap<Pair<String, Locale>, ResourceBundle> = mutableMapOf()
 
     override fun get(key: String, locale: Locale, bundleName: String): String {
-        return getBundles(locale, bundleName).getString(key)
+        return getBundle(locale, bundleName).getString(key)
     }
 
     override fun translate(
@@ -53,7 +53,7 @@ public open class ResourceBundleTranslationsProvider : TranslationsProvider() {
      * @param bundleName Name of the bundle.
      * @return The loaded instance of [ResourceBundle].
      */
-    protected open fun getBundles(locale: Locale, bundleName: String): ResourceBundle {
+    protected open fun getBundle(locale: Locale, bundleName: String): ResourceBundle {
         return bundles[createKey(bundleName, locale)]
             ?: throw ResourceBundleNotRegisteredException(bundleName, locale)
     }
