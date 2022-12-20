@@ -5,6 +5,7 @@ plugins {
     kotlin("plugin.serialization") version "1.7.22"
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("org.jetbrains.dokka") version "1.7.20"
+    `java-library`
     `maven-publish`
 }
 
@@ -136,6 +137,11 @@ publishing {
                         name.set("Quentixx")
                         email.set("Quentixx@outlook.fr")
                         url.set("https://github.com/Quentixx")
+                    }
+                    developer {
+                        name.set("Distractic")
+                        email.set("Distractic@outlook.fr")
+                        url.set("https://github.com/Distractic")
                     }
                 }
 
