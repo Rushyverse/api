@@ -132,8 +132,8 @@ and configuration classes to load the configuration of the server.
 The interfaces for configuration are located in this [package](src/main/kotlin/fr/rushy/api/configuration/IConfiguration.kt).
 
 ```kotlin
-import fr.rushy.api.configuration.IConfiguration
-import fr.rushy.api.configuration.IServerConfiguration
+import io.github.rushyverse.api.configuration.IConfiguration
+import io.github.rushyverse.api.configuration.IServerConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -167,7 +167,7 @@ data class MyConfiguration(
 
 ***Server class***
 ```kotlin
-import fr.rushy.api.RushyServer
+import io.github.rushyverse.api.RushyServer
 
 class MyServer(private val configurationPath: String?) : RushyServer() {
 
