@@ -2,14 +2,16 @@ package fr.rushy.api.configuration
 
 import com.typesafe.config.ConfigFactory
 import fr.rushy.api.utils.workingDirectory
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
 import java.io.File
 import java.io.FileNotFoundException
 
-public interface Configuration {
+/**
+ * Configuration of the application.
+ * @property server Configuration of server.
+ */
+public interface IConfiguration {
 
     public companion object {
 
@@ -43,37 +45,38 @@ public interface Configuration {
          * If the file does not exist, it will be created with the default configuration from resources folder.
          * @return The default config file.
          */
-        private fun getOrCreateDefaultConfigurationFile(parent: File): File = File(parent, DEFAULT_CONFIG_FILE_NAME).apply {
-            if (exists()) {
-                return this
-            }
-
-            val defaultConfiguration =
-                Configuration::class.java.classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE_NAME)
-                    ?: error("Unable to find default configuration file in server resources")
-
-            defaultConfiguration.use { inputStream ->
-                if (!createNewFile()) {
-                    throw FileSystemException(this, null, "Unable to create configuration file $absolutePath")
+        private fun getOrCreateDefaultConfigurationFile(parent: File): File =
+            File(parent, DEFAULT_CONFIG_FILE_NAME).apply {
+                if (exists()) {
+                    return this
                 }
 
-                outputStream().use { outputStream ->
-                    inputStream.copyTo(outputStream)
+                val defaultConfiguration =
+                    IConfiguration::class.java.classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE_NAME)
+                        ?: error("Unable to find default configuration file in server resources")
+
+                defaultConfiguration.use { inputStream ->
+                    if (!createNewFile()) {
+                        throw FileSystemException(this, null, "Unable to create configuration file $absolutePath")
+                    }
+
+                    outputStream().use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
                 }
             }
-        }
 
         /**
          * Load the configuration from the given file with HOCON format.
          * @param configFile Configuration file to load.
          * @return The configuration loaded from the given file.
          */
-        public  inline fun <reified T> readHoconConfigurationFile(configFile: File): T =
+        public inline fun <reified T> readHoconConfigurationFile(configFile: File): T =
             Hocon.decodeFromConfig(ConfigFactory.parseFile(configFile))
 
     }
 
-    public val server: ServerConfiguration
+    public val server: IServerConfiguration
 }
 
 /**
@@ -81,9 +84,10 @@ public interface Configuration {
  * @property port Port of the server.
  * @property world Path of the world to load.
  */
-@SerialName("server")
-@Serializable
-public data class ServerConfiguration(
-    val port: Int,
-    val world: String
-)
+public interface IServerConfiguration {
+
+    public val port: Int
+
+    public val world: String
+
+}
