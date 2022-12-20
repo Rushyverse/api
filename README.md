@@ -1,4 +1,4 @@
-_# API
+# API
 
 This project allows to create a Minestom server easily in Kotlin. It provides a lot of features to create a Minecraft server.
 
