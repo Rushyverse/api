@@ -63,70 +63,11 @@ dependencies {
 </project>
 ```
 
-## Modification
-
-Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing the `version` property.
-
-If you want to modify the API locally and use it in your project, you need to publish it in local repository with the following command:
-
-```bash
-gradlew publishApiPublicationToMavenLocal
-```
-
-When the publication is done, you can use the API in your project using the following configuration :
-
-**Replace `{version}` by the version in the [gradle.properties](gradle.properties) file used during publish.**
-
-### Gradle (groovy)
-
-```groovy
-repositories {
-    mavenLocal()
-}
-
-dependencies {
-  api("com.github.Rushyverse:api:{version}")
-}
-```
-
-### Gradle (kotlin)
-
-```kotlin
-repositories {
-    mavenLocal()
-}
-
-dependencies {
-    api("com.github.Rushyverse:api:{version}")
-}
-```
-
-### Maven
-
-```xml
-<project>
-    <repositories>
-        <repository>
-            <id>mavenLocal</id>
-            <url>file://${user.home}/.m2/repository</url>
-        </repository>
-    </repositories>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.github.Rushyverse</groupId>
-            <artifactId>api</artifactId>
-            <version>{version}</version>
-        </dependency>
-    </dependencies>
-</project>
-```
-
 ## Usage
 
 ### Create a server
 
-To create a server, you need to create a class that extends `RushyServer` and override the `start` method 
+To create a server, you need to create a class that extends `RushyServer` and override the `start` method
 and configuration classes to load the configuration of the server.
 
 ***Configuration classes***
@@ -253,6 +194,65 @@ class MyServer : RushyServer() {
         }
     }
 }
+```
+
+## Modification
+
+Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing the `version` property.
+
+If you want to modify the API locally and use it in your project, you need to publish it in local repository with the following command:
+
+```bash
+gradlew publishApiPublicationToMavenLocal
+```
+
+When the publication is done, you can use the API in your project using the following configuration :
+
+**Replace `{version}` by the version in the [gradle.properties](gradle.properties) file used during publish.**
+
+### Gradle (groovy)
+
+```groovy
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+  api("com.github.Rushyverse:api:{version}")
+}
+```
+
+### Gradle (kotlin)
+
+```kotlin
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    api("com.github.Rushyverse:api:{version}")
+}
+```
+
+### Maven
+
+```xml
+<project>
+    <repositories>
+        <repository>
+            <id>mavenLocal</id>
+            <url>file://${user.home}/.m2/repository</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.Rushyverse</groupId>
+            <artifactId>api</artifactId>
+            <version>{version}</version>
+        </dependency>
+    </dependencies>
+</project>
 ```
 
 ## Build
