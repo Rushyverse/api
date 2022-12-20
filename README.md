@@ -14,6 +14,8 @@ The API doesn't have an entrypoint.
 You can find the artifact on [Jitpack](https://jitpack.io/#UniverseProject/data-service).
 Use the version you prefer by following the tutorial on jitpack and replacing `{version}` bellow.
 
+The newest version can be found [here: ![](https://jitpack.io/v/Rushyverse/api.svg)](https://jitpack.io/#Rushyverse/api)
+
 ### Gradle (groovy)
 
 ```groovy
@@ -68,8 +70,6 @@ Firstly, you should modify the version of the project in [gradle.properties](gra
 If you want to modify the API locally and use it in your project, you need to publish it in local repository with the following command:
 
 ```bash
-gradle publishApiPublicationToMavenLocal
-# or
 gradlew publishApiPublicationToMavenLocal
 ```
 
