@@ -156,14 +156,14 @@ If when you start your application, you have an error like this:
 
 You need to suppress the warning by adding `@Suppress("PROVIDED_RUNTIME_TOO_LOW")` on the class.
 
-````kotlin
+```kotlin
 @Suppress("PROVIDED_RUNTIME_TOO_LOW") // https://github.com/Kotlin/kotlinx.serialization/issues/993
 @Serializable
 data class MyConfiguration(
     @SerialName("server")
     override val server: MyServerConfiguration
 ) : IConfiguration
-````
+```
 
 ***Server class***
 ```kotlin
@@ -259,9 +259,9 @@ To build the project, you need to use the gradle app ([gradlew.bat](gradlew.bat)
 and [gradlew](gradlew) for linux).
 `gradlew` is a wrapper to run gradle command without install it on our computer.
 
-````shell
+```shell
 gradlew shadowJar
-````
+```
 
 The jar will be created in the [dedicated folder](build/libs).
 
@@ -271,4 +271,4 @@ The code is tested using JUnit and can be executed using the following command:
 
 ```bash
 gradlew test
-```_
+```
