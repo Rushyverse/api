@@ -129,7 +129,7 @@ and configuration classes to load the configuration of the server.
 
 ***Configuration classes***
 
-The interfaces for configuration are located in this [package](src/main/kotlin/fr/rushy/api/configuration/IConfiguration.kt).
+The interfaces for configuration are located in this [package](src/main/kotlin/io/github/rushyverse/api/configuration/IConfiguration.kt).
 
 ```kotlin
 import io.github.rushyverse.api.configuration.IConfiguration
@@ -206,6 +206,52 @@ If in the working directory (where you launch the server) the configuration file
 However, the world folder must be added manually.
 
 _The method `start` takes a string as parameter. This string is the path to the configuration file. If the string is null, the configuration file will be searched in the working directory._
+
+### Commands
+
+In `RushyServer` class, the method `registerCommands` can be used to register the [implemented commands](src/main/kotlin/io/github/rushyverse/api/command) from API.
+
+```kotlin
+import io.github.rushyverse.api.RushyServer
+
+class MyServer : RushyServer() {
+
+    override fun start() {
+        start<MyConfiguration>(configurationPath) {
+            registerCommands()
+        }
+    }
+
+    override fun registerCommands(manager: CommandManager) {
+        super.registerCommands(manager) // register API commands
+        manager.register(MyCommand())
+    }
+}
+```
+
+### Translation
+
+The `RushyServer` class offers a method to create [TranslationsProvider](src/main/kotlin/io/github/rushyverse/api/translation/TranslationsProvider.kt) instance using [resource bundle files](src/main/resources/api.properties).
+
+If you want, you can override the method `createTranslationsProvider` to create your own instance of `TranslationsProvider`.
+
+```kotlin
+import io.github.rushyverse.api.RushyServer
+
+class MyServer : RushyServer() {
+
+    override fun start() {
+        start<MyConfiguration>(configurationPath) {
+            // Register "myBundle" resource bundle and the API resource bundle
+            val translationsProvider = createTranslationsProvider(listOf("myBundle"))
+            // Get the value of "myKey" for english language
+            println(translationsProvider.translate("myKey", SupportedLanguage.ENGLISH.locale, "myBundle"))
+            // Get the value of "myKey2" for english language with parameters
+            println(translationsProvider.translate("myKey2", SupportedLanguage.ENGLISH.locale, "myBundle", arrayOf("myValue")))
+        }
+    }
+}
+```
 
 ## Build
 
