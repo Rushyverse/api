@@ -77,6 +77,8 @@ When the publication is done, you can use the API in your project using the foll
 
 **Replace `{version}` by the version in the [gradle.properties](gradle.properties) file used during publish.**
 
+#### Gradle (groovy)
+
 ```groovy
 repositories {
     mavenLocal()
@@ -87,7 +89,7 @@ dependencies {
 }
 ```
 
-### Gradle (kotlin)
+#### Gradle (kotlin)
 
 ```kotlin
 repositories {
@@ -99,7 +101,7 @@ dependencies {
 }
 ```
 
-### Maven
+#### Maven
 
 ```xml
 <project>
