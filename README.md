@@ -63,7 +63,7 @@ dependencies {
 </project>
 ```
 
-### Local modification
+## Modification
 
 Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing the `version` property.
 
@@ -77,7 +77,7 @@ When the publication is done, you can use the API in your project using the foll
 
 **Replace `{version}` by the version in the [gradle.properties](gradle.properties) file used during publish.**
 
-#### Gradle (groovy)
+### Gradle (groovy)
 
 ```groovy
 repositories {
@@ -89,7 +89,7 @@ dependencies {
 }
 ```
 
-#### Gradle (kotlin)
+### Gradle (kotlin)
 
 ```kotlin
 repositories {
@@ -101,7 +101,7 @@ dependencies {
 }
 ```
 
-#### Maven
+### Maven
 
 ```xml
 <project>
