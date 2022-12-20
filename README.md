@@ -203,7 +203,7 @@ Firstly, you should modify the version of the project in [gradle.properties](gra
 If you want to modify the API locally and use it in your project, you need to publish it in local repository with the following command:
 
 ```bash
-gradlew publishApiPublicationToMavenLocal
+gradlew publishToMavenLocal
 ```
 
 When the publication is done, you can use the API in your project using the following configuration :
