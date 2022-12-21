@@ -1,6 +1,6 @@
 package io.github.rushyverse.api.command
 
-import io.github.rushyverse.api.permission.CustomPermission
+import io.github.rushyverse.api.command.CommandMessages.sendPlayerNotFoundMessage
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.command.CommandSender
@@ -11,15 +11,38 @@ import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentItemStack
 import net.minestom.server.entity.Player
 import net.minestom.server.item.ItemStack
+import net.minestom.server.permission.Permission
 
 /**
  * Command to give item to a player.
  */
 public class GiveCommand : Command("give") {
 
+    /**
+     * Enum of permission to perform [command][GiveCommand].
+     * @property permission Permission.
+     */
+    public enum class Permissions(public val permission: Permission) {
+        /**
+         * Permission to give item to oneself.
+         */
+        SELF(Permission("give.self")),
+
+        /**
+         * Permission to give item to another player.
+         */
+        OTHER(Permission("give.other"))
+    }
+
     init {
-        setCondition { sender, _ ->
-            sender !is Player || sender.hasPermission(CustomPermission.GIVE)
+        setCondition { sender, commandLine ->
+            if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
+                return@setCondition true
+            }
+            if(commandLine != null) {
+                CommandMessages.sendMissingPermissionMessage(sender)
+            }
+            return@setCondition false
         }
 
         setDefaultExecutor { sender, context ->
@@ -40,9 +63,7 @@ public class GiveCommand : Command("give") {
      * @param commandName Name of the command used to execute it.
      */
     private fun sendSyntaxMessage(sender: CommandSender, commandName: String) {
-        sender.sendMessage(
-            Component.text("Usage: /$commandName <target> <item> [amount]", NamedTextColor.RED)
-        )
+        sender.sendMessage(Component.text("Usage: /$commandName <target> <item> [amount]", NamedTextColor.RED))
     }
 
     /**
@@ -68,16 +89,30 @@ public class GiveCommand : Command("give") {
      */
     private fun setSyntax(playerArg: ArgumentEntity, itemArg: ArgumentItemStack, amountArg: Argument<Int>) {
         addSyntax({ sender, context ->
-            val target = context.get(playerArg).find(sender).filterIsInstance<Player>().firstOrNull()
+            val target = context.get(playerArg).findFirstPlayer(sender)
             if (target == null) {
                 sendPlayerNotFoundMessage(sender)
                 return@addSyntax
             }
 
+            if (target == sender) {
+                if (!sender.hasPermission(Permissions.SELF.permission)) {
+                    CommandMessages.sendMissingPermissionMessage(sender)
+                    return@addSyntax
+                }
+            } else {
+                if (!sender.hasPermission(Permissions.OTHER.permission)) {
+                    CommandMessages.sendMissingPermissionMessage(sender)
+                    return@addSyntax
+                }
+            }
+
             val amount = context.get(amountArg)
             val item = context.get(itemArg).withAmount(amount)
 
-            process(sender, target, item)
+            target.getAcquirable<Player>().sync {
+                process(sender, target, item)
+            }
         }, playerArg, itemArg, amountArg)
     }
 
@@ -93,6 +128,13 @@ public class GiveCommand : Command("give") {
         item: ItemStack
     ) {
         target.inventory.addItemStack(item)
-        sender.sendMessage(Component.text("Items [${item.displayName} x ${item.amount()}] sent"))
+        sender.sendMessage(
+            Component.translatable(
+                "commands.give.success.single",
+                Component.text(item.amount()),
+                Component.text(item.material().name()),
+                target.name
+            )
+        )
     }
 }
