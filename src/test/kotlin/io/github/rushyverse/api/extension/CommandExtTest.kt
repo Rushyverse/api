@@ -5,15 +5,18 @@ import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.job
+import kotlinx.coroutines.yield
 import net.minestom.server.command.CommandSender
 import net.minestom.server.command.builder.Command
 import net.minestom.server.command.builder.CommandContext
 import net.minestom.server.command.builder.arguments.ArgumentType
 import org.junit.jupiter.api.Test
+import java.util.concurrent.CountDownLatch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class CommandExtTest {
@@ -22,16 +25,28 @@ class CommandExtTest {
     fun `should use dispatcher to process set default executor suspend`() {
         val command = Command("test")
         var executed = false
+
         val senderMock = mockk<CommandSender>()
         val contextMock = mockk<CommandContext>()
+
         val scope = CoroutineScope(Dispatchers.Default)
+
+        val currentThread = Thread.currentThread()
+        val latch = CountDownLatch(1)
+
         command.setDefaultExecutorSuspend(scope) { sender, context ->
             checkContextFromScope(scope, coroutineContext)
             assertEquals(senderMock, sender)
             assertEquals(contextMock, context)
             executed = true
+
+            assertEquals(currentThread, Thread.currentThread())
+            yield()
+            assertNotEquals(currentThread, Thread.currentThread())
+            latch.countDown()
         }
         command.defaultExecutor?.apply(senderMock, contextMock)
+        latch.await()
         assertTrue(executed)
     }
 
@@ -46,14 +61,23 @@ class CommandExtTest {
         val contextMock = mockk<CommandContext>()
         val scope = CoroutineScope(Dispatchers.Default)
 
+        val currentThread = Thread.currentThread()
+        val latch = CountDownLatch(1)
+
         command.addSyntaxSuspend({ sender, context ->
             checkContextFromScope(scope, coroutineContext)
             assertEquals(senderMock, sender)
             assertEquals(contextMock, context)
             executed = true
+
+            assertEquals(currentThread, Thread.currentThread())
+            yield()
+            assertNotEquals(currentThread, Thread.currentThread())
+            latch.countDown()
         }, stringArg, intArg, coroutineScope = scope)
 
         command.syntaxes.first().executor.apply(senderMock, contextMock)
+        latch.await()
         assertTrue(executed)
     }
 
@@ -69,6 +93,9 @@ class CommandExtTest {
         val contextMock = mockk<CommandContext>()
         val scope = CoroutineScope(Dispatchers.Default)
 
+        val currentThread = Thread.currentThread()
+        val latch = CountDownLatch(1)
+
         val expectedCommandString = randomString()
         command.addConditionalSyntaxSuspend(
             { sender, commandString ->
@@ -78,11 +105,18 @@ class CommandExtTest {
                 true
             },
             { sender, context ->
-            checkContextFromScope(scope, coroutineContext)
-            assertEquals(senderMock, sender)
-            assertEquals(contextMock, context)
-            executed = true
-        }, stringArg, intArg, coroutineScope = scope)
+                checkContextFromScope(scope, coroutineContext)
+                assertEquals(senderMock, sender)
+                assertEquals(contextMock, context)
+                executed = true
+
+                assertEquals(currentThread, Thread.currentThread())
+                yield()
+                assertNotEquals(currentThread, Thread.currentThread())
+                latch.countDown()
+
+            }, stringArg, intArg, coroutineScope = scope
+        )
 
         val syntax = command.syntaxes.first()
         syntax.commandCondition!!.canUse(senderMock, expectedCommandString)
@@ -90,6 +124,7 @@ class CommandExtTest {
         assertTrue(conditionalExecuted)
 
         syntax.executor.apply(senderMock, contextMock)
+        latch.await()
         assertTrue(executed)
     }
 
