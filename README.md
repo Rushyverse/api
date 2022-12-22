@@ -215,7 +215,7 @@ class MyServer : RushyServer() {
 }
 ```
 
-### Commands
+### Suspend Command
 
 The API provides functions to execute command in coroutine context.
 
@@ -270,6 +270,46 @@ the [CoroutineScope](https://kotlin.github.io/kotlinx.coroutines/kotlinx-corouti
 of the coroutine using the `coroutineScope`.
 So, after the [delay](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/delay.html)
 function, the thread is changed to the thread defined by the `coroutineScope`.
+
+### Suspend Listener
+
+The API provides functions to execute listener in coroutine context through the class [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
+
+```kotlin
+import io.github.rushyverse.api.listener.EventListenerSuspend
+
+class MyListener : EventListenerSuspend<MyEvent>() {
+
+    override fun eventType(): Class<MyEvent> {
+        return MyEvent::class.java
+    }
+
+    override suspend fun runSuspend(event: MyEvent) {
+        sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+        delay(1000)
+        sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+    }
+}
+```
+
+Like suspend command, the first `sender.sendMessage(...)` is executed in the thread used by Minestom to execute the
+command.
+After the [delay](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/delay.html)
+function,
+the thread is changed to the thread defined by the `coroutineScope` in constructor of [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
+
+**Note: The method `runSuspend` doesn't return value because when the current thread change, the result of the initial `run` method is expected,
+so the class always returns EventListener.Result.SUCCESS.**
+
+You can also add a new listener to the event bus using the `addSuspendListener` method.
+
+```kotlin
+MinecraftServer.getGlobalEventHandler().addListenerSuspend<MyEvent> {
+    sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+    delay(1000)
+    sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+}
+```
 
 ## Modification
 
