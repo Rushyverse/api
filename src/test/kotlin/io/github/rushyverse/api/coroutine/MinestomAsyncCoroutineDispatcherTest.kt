@@ -11,7 +11,7 @@ import kotlin.test.Test
 class MinestomAsyncCoroutineDispatcherTest {
 
     @Test
-    fun `Should not perform if process is not alive`() {
+    fun `should not perform if process is not alive`() {
         val process = mockk<ServerProcess>()
         every { process.isAlive } returns false
         val schedulerManager = mockk<SchedulerManager>()
@@ -25,7 +25,7 @@ class MinestomAsyncCoroutineDispatcherTest {
     }
 
     @Test
-    fun `Should perform task in async context`() {
+    fun `should perform task in async context`() {
         val process = mockk<ServerProcess>()
         every { process.isAlive } returns true
         val schedulerManager = mockk<SchedulerManager>()
