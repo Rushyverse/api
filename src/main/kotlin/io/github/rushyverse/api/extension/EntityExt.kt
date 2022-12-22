@@ -15,7 +15,10 @@ import kotlin.contracts.contract
  * @param block The callback to execute once the element has been safely acquired.
  * @return The result of the callback in a [Deferred] object.
  */
-public inline fun <reified E : Entity, reified T> E.async(coroutineScope: CoroutineScope = Dispatchers.MinestomAsync.scope, crossinline block: E.() -> T): Deferred<T> {
+public inline fun <reified E : Entity, reified T> E.async(
+    coroutineScope: CoroutineScope = Dispatchers.MinestomAsync.scope,
+    crossinline block: E.() -> T
+): Deferred<T> {
     return coroutineScope.async { sync(block) }
 }
 
