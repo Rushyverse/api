@@ -2,6 +2,7 @@ package io.github.rushyverse.api.extension
 
 import io.github.rushyverse.api.coroutine.MinestomSync
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minestom.server.command.CommandSender
@@ -21,7 +22,7 @@ public inline fun Command.setDefaultExecutorSuspend(
     coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope,
     crossinline executor: suspend (sender: CommandSender, context: CommandContext) -> Unit
 ): Unit = setDefaultExecutor { sender, context ->
-    coroutineScope.launch {
+    coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
         executor(sender, context)
     }
 }
@@ -39,7 +40,7 @@ public inline fun Command.addSyntaxSuspend(
     vararg arguments: Argument<*>,
     coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope
 ): MutableCollection<CommandSyntax> = addSyntax({ sender, context ->
-    coroutineScope.launch {
+    coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
         executor(sender, context)
     }
 }, *arguments)
@@ -59,7 +60,7 @@ public inline fun Command.addConditionalSyntaxSuspend(
     vararg arguments: Argument<*>,
     coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope
 ): MutableCollection<CommandSyntax> = addConditionalSyntax(condition, { sender, context ->
-    coroutineScope.launch {
+    coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
         executor(sender, context)
     }
 }, *arguments)
