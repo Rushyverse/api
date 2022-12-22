@@ -1,6 +1,7 @@
 # API
 
-This project allows to create a Minestom server easily in Kotlin. It provides a lot of features to create a Minecraft server.
+This project allows to create a Minestom server easily in Kotlin. It provides a lot of features to create a Minecraft
+server.
 
 ## Tools
 
@@ -26,7 +27,7 @@ repositories {
 }
 
 dependencies {
-  api("com.github.Rushyverse:api:{version}")
+    api("com.github.Rushyverse:api:{version}")
 }
 ```
 
@@ -38,13 +39,14 @@ repositories {
 }
 
 dependencies {
-  api("com.github.Rushyverse:api:{version}")
+    api("com.github.Rushyverse:api:{version}")
 }
 ```
 
 ### Maven
 
 ```xml
+
 <project>
     <repositories>
         <repository>
@@ -72,7 +74,8 @@ and configuration classes to load the configuration of the server.
 
 ***Configuration classes***
 
-The interfaces for configuration are located in this [package](src/main/kotlin/io/github/rushyverse/api/configuration/IConfiguration.kt).
+The interfaces for configuration are located in
+this [package](src/main/kotlin/io/github/rushyverse/api/configuration/IConfiguration.kt).
 
 ```kotlin
 import io.github.rushyverse.api.configuration.IConfiguration
@@ -95,7 +98,8 @@ data class MyServerConfiguration(
 
 If when you start your application, you have an error like this:
 
-**Your current kotlinx.serialization core version is too low, while current Kotlin compiler plugin 1.7.22 requires at least 1.0-M1-SNAPSHOT. Please update your kotlinx.serialization runtime dependency.**
+**Your current kotlinx.serialization core version is too low, while current Kotlin compiler plugin 1.7.22 requires at
+least 1.0-M1-SNAPSHOT. Please update your kotlinx.serialization runtime dependency.**
 
 You need to suppress the warning by adding `@Suppress("PROVIDED_RUNTIME_TOO_LOW")` on the class.
 
@@ -109,6 +113,7 @@ data class MyConfiguration(
 ```
 
 ***Server class***
+
 ```kotlin
 import io.github.rushyverse.api.RushyServer
 
@@ -120,9 +125,9 @@ class MyServer(private val configurationPath: String?) : RushyServer() {
             MyServer(args.firstOrNull()).start()
         }
     }
-    
+
     override fun start() {
-        start<MyConfiguration>(configurationPath) { 
+        start<MyConfiguration>(configurationPath) {
             // this = MyConfiguration
             // it = InstanceContainer
             // Configure your server here
@@ -133,10 +138,12 @@ class MyServer(private val configurationPath: String?) : RushyServer() {
 
 ### Configuration
 
-The function `start` takes a configuration class as parameter. So you need to define a configuration file in the `resources` folder.
+The function `start` takes a configuration class as parameter. So you need to define a configuration file in
+the `resources` folder.
 The configuration file should be named `server.conf`.
 
-According to the configuration class above (`MyConfiguration`), the configuration file should have the following content:
+According to the configuration class above (`MyConfiguration`), the configuration file should have the following
+content:
 
 ```hocon
 server {
@@ -148,11 +155,13 @@ server {
 If in the working directory (where you launch the server) the configuration file will be created if it doesn't exist.
 However, the world folder must be added manually.
 
-_The method `start` takes a string as parameter. This string is the path to the configuration file. If the string is null, the configuration file will be searched in the working directory._
+_The method `start` takes a string as parameter. This string is the path to the configuration file. If the string is
+null, the configuration file will be searched in the working directory._
 
 ### Commands
 
-In `RushyServer` class, the method `registerCommands` can be used to register the [implemented commands](src/main/kotlin/io/github/rushyverse/api/command) from API.
+In `RushyServer` class, the method `registerCommands` can be used to register
+the [implemented commands](src/main/kotlin/io/github/rushyverse/api/command) from API.
 
 ```kotlin
 import io.github.rushyverse.api.RushyServer
@@ -174,9 +183,12 @@ class MyServer : RushyServer() {
 
 ### Translation
 
-The `RushyServer` class offers a method to create [TranslationsProvider](src/main/kotlin/io/github/rushyverse/api/translation/TranslationsProvider.kt) instance using [resource bundle files](src/main/resources/api.properties).
+The `RushyServer` class offers a method to
+create [TranslationsProvider](src/main/kotlin/io/github/rushyverse/api/translation/TranslationsProvider.kt) instance
+using [resource bundle files](src/main/resources/api.properties).
 
-If you want, you can override the method `createTranslationsProvider` to create your own instance of `TranslationsProvider`.
+If you want, you can override the method `createTranslationsProvider` to create your own instance
+of `TranslationsProvider`.
 
 ```kotlin
 import io.github.rushyverse.api.RushyServer
@@ -190,17 +202,82 @@ class MyServer : RushyServer() {
             // Get the value of "myKey" for english language
             println(translationsProvider.translate("myKey", SupportedLanguage.ENGLISH.locale, "myBundle"))
             // Get the value of "myKey2" for english language with parameters
-            println(translationsProvider.translate("myKey2", SupportedLanguage.ENGLISH.locale, "myBundle", arrayOf("myValue")))
+            println(
+                translationsProvider.translate(
+                    "myKey2",
+                    SupportedLanguage.ENGLISH.locale,
+                    "myBundle",
+                    arrayOf("myValue")
+                )
+            )
         }
     }
 }
 ```
 
+### Commands
+
+The API provides functions to execute command in coroutine context.
+
+```kotlin
+import io.github.rushyverse.api.extension.addConditionalSyntaxSuspend
+import io.github.rushyverse.api.extension.addSyntaxSuspend
+import io.github.rushyverse.api.extension.setDefaultExecutorSuspend
+import kotlinx.coroutines.delay
+import net.minestom.server.command.builder.Command
+import net.minestom.server.command.builder.arguments.ArgumentType
+import net.minestom.server.entity.Player
+
+class MyCommand : Command("mycommand") {
+
+    init {
+        setDefaultExecutorSuspend { sender, context ->
+            sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+            delay(1000)
+            sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+        }
+
+        val argument = ArgumentType.String("argument")
+
+        addSyntaxSuspend({ sender, context ->
+            sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+            delay(1000)
+            sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+        }, argument)
+
+        val argumentInt = ArgumentType.Integer("argumentInt")
+
+        addConditionalSyntaxSuspend({ sender, commandString ->
+            sender is Player
+        }, { sender, context ->
+            sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+            delay(1000)
+            sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+        }, argument, argumentInt)
+    }
+}
+```
+
+As you can see, the `setDefaultExecutorSuspend`, `addSyntaxSuspend` and `addConditionalSyntaxSuspend` methods are
+extensions of `Command` class.
+These methods allow you to execute the command in coroutine context if needed.
+
+In the example above, the first `sender.sendMessage(...)` is executed in the thread used by Minestom to execute the
+command.
+However, when a suspend function is called, the next part of the code is executed in another thread.
+You can define
+the [CoroutineScope](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-coroutine-scope/)
+of the coroutine using the `coroutineScope`.
+So, after the [delay](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/delay.html)
+function, the thread is changed to the thread defined by the `coroutineScope`.
+
 ## Modification
 
-Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing the `version` property.
+Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing
+the `version` property.
 
-If you want to modify the API locally and use it in your project, you need to publish it in local repository with the following command:
+If you want to modify the API locally and use it in your project, you need to publish it in local repository with the
+following command:
 
 ```bash
 gradlew publishToMavenLocal
@@ -218,7 +295,7 @@ repositories {
 }
 
 dependencies {
-  api("com.github.Rushyverse:api:{version}")
+    api("com.github.Rushyverse:api:{version}")
 }
 ```
 
@@ -237,6 +314,7 @@ dependencies {
 ### Maven
 
 ```xml
+
 <project>
     <repositories>
         <repository>
