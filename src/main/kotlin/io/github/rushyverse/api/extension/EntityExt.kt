@@ -16,10 +16,6 @@ import kotlin.contracts.contract
  * @return The result of the callback in a [Deferred] object.
  */
 public inline fun <reified E : Entity, reified T> E.async(coroutineScope: CoroutineScope = Dispatchers.MinestomAsync.scope, crossinline block: E.() -> T): Deferred<T> {
-    contract {
-        callsInPlace(block, InvocationKind.UNKNOWN)
-    }
-
     return coroutineScope.async { sync(block) }
 }
 
