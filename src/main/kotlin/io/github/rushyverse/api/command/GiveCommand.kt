@@ -1,6 +1,6 @@
 package io.github.rushyverse.api.command
 
-import io.github.rushyverse.api.command.CommandMessages.sendPlayerNotFoundMessage
+import io.github.rushyverse.api.extension.sync
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.command.CommandSender
@@ -26,12 +26,7 @@ public class GiveCommand : Command("give") {
         /**
          * Permission to give item to oneself.
          */
-        SELF(Permission("give.self")),
-
-        /**
-         * Permission to give item to another player.
-         */
-        OTHER(Permission("give.other"))
+        EXECUTE(Permission("give")),
     }
 
     init {
@@ -39,10 +34,10 @@ public class GiveCommand : Command("give") {
             if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
                 return@setCondition true
             }
-            if(commandLine != null) {
+            if (commandLine != null) {
                 CommandMessages.sendMissingPermissionMessage(sender)
             }
-            return@setCondition false
+            false
         }
 
         setDefaultExecutor { sender, context ->
@@ -50,11 +45,11 @@ public class GiveCommand : Command("give") {
             sendSyntaxMessage(sender, commandName)
         }
 
-        val playerArg = argumentPlayer()
+        val playersArg = argumentPlayers()
         val itemArg = argumentItem()
         val amountArg = argumentAmount()
 
-        setSyntax(playerArg, itemArg, amountArg)
+        setSyntax(playersArg, itemArg, amountArg)
     }
 
     /**
@@ -63,14 +58,15 @@ public class GiveCommand : Command("give") {
      * @param commandName Name of the command used to execute it.
      */
     private fun sendSyntaxMessage(sender: CommandSender, commandName: String) {
-        sender.sendMessage(Component.text("Usage: /$commandName <target> <item> [amount]", NamedTextColor.RED))
+        sender.sendMessage(Component.text("Usage: /$commandName <targets> <item> [amount]", NamedTextColor.RED))
     }
 
     /**
      * Create a new argument targeting players name.
      * @return New argument.
      */
-    private fun argumentPlayer(): ArgumentEntity = ArgumentType.Entity("target").onlyPlayers(true)
+    private fun argumentPlayers(): ArgumentEntity =
+        ArgumentType.Entity("targets").singleEntity(false)
 
     /**
      * Create a new argument targeting the amount of item.
@@ -87,54 +83,54 @@ public class GiveCommand : Command("give") {
     /**
      * Define the syntax to process the command.
      */
-    private fun setSyntax(playerArg: ArgumentEntity, itemArg: ArgumentItemStack, amountArg: Argument<Int>) {
+    private fun setSyntax(playersArg: ArgumentEntity, itemArg: ArgumentItemStack, amountArg: Argument<Int>) {
         addSyntax({ sender, context ->
-            val target = context.get(playerArg).findFirstPlayer(sender)
-            if (target == null) {
-                sendPlayerNotFoundMessage(sender)
-                return@addSyntax
-            }
-
-            if (target == sender) {
-                if (!sender.hasPermission(Permissions.SELF.permission)) {
-                    CommandMessages.sendMissingPermissionMessage(sender)
-                    return@addSyntax
-                }
-            } else {
-                if (!sender.hasPermission(Permissions.OTHER.permission)) {
-                    CommandMessages.sendMissingPermissionMessage(sender)
-                    return@addSyntax
-                }
-            }
+            val targets = context.get(playersArg).find(sender).asSequence().filterIsInstance<Player>()
 
             val amount = context.get(amountArg)
             val item = context.get(itemArg).withAmount(amount)
 
-            target.getAcquirable<Player>().sync {
-                process(sender, target, item)
-            }
-        }, playerArg, itemArg, amountArg)
+            process(sender, targets, item)
+        }, playersArg, itemArg, amountArg)
     }
 
     /**
      * Give the item and notify sender.
      * @param sender Command's sender.
-     * @param target Player who will receive the item.
+     * @param targets Player who will receive the item.
      * @param item Item given.
      */
     private fun process(
         sender: CommandSender,
-        target: Player,
+        targets: Sequence<Player>,
         item: ItemStack
     ) {
-        target.inventory.addItemStack(item)
-        sender.sendMessage(
-            Component.translatable(
-                "commands.give.success.single",
-                Component.text(item.amount()),
-                Component.text(item.material().name()),
-                target.name
+        val receivers = targets.map {
+            it.sync {
+                inventory.addItemStack(item)
+                name
+            }
+        }.toList()
+
+        if (receivers.size == 1) {
+            sender.sendMessage(
+                Component.translatable(
+                    "commands.give.success.single",
+                    Component.text(item.amount()),
+                    Component.text(item.material().name()),
+                    receivers.first()
+                )
             )
-        )
+        } else {
+            sender.sendMessage(
+                Component.translatable(
+                    "commands.give.success.multiple",
+                    Component.text(item.amount()),
+                    Component.text(item.material().name()),
+                    Component.text(receivers.size)
+                )
+            )
+        }
+
     }
 }

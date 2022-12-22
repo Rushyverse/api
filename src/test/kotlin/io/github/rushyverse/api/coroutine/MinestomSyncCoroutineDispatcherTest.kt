@@ -8,7 +8,7 @@ import net.minestom.server.timer.ExecutionType
 import net.minestom.server.timer.SchedulerManager
 import kotlin.test.Test
 
-class AsyncDispatcherTest {
+class MinestomSyncCoroutineDispatcherTest {
 
     @Test
     fun `Should not perform if process is not alive`() {
@@ -17,7 +17,7 @@ class AsyncDispatcherTest {
         val schedulerManager = mockk<SchedulerManager>()
         every { process.scheduler() } returns schedulerManager
 
-        val dispatcher = AsyncCoroutineDispatcher(process)
+        val dispatcher = MinestomSyncCoroutineDispatcher(process)
         dispatcher.dispatch(mockk()) {}
 
         verify(exactly = 0) { schedulerManager.scheduleNextProcess(any(), any()) }
@@ -25,19 +25,19 @@ class AsyncDispatcherTest {
     }
 
     @Test
-    fun `Should perform task in async context`() {
+    fun `Should perform task in sync context`() {
         val process = mockk<ServerProcess>()
         every { process.isAlive } returns true
         val schedulerManager = mockk<SchedulerManager>()
         every { process.scheduler() } returns schedulerManager
         every { schedulerManager.scheduleNextProcess(any(), any()) } returns mockk()
 
-        val dispatcher = AsyncCoroutineDispatcher(process)
+        val dispatcher = MinestomSyncCoroutineDispatcher(process)
 
         val runnable = mockk<Runnable>()
         dispatcher.dispatch(mockk(), runnable)
 
-        verify(exactly = 1) { schedulerManager.scheduleNextProcess(runnable, ExecutionType.ASYNC) }
+        verify(exactly = 1) { schedulerManager.scheduleNextProcess(runnable, ExecutionType.SYNC) }
         verify(exactly = 0) { schedulerManager.scheduleNextTick(any()) }
     }
 

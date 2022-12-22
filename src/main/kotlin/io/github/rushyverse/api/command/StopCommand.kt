@@ -1,9 +1,8 @@
 package io.github.rushyverse.api.command
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import io.github.rushyverse.api.extension.async
+import io.github.rushyverse.api.extension.setDefaultExecutorSuspend
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.minestom.server.MinecraftServer
 import net.minestom.server.command.builder.Command
@@ -34,28 +33,19 @@ public class StopCommand : Command("stop") {
             if (commandLine != null) {
                 CommandMessages.sendMissingPermissionMessage(sender)
             }
-            return@setCondition false
+            false
         }
 
-        setDefaultExecutor { _, _ ->
-            GlobalScope.launch {
-                val stopComponent = Component.translatable("commands.stop.stopping")
-                MinecraftServer.getInstanceManager().instances
-                    .asSequence()
-                    .flatMap { it.players }
-                    .map { it.getAcquirable<Player>() }
-                    .map {
-                        GlobalScope.async {
-                            it.sync {
-                                it.kick(stopComponent)
-                            }
-                        }
-                    }.toList().awaitAll()
+        setDefaultExecutorSuspend { _, _ ->
+            val stopComponent = Component.translatable("commands.stop.stopping")
+            MinecraftServer.getInstanceManager().instances
+                .asSequence()
+                .flatMap { it.players }
+                .map {
+                    it.async { kick(stopComponent) }
+                }.toList().awaitAll()
 
-                MinecraftServer.stopCleanly()
-            }
-
+            MinecraftServer.stopCleanly()
         }
-
     }
 }

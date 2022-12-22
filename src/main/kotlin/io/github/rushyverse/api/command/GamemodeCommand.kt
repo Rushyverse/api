@@ -2,6 +2,7 @@ package io.github.rushyverse.api.command
 
 import io.github.rushyverse.api.command.CommandMessages.sendMissingPermissionMessage
 import io.github.rushyverse.api.command.CommandMessages.sendPlayerNotFoundMessage
+import io.github.rushyverse.api.extension.sync
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.command.CommandSender
@@ -12,7 +13,6 @@ import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity
 import net.minestom.server.entity.GameMode
 import net.minestom.server.entity.Player
 import net.minestom.server.permission.Permission
-import java.util.*
 
 /**
  * Command to define the game mode of a player.
@@ -40,13 +40,13 @@ public class GamemodeCommand : Command("gamemode") {
         val playerArg = argumentPlayer()
 
         setCondition { sender, commandLine ->
-            if(sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
+            if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
                 return@setCondition true
             }
-            if(commandLine != null) {
+            if (commandLine != null) {
                 sendMissingPermissionMessage(sender)
             }
-            return@setCondition false
+            false
         }
 
         setDefaultExecutor { sender, context ->
@@ -96,28 +96,31 @@ public class GamemodeCommand : Command("gamemode") {
      * @param gamemodeArg Argument to retrieve game mode selected.
      */
     private fun addOtherSyntax(playerArg: ArgumentEntity, gamemodeArg: ArgumentEnum<GameMode>) {
-        addSyntax({ sender, context ->
-            if (!sender.hasPermission(Permissions.OTHER.permission)) {
-                sendMissingPermissionMessage(sender)
-                return@addSyntax
-            }
-
-            val finder = context.get(playerArg)
-            val player = finder.findFirstPlayer(sender)
-            if (player == null) {
-                sendPlayerNotFoundMessage(sender)
-                return@addSyntax
-            }
-
-            player.getAcquirable<Player>().sync {
-                val gamemode = context.get(gamemodeArg)
-                if (player == sender) {
-                    processSelf(player, gamemode)
-                } else {
-                    processOther(sender, player, gamemode)
+        addConditionalSyntax(
+            { sender, _ ->
+                sender !is Player || sender.hasPermission(Permissions.OTHER.permission)
+            },
+            { sender, context ->
+                val finder = context.get(playerArg)
+                val player = finder.findFirstPlayer(sender)
+                if (player == null) {
+                    sendPlayerNotFoundMessage(sender)
+                    return@addConditionalSyntax
                 }
-            }
-        }, gamemodeArg, playerArg)
+
+                if (player == sender) {
+                    if (!sender.hasPermission(Permissions.SELF.permission)) {
+                        sendMissingPermissionMessage(sender)
+                        return@addConditionalSyntax
+                    }
+
+                    processSelf(player, context.get(gamemodeArg))
+                    return@addConditionalSyntax
+                }
+
+                processOther(sender, player, context.get(gamemodeArg))
+            }, gamemodeArg, playerArg
+        )
     }
 
     /**
@@ -131,10 +134,7 @@ public class GamemodeCommand : Command("gamemode") {
                 return@addSyntax
             }
 
-            sender.getAcquirable<Player>().sync {
-                val gamemode = context.get(gamemodeArg)
-                processSelf(sender, gamemode)
-            }
+            processSelf(sender, context.get(gamemodeArg))
         }, gamemodeArg)
     }
 
@@ -144,11 +144,9 @@ public class GamemodeCommand : Command("gamemode") {
      * @param gamemode Game mode applied to the player.
      */
     private fun processSelf(player: Player, gamemode: GameMode) {
-        player.apply {
-            gameMode = gamemode
-            val gamemodeComponent = createTranslatableGameModeComponent(gamemode)
-            sendMessage(Component.translatable("commands.gamemode.success.self", gamemodeComponent))
-        }
+        val gamemodeComponent = createTranslatableGameModeComponent(gamemode)
+        changeGameModeSafe(player, gamemode)
+        player.sendMessage(Component.translatable("commands.gamemode.success.self", gamemodeComponent))
     }
 
     /**
@@ -158,12 +156,20 @@ public class GamemodeCommand : Command("gamemode") {
      * @param gamemode Game mode applied to the players.
      */
     private fun processOther(sender: CommandSender, player: Player, gamemode: GameMode) {
-        player.gameMode = gamemode
         val gamemodeComponent = createTranslatableGameModeComponent(gamemode)
         val playerName: Component = player.displayName ?: player.name
-
+        changeGameModeSafe(player, gamemode)
         player.sendMessage(Component.translatable("gameMode.changed", gamemodeComponent))
         sender.sendMessage(Component.translatable("commands.gamemode.success.other", playerName, gamemodeComponent))
+    }
+
+    /**
+     * Get a safe instance of the player to assign the new game mode.
+     * @param player Player who has his game mode modified.
+     * @param gamemode GameMode applied to the player.
+     */
+    private fun changeGameModeSafe(player: Player, gamemode: GameMode) {
+        player.sync { gameMode = gamemode }
     }
 
     /**
@@ -172,6 +178,6 @@ public class GamemodeCommand : Command("gamemode") {
      * @return Component representing the game mode.
      */
     private fun createTranslatableGameModeComponent(gamemode: GameMode): Component {
-        return Component.translatable("gameMode." + gamemode.name.lowercase(Locale.ROOT))
+        return Component.translatable("gameMode." + gamemode.name.lowercase())
     }
 }
