@@ -1,10 +1,10 @@
 package io.github.rushyverse.api.extension
 
+import io.github.rushyverse.api.utils.assertCoroutineContextFromScope
 import io.github.rushyverse.api.utils.randomString
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.job
 import kotlinx.coroutines.yield
 import net.minestom.server.command.CommandSender
 import net.minestom.server.command.builder.Command
@@ -12,7 +12,6 @@ import net.minestom.server.command.builder.CommandContext
 import net.minestom.server.command.builder.arguments.ArgumentType
 import org.junit.jupiter.api.Test
 import java.util.concurrent.CountDownLatch
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -35,7 +34,7 @@ class CommandExtTest {
         val latch = CountDownLatch(1)
 
         command.setDefaultExecutorSuspend(scope) { sender, context ->
-            checkContextFromScope(scope, coroutineContext)
+            assertCoroutineContextFromScope(scope, coroutineContext)
             assertEquals(senderMock, sender)
             assertEquals(contextMock, context)
             executed = true
@@ -65,7 +64,7 @@ class CommandExtTest {
         val latch = CountDownLatch(1)
 
         command.addSyntaxSuspend({ sender, context ->
-            checkContextFromScope(scope, coroutineContext)
+            assertCoroutineContextFromScope(scope, coroutineContext)
             assertEquals(senderMock, sender)
             assertEquals(contextMock, context)
             executed = true
@@ -105,7 +104,7 @@ class CommandExtTest {
                 true
             },
             { sender, context ->
-                checkContextFromScope(scope, coroutineContext)
+                assertCoroutineContextFromScope(scope, coroutineContext)
                 assertEquals(senderMock, sender)
                 assertEquals(contextMock, context)
                 executed = true
@@ -126,9 +125,5 @@ class CommandExtTest {
         syntax.executor.apply(senderMock, contextMock)
         latch.await()
         assertTrue(executed)
-    }
-
-    private fun checkContextFromScope(scope: CoroutineScope, coroutineContext: CoroutineContext) {
-        assertEquals(scope.coroutineContext.job.key, coroutineContext.job.key)
     }
 }
