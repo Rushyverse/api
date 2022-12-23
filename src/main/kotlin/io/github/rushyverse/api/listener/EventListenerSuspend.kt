@@ -10,14 +10,14 @@ import net.minestom.server.event.EventListener
 
 /**
  * Allows to handle event in a coroutine context.
- * @param T Type of the event to handle.
+ * @param E Type of the event to handle.
  * @property coroutineScope Coroutine scope where the event will be handled.
  */
-public abstract class EventListenerSuspend<T : Event>(
+public abstract class EventListenerSuspend<E : Event>(
     private val coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope
-) : EventListener<T> {
+) : EventListener<E> {
 
-    override fun run(event: T): EventListener.Result {
+    override fun run(event: E): EventListener.Result {
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             runSuspend(event)
         }
@@ -30,5 +30,5 @@ public abstract class EventListenerSuspend<T : Event>(
      * When the first suspension point is reached, the code will be executed in a thread obtained using [coroutineScope].
      * @param event Event that was fired.
      */
-    public abstract suspend fun runSuspend(event: T)
+    protected abstract suspend fun runSuspend(event: E)
 }
