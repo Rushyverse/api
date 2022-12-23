@@ -273,7 +273,7 @@ function, the thread is changed to the thread defined by the `coroutineScope`.
 
 ### Suspend Listener
 
-The API provides functions to execute listener in coroutine context through the class [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
+The API provides functions to handle events in coroutine context through the class [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
 
 ```kotlin
 import io.github.rushyverse.api.listener.EventListenerSuspend
@@ -292,8 +292,8 @@ class MyListener : EventListenerSuspend<MyEvent>() {
 }
 ```
 
-Like suspend command, the first `sender.sendMessage(...)` is executed in the thread used by Minestom to execute the
-command.
+Like suspend command, the first `sender.sendMessage(...)` is executed in the thread used by Minestom to handle the
+event.
 After the [delay](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/delay.html)
 function,
 the thread is changed to the thread defined by the `coroutineScope` in constructor of [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
