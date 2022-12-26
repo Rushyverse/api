@@ -39,12 +39,9 @@ public class GamemodeCommand : Command("gamemode") {
         val gamemodeArg = createGamemodeArgument()
         val playerArg = argumentPlayer()
 
-        setCondition { sender, commandLine ->
+        setCondition { sender, _ ->
             if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
                 return@setCondition true
-            }
-            if (commandLine != null) {
-                sendMissingPermissionMessage(sender)
             }
             false
         }

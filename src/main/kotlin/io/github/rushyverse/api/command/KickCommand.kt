@@ -1,8 +1,7 @@
 package io.github.rushyverse.api.command
 
 import io.github.rushyverse.api.command.CommandMessages.sendPlayerNotFoundMessage
-import io.github.rushyverse.api.extension.addSyntaxSuspend
-import io.github.rushyverse.api.extension.async
+import io.github.rushyverse.api.extension.sync
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.command.CommandSender
@@ -15,8 +14,13 @@ import net.minestom.server.permission.Permission
 
 /**
  * Command to kick a player.
+ * @param isProtected Lambda to check if a player is protected from being kicked.
  */
-public class KickCommand : Command("kick") {
+public class KickCommand(
+    private val isProtected: (CommandSender, Player) -> Boolean = { _, target ->
+        target.sync { hasPermission(Permissions.EXECUTE.permission) }
+    }
+) : Command("kick") {
 
     /**
      * Enum of permission to perform [command][KickCommand].
@@ -24,14 +28,9 @@ public class KickCommand : Command("kick") {
      */
     public enum class Permissions(public val permission: Permission) {
         /**
-         * Permission to be protected against kick.
-         */
-        PROTECTED(Permission("kick.protected")),
-
-        /**
          * Permission to kick another player.
          */
-        OTHER(Permission("kick.other"))
+        EXECUTE(Permission("kick"))
     }
 
     init {
@@ -40,12 +39,9 @@ public class KickCommand : Command("kick") {
             sendSyntaxMessage(sender, commandName)
         }
 
-        setCondition { sender, commandLine ->
-            if (sender !is Player || sender.hasPermission(Permissions.OTHER.permission)) {
+        setCondition { sender, _ ->
+            if (sender !is Player || sender.hasPermission(Permissions.EXECUTE.permission)) {
                 return@setCondition true
-            }
-            if (commandLine != null) {
-                CommandMessages.sendMissingPermissionMessage(sender)
             }
             false
         }
@@ -83,16 +79,16 @@ public class KickCommand : Command("kick") {
      * @param playerArg Argument to retrieve player selected.
      */
     private fun addSyntaxPlayer(playerArg: ArgumentEntity, reasonArg: Argument<String>) {
-        addSyntaxSuspend({ sender, context ->
+        addSyntax({ sender, context ->
             val player = context.get(playerArg).findFirstPlayer(sender)
             if (player == null) {
                 sendPlayerNotFoundMessage(sender)
-                return@addSyntaxSuspend
+                return@addSyntax
             }
 
-            if (player.hasPermission(Permissions.PROTECTED.permission)) {
+            if (!isProtected(sender, player)) {
                 sender.sendMessage(Component.text("You can't kick this player", NamedTextColor.RED))
-                return@addSyntaxSuspend
+                return@addSyntax
             }
 
             val reasonComponent = Component.text(context.get(reasonArg))
@@ -112,7 +108,7 @@ public class KickCommand : Command("kick") {
      * @param player Player to kick.
      * @param reason Component to display as the reason of the kick.
      */
-    private suspend fun kickPlayer(
+    private fun kickPlayer(
         player: Player,
         reason: Component
     ) {
@@ -120,6 +116,6 @@ public class KickCommand : Command("kick") {
             .appendNewline()
             .append(reason)
 
-        player.async { kick(kickComponent) }.await()
+        player.sync { kick(kickComponent) }
     }
 }

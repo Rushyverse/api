@@ -30,12 +30,9 @@ public class GiveCommand : Command("give") {
     }
 
     init {
-        setCondition { sender, commandLine ->
+        setCondition { sender, _ ->
             if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
                 return@setCondition true
-            }
-            if (commandLine != null) {
-                CommandMessages.sendMissingPermissionMessage(sender)
             }
             false
         }
