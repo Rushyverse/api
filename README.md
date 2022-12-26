@@ -331,11 +331,15 @@ import io.github.rushyverse.api.extension.async
 
 val player: Player = ...
 player.sync {
+    // The acquirable instance is locked here
     // This code is executed in the current thread with the entity locked
     player.sendMessage("In sync ${Thread.currentThread().name}")
 }
+
 // The acquirable instance is unlocked here
+
 player.async {
+    // The acquirable instance is locked here
     // This code is executed in the thread defined by the scope sent in parameter (optional)
     player.sendMessage("In async ${Thread.currentThread().name}")
 }
