@@ -311,6 +311,47 @@ MinecraftServer.getGlobalEventHandler().addListenerSuspend<MyEvent> {
 }
 ```
 
+### Acquirable
+
+Minestom provides the [Acquirable API](https://wiki.minestom.net/thread-architecture/acquirable-api).
+In order to simplify the use of these components, we provide some extensions.
+
+```kotlin
+import io.github.rushyverse.api.extension.acquirable
+
+val player: Player = ...
+player.acquirable // to retrieve the Acquirable instance
+```
+
+When you need to synchronize the access to an entity, you can use `sync` and `async` methods.
+
+```kotlin
+import io.github.rushyverse.api.extension.sync
+import io.github.rushyverse.api.extension.async
+
+val player: Player = ...
+player.sync {
+    // This code is executed in the current thread with the entity locked
+    player.sendMessage("In sync ${Thread.currentThread().name}")
+}
+// The acquirable instance is unlocked here
+player.async {
+    // This code is executed in the thread defined by the scope sent in parameter (optional)
+    player.sendMessage("In async ${Thread.currentThread().name}")
+}
+```
+
+Sometimes, you work with a list of entities and you need to synchronize the access to all of them.
+
+```kotlin
+import io.github.rushyverse.api.extension.toAcquirables
+
+val players: List<Player> = ...
+val acquirables: AcquirableCollection<Player> = players.toAcquirables()
+```
+
+With the method `toAcquirables`, you can convert a list of entities to [AcquirableCollection](https://wiki.minestom.net/thread-architecture/acquirable-api#acquirable-collections).
+
 ## Modification
 
 Firstly, you should modify the version of the project in [gradle.properties](gradle.properties) file by changing
