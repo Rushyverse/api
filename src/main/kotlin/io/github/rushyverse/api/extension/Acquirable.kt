@@ -1,7 +1,13 @@
 package io.github.rushyverse.api.extension
 
 import net.minestom.server.entity.Entity
+import net.minestom.server.thread.Acquirable
 import net.minestom.server.thread.AcquirableCollection
+
+/**
+ * Get the [Acquirable] of the entity.
+ */
+public val <E : Entity> E.acquirable: Acquirable<E> get() = getAcquirable()
 
 /**
  * Transform an iterable of entities into an [AcquirableCollection].
@@ -27,6 +33,6 @@ public fun <E : Entity> Array<E>.toAcquirables(): AcquirableCollection<E> {
  * @return An [AcquirableCollection] of entities.
  */
 public fun <E : Entity> Sequence<E>.toAcquirables(): AcquirableCollection<E> {
-    return AcquirableCollection(map { it.getAcquirable<E>() }.toList())
+    return AcquirableCollection(map { it.acquirable }.toList())
 }
 

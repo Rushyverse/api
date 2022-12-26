@@ -19,7 +19,7 @@ public inline fun <reified E : Entity, reified T> E.async(
     coroutineScope: CoroutineScope = Dispatchers.MinestomAsync.scope,
     crossinline block: suspend E.() -> T
 ): Deferred<T> = coroutineScope.async {
-    val acquirable = getAcquirable<E>().lock()
+    val acquirable = acquirable.lock()
     try {
         block(acquirable.get())
     } finally {
@@ -39,7 +39,7 @@ public inline fun <reified E : Entity, reified T> E.sync(block: E.() -> T): T {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
 
-    val acquirable = getAcquirable<E>().lock()
+    val acquirable = acquirable.lock()
     try {
         return block(acquirable.get())
     } finally {

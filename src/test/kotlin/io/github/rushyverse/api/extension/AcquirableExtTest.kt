@@ -15,11 +15,19 @@ import kotlin.test.assertTrue
 
 class AcquirableExtTest {
 
+    @Test
+    fun `should get the acquirable of the entity`() {
+        val entity = mockk<Player>()
+        val acquirable = mockk<Acquirable<Player>>()
+        every { entity.getAcquirable<Player>() } returns acquirable
+        assertTrue { entity.acquirable == acquirable }
+    }
+
     @Nested
     inner class IterableToAcquirables {
 
         @Test
-        fun `Empty to AcquirableCollection`() {
+        fun `empty to AcquirableCollection`() {
             val iterable = emptyList<Player>()
             val acquirableCollection = iterable.toAcquirables()
             assertTrue(acquirableCollection.unwrap().toList().isEmpty())
@@ -28,13 +36,13 @@ class AcquirableExtTest {
 
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
-        fun `Not empty to AcquirableCollection`(numberOfEntities: Int) {
+        fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
             val iterable = List(numberOfEntities) {
                 val entity = mockk<Entity>()
                 val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
                     every { unwrap() } returns entity
                 }
-                every { entity.getAcquirable<Entity>() } returns acquirable
+                every { entity.acquirable } returns acquirable
                 entity
             }.asIterable()
             val acquirableCollection = iterable.toAcquirables()
@@ -46,7 +54,7 @@ class AcquirableExtTest {
     inner class ArrayToAcquirables {
 
         @Test
-        fun `Empty to AcquirableCollection`() {
+        fun `empty to AcquirableCollection`() {
             val array = emptyArray<Player>()
             val acquirableCollection = array.toAcquirables()
             assertTrue(acquirableCollection.unwrap().toList().isEmpty())
@@ -55,13 +63,13 @@ class AcquirableExtTest {
 
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
-        fun `Not empty to AcquirableCollection`(numberOfEntities: Int) {
+        fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
             val array = Array(numberOfEntities) {
                 val entity = mockk<Entity>()
                 val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
                     every { unwrap() } returns entity
                 }
-                every { entity.getAcquirable<Entity>() } returns acquirable
+                every { entity.acquirable } returns acquirable
                 entity
             }
             val acquirableCollection = array.toAcquirables()
@@ -73,7 +81,7 @@ class AcquirableExtTest {
     inner class SequenceToAcquirables {
 
         @Test
-        fun `Empty to AcquirableCollection`() {
+        fun `empty to AcquirableCollection`() {
             val array = emptySequence<Player>()
             val acquirableCollection = array.toAcquirables()
             assertTrue(acquirableCollection.unwrap().toList().isEmpty())
@@ -82,13 +90,13 @@ class AcquirableExtTest {
 
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
-        fun `Not empty to AcquirableCollection`(numberOfEntities: Int) {
+        fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
             val sequence = Array(numberOfEntities) {
                 val entity = mockk<Entity>()
                 val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
                     every { unwrap() } returns entity
                 }
-                every { entity.getAcquirable<Entity>() } returns acquirable
+                every { entity.acquirable } returns acquirable
                 entity
             }.asSequence()
             val acquirableCollection = sequence.toAcquirables()

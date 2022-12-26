@@ -36,12 +36,12 @@ class EntityExtTest {
                 every { lock() } returns acquired
             }
 
-            every { player.getAcquirable<Player>() } returns acquirable
+            every { player.acquirable } returns acquirable
 
             var executed = false
             val expectedValue = randomString()
             val returnedValue = player.sync {
-                verify(exactly = 1) { player.getAcquirable<Player>() }
+                verify(exactly = 1) { player.acquirable }
                 verify(exactly = 1) { acquired.get() }
                 verify(exactly = 1) { acquirable.lock() }
                 verify(exactly = 0) { acquired.unlock() }
@@ -52,7 +52,7 @@ class EntityExtTest {
             assertTrue(executed)
             assertEquals(expectedValue, returnedValue)
 
-            verify(exactly = 1) { player.getAcquirable<Player>() }
+            verify(exactly = 1) { player.acquirable }
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 1) { acquired.unlock() }
@@ -69,7 +69,7 @@ class EntityExtTest {
                 every { lock() } returns acquired
             }
 
-            every { player.getAcquirable<Player>() } returns acquirable
+            every { player.acquirable } returns acquirable
 
             val ex = assertThrows<Exception> {
                 player.sync {
@@ -80,7 +80,7 @@ class EntityExtTest {
 
             assertTrue(ex.message == "Test")
 
-            verify(exactly = 1) { player.getAcquirable<Player>() }
+            verify(exactly = 1) { player.acquirable }
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 1) { acquired.unlock() }
@@ -101,7 +101,7 @@ class EntityExtTest {
                 every { lock() } returns acquired
             }
 
-            every { player.getAcquirable<Player>() } returns acquirable
+            every { player.acquirable } returns acquirable
             val scope = CoroutineScope(Dispatchers.Default)
 
             val latch = CountDownLatch(1)
@@ -109,7 +109,7 @@ class EntityExtTest {
             val expectedValue = randomString()
             val deferred = player.async(scope) {
                 assertCoroutineContextFromScope(scope, coroutineContext)
-                verify(exactly = 1) { player.getAcquirable<Player>() }
+                verify(exactly = 1) { player.acquirable }
                 verify(exactly = 1) { acquired.get() }
                 verify(exactly = 1) { acquirable.lock() }
                 verify(exactly = 0) { acquired.unlock() }
@@ -119,7 +119,7 @@ class EntityExtTest {
                 expectedValue
             }
 
-            verify(exactly = 1) { player.getAcquirable<Player>() }
+            verify(exactly = 1) { player.acquirable }
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 0) { acquired.unlock() }
@@ -129,7 +129,7 @@ class EntityExtTest {
             assertEquals(expectedValue, deferred.await())
             assertTrue(executed)
 
-            verify(exactly = 1) { player.getAcquirable<Player>() }
+            verify(exactly = 1) { player.acquirable }
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 1) { acquired.unlock() }
@@ -146,7 +146,7 @@ class EntityExtTest {
                 every { lock() } returns acquired
             }
 
-            every { player.getAcquirable<Player>() } returns acquirable
+            every { player.acquirable } returns acquirable
             val scope = CoroutineScope(Dispatchers.Default)
 
             val deferred = player.async(scope) {
@@ -163,7 +163,7 @@ class EntityExtTest {
             assertTrue(ex is Exception)
             assertTrue(ex.message == "Test")
 
-            verify(exactly = 1) { player.getAcquirable<Player>() }
+            verify(exactly = 1) { player.acquirable }
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 1) { acquired.unlock() }
