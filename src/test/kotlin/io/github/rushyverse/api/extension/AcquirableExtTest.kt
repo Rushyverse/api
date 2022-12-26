@@ -37,14 +37,8 @@ class AcquirableExtTest {
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
         fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
-            val iterable = List(numberOfEntities) {
-                val entity = mockk<Entity>()
-                val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
-                    every { unwrap() } returns entity
-                }
-                every { entity.acquirable } returns acquirable
-                entity
-            }.asIterable()
+            val list = createListOfEntities(numberOfEntities)
+            val iterable = list.asIterable()
             val acquirableCollection = iterable.toAcquirables()
             assertContentEquals(iterable, acquirableCollection.unwrap().toList())
         }
@@ -64,14 +58,7 @@ class AcquirableExtTest {
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
         fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
-            val array = Array(numberOfEntities) {
-                val entity = mockk<Entity>()
-                val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
-                    every { unwrap() } returns entity
-                }
-                every { entity.acquirable } returns acquirable
-                entity
-            }
+            val array = createListOfEntities(numberOfEntities).toTypedArray()
             val acquirableCollection = array.toAcquirables()
             assertContentEquals(array.toList(), acquirableCollection.unwrap().toList())
         }
@@ -91,17 +78,19 @@ class AcquirableExtTest {
         @ParameterizedTest
         @ValueSource(ints = [1, 5, 10])
         fun `not empty to AcquirableCollection`(numberOfEntities: Int) {
-            val sequence = Array(numberOfEntities) {
-                val entity = mockk<Entity>()
-                val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
-                    every { unwrap() } returns entity
-                }
-                every { entity.acquirable } returns acquirable
-                entity
-            }.asSequence()
+            val sequence = createListOfEntities(numberOfEntities).asSequence()
             val acquirableCollection = sequence.toAcquirables()
             assertContentEquals(sequence.toList(), acquirableCollection.unwrap().toList())
         }
+    }
+
+    private fun createListOfEntities(numberOfEntities: Int) = List(numberOfEntities) {
+        val entity = mockk<Entity>()
+        val acquirable = spyk<Acquirable<Entity>>(Acquirable.of(entity)) {
+            every { unwrap() } returns entity
+        }
+        every { entity.acquirable } returns acquirable
+        entity
     }
 
 }
