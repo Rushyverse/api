@@ -17,9 +17,16 @@ import kotlin.contracts.contract
  */
 public inline fun <reified E : Entity, reified T> E.async(
     coroutineScope: CoroutineScope = Dispatchers.MinestomAsync.scope,
-    crossinline block: E.() -> T
+    crossinline block: suspend E.() -> T
 ): Deferred<T> {
-    return coroutineScope.async { sync(block) }
+    return coroutineScope.async {
+        val acquirable = getAcquirable<E>().lock()
+        try {
+            return@async block(acquirable.get())
+        } finally {
+            acquirable.unlock()
+        }
+    }
 }
 
 /**
