@@ -23,17 +23,17 @@ class ComponentExtTest {
 
         @ParameterizedTest
         @ValueSource(strings = ["Hello", "&#3b81f1Hello", "Hello https://www.youtube.com #3b81f1"])
-        fun `should return component with text without legacy color`(value: String) {
+        fun `should return component with text without extract color`(value: String) {
             val component = value.toComponent(extractColors = false)
             assertEquals(Component.text(value), component)
         }
 
         @Test
         fun `should separate text and url`() {
-            val component = "Hello https://www.youtube.com #3b81f1".toComponent(extractUrls = true, extractColors = false)
+            val component = "Hello https://www.youtube.com &#3b81f1".toComponent(extractUrls = true, extractColors = false)
             val expected = Component.text("Hello ")
                 .append(Component.text("https://www.youtube.com").clickEvent(ClickEvent.openUrl("https://www.youtube.com")))
-                .append(Component.text(" #3b81f1"))
+                .append(Component.text(" &#3b81f1"))
             assertEquals(expected, component)
         }
 
