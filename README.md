@@ -75,11 +75,11 @@ and configuration classes to load the configuration of the server.
 ***Configuration classes***
 
 The interfaces for configuration are located in
-this [package](src/main/kotlin/io/github/rushyverse/api/configuration/IConfiguration.kt).
+this [package](src/main/kotlin/com/github/rushyverse/api/configuration/IConfiguration.kt).
 
 ```kotlin
-import io.github.rushyverse.api.configuration.IConfiguration
-import io.github.rushyverse.api.configuration.IServerConfiguration
+import com.github.rushyverse.api.configuration.IConfiguration
+import com.github.rushyverse.api.configuration.IServerConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -115,7 +115,7 @@ data class MyConfiguration(
 ***Server class***
 
 ```kotlin
-import io.github.rushyverse.api.RushyServer
+import com.github.rushyverse.api.RushyServer
 
 class MyServer(private val configurationPath: String?) : RushyServer() {
 
@@ -161,10 +161,10 @@ null, the configuration file will be searched in the working directory._
 ### Commands
 
 In `API` class, the method `registerCommands` can be used to register
-the [implemented commands](src/main/kotlin/io/github/rushyverse/api/command) from API.
+the [implemented commands](src/main/kotlin/com/github/rushyverse/api/command) from API.
 
 ```kotlin
-import io.github.rushyverse.api.RushyServer
+import com.github.rushyverse.api.RushyServer
 
 class MyServer : RushyServer() {
 
@@ -179,14 +179,14 @@ class MyServer : RushyServer() {
 ### Translation
 
 The `RushyServer` class offers a method to
-create [TranslationsProvider](src/main/kotlin/io/github/rushyverse/api/translation/TranslationsProvider.kt) instance
+create [TranslationsProvider](src/main/kotlin/com/github/rushyverse/api/translation/TranslationsProvider.kt) instance
 using [resource bundle files](src/main/resources/api.properties).
 
 If you want, you can override the method `createTranslationsProvider` to create your own instance
 of `TranslationsProvider`.
 
 ```kotlin
-import io.github.rushyverse.api.RushyServer
+import com.github.rushyverse.api.RushyServer
 
 class MyServer : RushyServer() {
 
@@ -215,9 +215,9 @@ class MyServer : RushyServer() {
 The API provides functions to execute command in coroutine context.
 
 ```kotlin
-import io.github.rushyverse.api.extension.addConditionalSyntaxSuspend
-import io.github.rushyverse.api.extension.addSyntaxSuspend
-import io.github.rushyverse.api.extension.setDefaultExecutorSuspend
+import com.github.rushyverse.api.extension.addConditionalSyntaxSuspend
+import com.github.rushyverse.api.extension.addSyntaxSuspend
+import com.github.rushyverse.api.extension.setDefaultExecutorSuspend
 import kotlinx.coroutines.delay
 import net.minestom.server.command.builder.Command
 import net.minestom.server.command.builder.arguments.ArgumentType
@@ -268,10 +268,10 @@ function, the thread is changed to the thread defined by the `coroutineScope`.
 
 ### Suspend Listener
 
-The API provides functions to handle events in coroutine context through the class [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
+The API provides functions to handle events in coroutine context through the class [EventListenerSuspend](src/main/kotlin/com/github/rushyverse/api/listener/EventListenerSuspend.kt).
 
 ```kotlin
-import io.github.rushyverse.api.listener.EventListenerSuspend
+import com.github.rushyverse.api.listener.EventListenerSuspend
 
 class MyListener : EventListenerSuspend<MyEvent>() {
 
@@ -291,7 +291,7 @@ Like suspend command, the first `sender.sendMessage(...)` is executed in the thr
 event.
 After the [delay](https://kotlin.github.io/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/delay.html)
 function,
-the thread is changed to the thread defined by the `coroutineScope` in constructor of [EventListenerSuspend](src/main/kotlin/io/github/rushyverse/api/listener/EventListenerSuspend.kt).
+the thread is changed to the thread defined by the `coroutineScope` in constructor of [EventListenerSuspend](src/main/kotlin/com/github/rushyverse/api/listener/EventListenerSuspend.kt).
 
 **Note: The method `runSuspend` doesn't return value because when the current thread change, the result of the initial `run` method is expected,
 so the class always returns EventListener.Result.SUCCESS.**
@@ -312,7 +312,7 @@ Minestom provides the [Acquirable API](https://wiki.minestom.net/thread-architec
 In order to simplify the use of these components, we provide some extensions.
 
 ```kotlin
-import io.github.rushyverse.api.extension.acquirable
+import com.github.rushyverse.api.extension.acquirable
 
 val player: Player = ...
 player.acquirable // to retrieve the Acquirable instance
@@ -321,8 +321,8 @@ player.acquirable // to retrieve the Acquirable instance
 When you need to synchronize the access to an entity, you can use `sync` and `async` methods.
 
 ```kotlin
-import io.github.rushyverse.api.extension.sync
-import io.github.rushyverse.api.extension.async
+import com.github.rushyverse.api.extension.sync
+import com.github.rushyverse.api.extension.async
 
 val player: Player = ...
 player.sync {
@@ -343,7 +343,7 @@ player.async {
 Sometimes, you work with a list of entities and you need to synchronize the access to all of them.
 
 ```kotlin
-import io.github.rushyverse.api.extension.toAcquirables
+import com.github.rushyverse.api.extension.toAcquirables
 
 val players: List<Player> = ...
 val acquirables: AcquirableCollection<Player> = players.toAcquirables()
