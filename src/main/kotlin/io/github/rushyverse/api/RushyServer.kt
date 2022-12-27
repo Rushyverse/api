@@ -26,11 +26,22 @@ public val logger: KLogger = KotlinLogging.logger { }
  */
 public abstract class RushyServer {
 
-    public companion object {
+    public companion object API {
         /**
          * Name of the bundle for API.
          */
-        public const val API_BUNDLE_NAME: String = "api"
+        public const val BUNDLE_API: String = "api"
+
+        /**
+         * Register the API commands in the [CommandManager].
+         * @param manager CommandManager to register the commands in.
+         */
+        public fun registerCommands(manager: CommandManager = MinecraftServer.getCommandManager()) {
+            manager.register(StopCommand())
+            manager.register(KickCommand())
+            manager.register(GiveCommand())
+            manager.register(GamemodeCommand())
+        }
     }
 
     /**
@@ -95,19 +106,7 @@ public abstract class RushyServer {
      */
     protected open fun createTranslationsProvider(bundles: Iterable<String>): TranslationsProvider {
         return ResourceBundleTranslationsProvider().apply {
-            registerResourceBundleForSupportedLocales(API_BUNDLE_NAME, ResourceBundle::getBundle)
             bundles.forEach { registerResourceBundleForSupportedLocales(it, ResourceBundle::getBundle) }
         }
-    }
-
-    /**
-     * Register all commands.
-     * @param manager Command manager of the server.
-     */
-    protected open fun registerCommands(manager: CommandManager = MinecraftServer.getCommandManager()) {
-        manager.register(StopCommand())
-        manager.register(KickCommand())
-        manager.register(GiveCommand())
-        manager.register(GamemodeCommand())
     }
 }

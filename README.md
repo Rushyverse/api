@@ -160,7 +160,7 @@ null, the configuration file will be searched in the working directory._
 
 ### Commands
 
-In `RushyServer` class, the method `registerCommands` can be used to register
+In `API` class, the method `registerCommands` can be used to register
 the [implemented commands](src/main/kotlin/io/github/rushyverse/api/command) from API.
 
 ```kotlin
@@ -170,13 +170,8 @@ class MyServer : RushyServer() {
 
     override fun start() {
         start<MyConfiguration>(configurationPath) {
-            registerCommands()
+            API.registerCommands()
         }
-    }
-
-    override fun registerCommands(manager: CommandManager) {
-        super.registerCommands(manager) // register API commands
-        manager.register(MyCommand())
     }
 }
 ```
@@ -198,7 +193,7 @@ class MyServer : RushyServer() {
     override fun start() {
         start<MyConfiguration>(configurationPath) {
             // Register "myBundle" resource bundle and the API resource bundle
-            val translationsProvider = createTranslationsProvider(listOf("myBundle"))
+            val translationsProvider = createTranslationsProvider(listOf(API.BUNDLE_API, "myBundle"))
             // Get the value of "myKey" for english language
             println(translationsProvider.translate("myKey", SupportedLanguage.ENGLISH.locale, "myBundle"))
             // Get the value of "myKey2" for english language with parameters

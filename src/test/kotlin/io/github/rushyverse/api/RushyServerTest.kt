@@ -37,7 +37,7 @@ class RushyServerTest : AbstractTest() {
 
     @Test
     fun `should have the correct bundle name`() {
-        assertEquals("api", RushyServer.API_BUNDLE_NAME)
+        assertEquals("api", RushyServer.BUNDLE_API)
     }
 
     @Nested
