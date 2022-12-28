@@ -7,21 +7,16 @@ import com.github.rushyverse.api.command.StopCommand
 import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
 import com.github.rushyverse.api.configuration.VelocityConfiguration
-import com.github.rushyverse.api.utils.assertCoroutineContextFromScope
 import com.github.rushyverse.api.utils.randomString
-import kotlinx.coroutines.*
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.MinecraftServer
 import net.minestom.server.extras.MojangAuth
 import net.minestom.server.extras.bungee.BungeeCordProxy
 import net.minestom.server.extras.velocity.VelocityProxy
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
-import java.util.concurrent.CountDownLatch
-import kotlin.coroutines.coroutineContext
 import kotlin.test.*
 
 class TestServer(private val configuration: String? = null) : RushyServer() {
@@ -46,37 +41,6 @@ class RushyServerTest : AbstractTest() {
     @Test
     fun `should have the correct bundle name`() {
         assertEquals("api", RushyServer.API.BUNDLE_API)
-    }
-
-    @Test
-    @Disabled
-    fun `start body should be in coroutine context`() {
-        val latch = CountDownLatch(1)
-        var executed = false
-        copyWorldInTmpDirectory()
-
-        val scope = CoroutineScope(Dispatchers.Default)
-
-        val server = object : RushyServer() {
-            override suspend fun start() {
-                assertCoroutineContextFromScope(scope, coroutineContext)
-                start<TestConfiguration>() {
-                    assertCoroutineContextFromScope(scope, coroutineContext)
-                    yield()
-                    assertCoroutineContextFromScope(scope, coroutineContext)
-                    executed = true
-                    latch.countDown()
-                }
-            }
-        }
-
-        scope.launch {
-            server.start()
-        }
-
-        latch.await()
-        scope.cancel()
-        assertTrue(executed)
     }
 
     @Nested
