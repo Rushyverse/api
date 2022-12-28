@@ -77,8 +77,10 @@ The interfaces for configuration are located in
 this [package](src/main/kotlin/com/github/rushyverse/api/configuration/IConfiguration.kt).
 
 ```kotlin
+import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
 import com.github.rushyverse.api.configuration.IServerConfiguration
+import com.github.rushyverse.api.configuration.VelocityConfiguration
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -261,17 +263,20 @@ The API provides functions to handle events in coroutine context through the cla
 
 ```kotlin
 import com.github.rushyverse.api.listener.EventListenerSuspend
+import kotlinx.coroutines.delay
+import net.minestom.server.event.player.PlayerSpawnEvent
 
-class MyListener : EventListenerSuspend<MyEvent>() {
+class PlayerSpawnListener : EventListenerSuspend<PlayerSpawnEvent>() {
 
-    override fun eventType(): Class<MyEvent> {
-        return MyEvent::class.java
+    override fun eventType(): Class<PlayerSpawnEvent> {
+        return PlayerSpawnEvent::class.java
     }
 
-    override suspend fun runSuspend(event: MyEvent) {
-        sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+    override suspend fun runSuspend(event: PlayerSpawnEvent) {
+        val player = event.player
+        player.sendMessage("Hello initial thread ${Thread.currentThread().name}")
         delay(1000)
-        sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+        player.sendMessage("The thread is changed to ${Thread.currentThread().name}")
     }
 }
 ```
@@ -288,10 +293,11 @@ so the class always returns EventListener.Result.SUCCESS.**
 You can also add a new listener to the event bus using the `addSuspendListener` method.
 
 ```kotlin
-MinecraftServer.getGlobalEventHandler().addListenerSuspend<MyEvent> {
-    sender.sendMessage("Hello initial thread ${Thread.currentThread().name}")
+MinecraftServer.getGlobalEventHandler().addListenerSuspend<PlayerSpawnEvent> {
+    val player = event.player
+    player.sendMessage("Hello initial thread ${Thread.currentThread().name}")
     delay(1000)
-    sender.sendMessage("The thread is changed to ${Thread.currentThread().name}")
+    player.sendMessage("The thread is changed to ${Thread.currentThread().name}")
 }
 ```
 
