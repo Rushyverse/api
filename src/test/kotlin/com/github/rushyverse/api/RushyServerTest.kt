@@ -15,6 +15,7 @@ import net.minestom.server.MinecraftServer
 import net.minestom.server.extras.MojangAuth
 import net.minestom.server.extras.bungee.BungeeCordProxy
 import net.minestom.server.extras.velocity.VelocityProxy
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -48,6 +49,7 @@ class RushyServerTest : AbstractTest() {
     }
 
     @Test
+    @Disabled
     fun `start body should be in coroutine context`() {
         val latch = CountDownLatch(1)
         var executed = false
