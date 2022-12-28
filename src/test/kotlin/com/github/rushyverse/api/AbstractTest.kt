@@ -1,9 +1,6 @@
 package com.github.rushyverse.api
 
-import com.github.rushyverse.api.configuration.IBungeeCordConfiguration
-import com.github.rushyverse.api.configuration.IConfiguration
-import com.github.rushyverse.api.configuration.IServerConfiguration
-import com.github.rushyverse.api.configuration.IVelocityConfiguration
+import com.github.rushyverse.api.configuration.*
 import com.github.rushyverse.api.utils.getAvailablePort
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,8 +21,8 @@ data class ServerConfiguration(
     override val port: Int,
     override val world: String,
     override val onlineMode: Boolean,
-    override val velocity: IVelocityConfiguration.VelocityConfiguration,
-    override val bungeeCord: IBungeeCordConfiguration.BungeeCordConfiguration
+    override val velocity: VelocityConfiguration,
+    override val bungeeCord: BungeeCordConfiguration
 ) : IServerConfiguration
 
 abstract class AbstractTest {
@@ -46,8 +43,8 @@ abstract class AbstractTest {
                 25565,
                 DEFAULT_WORLD,
                 false,
-                IVelocityConfiguration.VelocityConfiguration(false, ""),
-                IBungeeCordConfiguration.BungeeCordConfiguration(false, "")
+                VelocityConfiguration(false, ""),
+                BungeeCordConfiguration(false, "")
             )
         )
 
@@ -67,7 +64,10 @@ abstract class AbstractTest {
     protected fun configurationToHocon(configuration: TestConfiguration) =
         Hocon.encodeToConfig(TestConfiguration.serializer(), configuration)
 
-    protected fun configurationToHoconFile(configuration: TestConfiguration, file: File = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)) =
+    protected fun configurationToHoconFile(
+        configuration: TestConfiguration,
+        file: File = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+    ) =
         file.writeText(configurationToHocon(configuration).root().render())
 
     protected fun copyFolderFromResourcesToFolder(folderName: String, destination: File) {

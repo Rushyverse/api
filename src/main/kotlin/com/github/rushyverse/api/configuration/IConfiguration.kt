@@ -112,15 +112,16 @@ public interface IVelocityConfiguration {
 
     public val secret: String
 
-    /**
-     * Configuration to connect the server to the velocity proxy.
-     */
-    @Serializable
-    public data class VelocityConfiguration(
-        override val enabled: Boolean,
-        override val secret: String
-    ) : IVelocityConfiguration
 }
+
+/**
+ * Configuration to connect the server to the velocity proxy.
+ */
+@Serializable
+public data class VelocityConfiguration(
+    override val enabled: Boolean,
+    override val secret: String
+) : IVelocityConfiguration
 
 
 /**
@@ -134,12 +135,13 @@ public interface IBungeeCordConfiguration {
 
     public val secret: String
 
-    /**
-     * Configuration to connect the server to the bungeeCord proxy.
-     */
-    @Serializable
-    public data class BungeeCordConfiguration(
-        override val enabled: Boolean,
-        override val secret: String
-    ) : IBungeeCordConfiguration
 }
+
+/**
+ * Configuration to connect the server to the bungeeCord proxy.
+ */
+@Serializable
+public data class BungeeCordConfiguration(
+    override val enabled: Boolean,
+    override val secret: String
+) : IBungeeCordConfiguration

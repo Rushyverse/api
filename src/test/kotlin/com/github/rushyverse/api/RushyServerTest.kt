@@ -4,9 +4,9 @@ import com.github.rushyverse.api.command.GamemodeCommand
 import com.github.rushyverse.api.command.GiveCommand
 import com.github.rushyverse.api.command.KickCommand
 import com.github.rushyverse.api.command.StopCommand
-import com.github.rushyverse.api.configuration.IBungeeCordConfiguration
+import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
-import com.github.rushyverse.api.configuration.IVelocityConfiguration
+import com.github.rushyverse.api.configuration.VelocityConfiguration
 import com.github.rushyverse.api.utils.randomString
 import net.minestom.server.MinecraftServer
 import net.minestom.server.extras.MojangAuth
@@ -141,7 +141,7 @@ class RushyServerTest : AbstractTest() {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 defaultConfiguration.server.copy(
-                    velocity = IVelocityConfiguration.VelocityConfiguration(enabled, secret)
+                    velocity = VelocityConfiguration(enabled, secret)
                 )
             )
             configurationToHoconFile(configuration)
@@ -179,7 +179,7 @@ class RushyServerTest : AbstractTest() {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 server = defaultConfiguration.server.copy(
-                    bungeeCord = IBungeeCordConfiguration.BungeeCordConfiguration(enabled, secret)
+                    bungeeCord = BungeeCordConfiguration(enabled, secret)
                 )
             )
 
