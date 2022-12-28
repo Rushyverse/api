@@ -116,16 +116,13 @@ data class MyConfiguration(
 ```kotlin
 import com.github.rushyverse.api.RushyServer
 
+suspend fun main(args: Array<String>) {
+    MyServer(args.firstOrNull()).start()
+}
+
 class MyServer(private val configurationPath: String?) : RushyServer() {
 
-    companion object {
-        @JvmStatic
-        fun main(args: Array<String>) {
-            MyServer(args.firstOrNull()).start()
-        }
-    }
-
-    override fun start() {
+    override suspend fun start() {
         start<MyConfiguration>(configurationPath) {
             // this = MyConfiguration
             // it = InstanceContainer
@@ -157,7 +154,7 @@ import com.github.rushyverse.api.RushyServer
 
 class MyServer : RushyServer() {
 
-    override fun start() {
+    override suspend fun start() {
         start<MyConfiguration>(configurationPath) {
             API.registerCommands()
         }
@@ -179,7 +176,7 @@ import com.github.rushyverse.api.RushyServer
 
 class MyServer : RushyServer() {
 
-    override fun start() {
+    override suspend fun start() {
         start<MyConfiguration>(configurationPath) {
             // Register "myBundle" resource bundle and the API resource bundle
             val translationsProvider = createTranslationsProvider(listOf(API.BUNDLE_API, "myBundle"))
