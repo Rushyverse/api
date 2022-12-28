@@ -4,7 +4,9 @@ import com.github.rushyverse.api.command.GamemodeCommand
 import com.github.rushyverse.api.command.GiveCommand
 import com.github.rushyverse.api.command.KickCommand
 import com.github.rushyverse.api.command.StopCommand
+import com.github.rushyverse.api.configuration.IBungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
+import com.github.rushyverse.api.configuration.IVelocityConfiguration
 import com.github.rushyverse.api.translation.ResourceBundleTranslationsProvider
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
@@ -13,6 +15,9 @@ import mu.KLogger
 import mu.KotlinLogging
 import net.minestom.server.MinecraftServer
 import net.minestom.server.command.CommandManager
+import net.minestom.server.extras.MojangAuth
+import net.minestom.server.extras.bungee.BungeeCordProxy
+import net.minestom.server.extras.velocity.VelocityProxy
 import net.minestom.server.instance.AnvilLoader
 import net.minestom.server.instance.InstanceContainer
 import java.io.File
@@ -67,9 +72,47 @@ public abstract class RushyServer {
         val serverConfig = config.server
         loadWorld(serverConfig.world, instanceContainer)
 
+        applyVelocityConfiguration(serverConfig.velocity)
+        applyBungeeCordConfiguration(serverConfig.bungeeCord)
+
+        applyOnlineMode(serverConfig.onlineMode)
+
         init(config, instanceContainer)
 
         minecraftServer.start("0.0.0.0", serverConfig.port)
+    }
+
+    protected open fun applyOnlineMode(enabled: Boolean) {
+        if (enabled) {
+            logger.info { "Enabling Online mode" }
+            MojangAuth.init()
+            logger.info { "Online mode enabled" }
+        }
+    }
+
+    /**
+     * Enable the [Velocity system][VelocityProxy] if the configuration [IVelocityConfiguration] is enabled.
+     * @param velocity Velocity configuration.
+     */
+    protected open fun applyVelocityConfiguration(velocity: IVelocityConfiguration) {
+        if (velocity.enabled) {
+            logger.info { "Enabling Velocity support" }
+            VelocityProxy.enable(velocity.secret)
+            logger.info { "Velocity support enabled" }
+        }
+    }
+
+    /**
+     * Enable the [BungeeCord system][BungeeCordProxy] if the configuration [IBungeeCordConfiguration] is enabled.
+     * @param bungeeCord BungeeCord configuration.
+     */
+    protected open fun applyBungeeCordConfiguration(bungeeCord: IBungeeCordConfiguration) {
+        if (bungeeCord.enabled) {
+            logger.info { "Enabling BungeeCord support" }
+            BungeeCordProxy.enable()
+            BungeeCordProxy.setBungeeGuardTokens(setOf(bungeeCord.secret))
+            logger.info { "BungeeCord support enabled" }
+        }
     }
 
     /**
