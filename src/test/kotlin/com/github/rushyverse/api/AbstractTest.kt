@@ -1,7 +1,6 @@
 package com.github.rushyverse.api
 
-import com.github.rushyverse.api.configuration.IConfiguration
-import com.github.rushyverse.api.configuration.IServerConfiguration
+import com.github.rushyverse.api.configuration.*
 import com.github.rushyverse.api.utils.getAvailablePort
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -20,13 +19,17 @@ data class TestConfiguration(
 @Serializable
 data class ServerConfiguration(
     override val port: Int,
-    override val world: String
+    override val world: String,
+    override val onlineMode: Boolean,
+    override val velocity: VelocityConfiguration,
+    override val bungeeCord: BungeeCordConfiguration
 ) : IServerConfiguration
 
 abstract class AbstractTest {
 
     companion object {
         private const val PROPERTY_USER_DIR = "user.dir"
+        const val DEFAULT_WORLD = "world"
     }
 
     @TempDir
@@ -36,7 +39,13 @@ abstract class AbstractTest {
 
     protected val expectedDefaultConfiguration: TestConfiguration
         get() = TestConfiguration(
-            ServerConfiguration(25565, "world")
+            ServerConfiguration(
+                25565,
+                DEFAULT_WORLD,
+                false,
+                VelocityConfiguration(false, ""),
+                BungeeCordConfiguration(false, "")
+            )
         )
 
     @BeforeTest
@@ -55,7 +64,10 @@ abstract class AbstractTest {
     protected fun configurationToHocon(configuration: TestConfiguration) =
         Hocon.encodeToConfig(TestConfiguration.serializer(), configuration)
 
-    protected fun configurationToHoconFile(configuration: TestConfiguration, file: File) =
+    protected fun configurationToHoconFile(
+        configuration: TestConfiguration,
+        file: File = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+    ) =
         file.writeText(configurationToHocon(configuration).root().render())
 
     protected fun copyFolderFromResourcesToFolder(folderName: String, destination: File) {
@@ -67,7 +79,7 @@ abstract class AbstractTest {
         configuration: TestConfiguration = defaultConfigurationOnAvailablePort()
     ) {
         val worldFile = fileOfTmpDirectory(configuration.server.world)
-        copyFolderFromResourcesToFolder("world", worldFile)
+        copyFolderFromResourcesToFolder(DEFAULT_WORLD, worldFile)
     }
 
     protected fun defaultConfigurationOnAvailablePort() = expectedDefaultConfiguration.let {

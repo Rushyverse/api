@@ -46,7 +46,6 @@ dependencies {
 ### Maven
 
 ```xml
-
 <project>
     <repositories>
         <repository>
@@ -140,17 +139,7 @@ class MyServer(private val configurationPath: String?) : RushyServer() {
 
 The function `start` takes a configuration class as parameter. So you need to define a configuration file in
 the `resources` folder.
-The configuration file should be named `server.conf`.
-
-According to the configuration class above (`MyConfiguration`), the configuration file should have the following
-content:
-
-```hocon
-server {
-  port = 25565
-  world = "world"
-}
-```
+The configuration file should be named `server.conf` and use this [template](src/test/resources/server.conf).
 
 If in the working directory (where you launch the server) the configuration file will be created if it doesn't exist.
 However, the world folder must be added manually.
@@ -394,7 +383,6 @@ dependencies {
 ### Maven
 
 ```xml
-
 <project>
     <repositories>
         <repository>

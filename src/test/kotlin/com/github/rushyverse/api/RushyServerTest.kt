@@ -4,17 +4,19 @@ import com.github.rushyverse.api.command.GamemodeCommand
 import com.github.rushyverse.api.command.GiveCommand
 import com.github.rushyverse.api.command.KickCommand
 import com.github.rushyverse.api.command.StopCommand
+import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
+import com.github.rushyverse.api.configuration.VelocityConfiguration
 import com.github.rushyverse.api.utils.randomString
 import net.minestom.server.MinecraftServer
+import net.minestom.server.extras.MojangAuth
+import net.minestom.server.extras.bungee.BungeeCordProxy
+import net.minestom.server.extras.velocity.VelocityProxy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.IOException
-import kotlin.test.AfterTest
-import kotlin.test.assertContentEquals
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class TestServer(private val configuration: String? = null) : RushyServer() {
 
@@ -112,5 +114,119 @@ class RushyServerTest : AbstractTest() {
                 ).sortedBy { it.simpleName }.toList()
             )
         }
+    }
+
+    @Nested
+    inner class Velocity {
+
+        @BeforeTest
+        fun onBefore() {
+            VelocityProxy::class.java.getDeclaredField("enabled").apply {
+                isAccessible = true
+                setBoolean(null, false)
+            }
+        }
+
+        @Test
+        fun `should load velocity`() {
+            test(true, "secret")
+        }
+
+        @Test
+        fun `should not load velocity`() {
+            test(false, "")
+        }
+
+        private fun test(enabled: Boolean, secret: String) {
+            val defaultConfiguration = expectedDefaultConfiguration
+            val configuration = expectedDefaultConfiguration.copy(
+                defaultConfiguration.server.copy(
+                    velocity = VelocityConfiguration(enabled, secret)
+                )
+            )
+            configurationToHoconFile(configuration)
+            copyWorldInTmpDirectory(configuration)
+            TestServer().start()
+
+            assertEquals(enabled, VelocityProxy.isEnabled())
+        }
+    }
+
+    @Nested
+    inner class BungeeCord {
+
+        @BeforeTest
+        fun onBefore() {
+            BungeeCordProxy::class.java.getDeclaredField("enabled").apply {
+                isAccessible = true
+                setBoolean(null, false)
+            }
+            BungeeCordProxy.setBungeeGuardTokens(null)
+        }
+
+        @Test
+        fun `should load bungeecord`() {
+            test(true, "test")
+            assertTrue(BungeeCordProxy.isValidBungeeGuardToken("test"))
+        }
+
+        @Test
+        fun `should not load bungeecord`() {
+            test(false, "")
+        }
+
+        private fun test(enabled: Boolean, secret: String) {
+            val defaultConfiguration = expectedDefaultConfiguration
+            val configuration = expectedDefaultConfiguration.copy(
+                server = defaultConfiguration.server.copy(
+                    bungeeCord = BungeeCordConfiguration(enabled, secret)
+                )
+            )
+
+            configurationToHoconFile(configuration)
+            copyWorldInTmpDirectory(configuration)
+
+            TestServer().start()
+
+            assertEquals(enabled, BungeeCordProxy.isEnabled())
+            assertEquals(enabled, BungeeCordProxy.isBungeeGuardEnabled())
+        }
+    }
+
+    @Nested
+    inner class OnlineMode {
+
+        @BeforeTest
+        fun onBefore() {
+            MojangAuth::class.java.getDeclaredField("enabled").apply {
+                isAccessible = true
+                setBoolean(null, false)
+            }
+        }
+
+        @Test
+        fun `should set online mode`() {
+            test(true)
+        }
+
+        @Test
+        fun `should set offline mode`() {
+            test(false)
+        }
+
+        private fun test(onlineMode: Boolean) {
+            val defaultConfiguration = expectedDefaultConfiguration
+            val configuration = expectedDefaultConfiguration.copy(
+                server = defaultConfiguration.server.copy(
+                    onlineMode = onlineMode
+                )
+            )
+            configurationToHoconFile(configuration)
+            copyWorldInTmpDirectory(configuration)
+            TestServer().start()
+
+            assertEquals(onlineMode, MojangAuth.isEnabled())
+        }
+
     }
 }

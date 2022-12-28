@@ -1,7 +1,8 @@
 package com.github.rushyverse.api.configuration
 
-import com.typesafe.config.ConfigFactory
 import com.github.rushyverse.api.utils.workingDirectory
+import com.typesafe.config.ConfigFactory
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
 import java.io.File
@@ -83,6 +84,9 @@ public interface IConfiguration {
  * Configuration about the minestom server.
  * @property port Port of the server.
  * @property world Path of the world to load.
+ * @property onlineMode `true` to enable the Mojang authentication.
+ * @property velocity Velocity configuration.
+ * @property bungeeCord BungeeCord configuration.
  */
 public interface IServerConfiguration {
 
@@ -90,4 +94,54 @@ public interface IServerConfiguration {
 
     public val world: String
 
+    public val onlineMode: Boolean
+
+    public val velocity: IVelocityConfiguration
+
+    public val bungeeCord: IBungeeCordConfiguration
 }
+
+/**
+ * Configuration to connect the server to the velocity proxy.
+ * @property enabled Whether the velocity support is enabled.
+ * @property secret Secret to verify if the client comes from the proxy.
+ */
+public interface IVelocityConfiguration {
+
+    public val enabled: Boolean
+
+    public val secret: String
+
+}
+
+/**
+ * Configuration to connect the server to the velocity proxy.
+ */
+@Serializable
+public data class VelocityConfiguration(
+    override val enabled: Boolean,
+    override val secret: String
+) : IVelocityConfiguration
+
+
+/**
+ * Configuration to connect the server to the bungeeCord proxy.
+ * @property enabled Whether the server should connect to the bungeeCord proxy.
+ * @property secret Secret to verify if the client comes from the proxy.
+ */
+public interface IBungeeCordConfiguration {
+
+    public val enabled: Boolean
+
+    public val secret: String
+
+}
+
+/**
+ * Configuration to connect the server to the bungeeCord proxy.
+ */
+@Serializable
+public data class BungeeCordConfiguration(
+    override val enabled: Boolean,
+    override val secret: String
+) : IBungeeCordConfiguration
