@@ -127,7 +127,7 @@ public data class VelocityConfiguration(
 /**
  * Configuration to connect the server to the bungeeCord proxy.
  * @property enabled Whether the server should connect to the bungeeCord proxy.
- * @property secret Set of valid secrets to verify if the client comes from the proxy.
+ * @property secret Secret to verify if the client comes from the proxy.
  */
 public interface IBungeeCordConfiguration {
 
