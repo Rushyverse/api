@@ -15,7 +15,7 @@ The API doesn't have an entrypoint.
 You can find the artifact on [Jitpack](https://jitpack.io/#UniverseProject/data-service).
 Use the version you prefer by following the tutorial on jitpack and replacing `{version}` bellow.
 
-The newest version can be found [here![](https://jitpack.io/v/Rushyverse/api.svg)](https://jitpack.io/#Rushyverse/api)
+The newest version can be found [here: ![](https://jitpack.io/v/Rushyverse/api.svg)](https://jitpack.io/#Rushyverse/api)
 
 ### Gradle (groovy)
 
