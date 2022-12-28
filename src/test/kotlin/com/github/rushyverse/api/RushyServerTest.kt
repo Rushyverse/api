@@ -8,6 +8,7 @@ import com.github.rushyverse.api.configuration.BungeeCordConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration
 import com.github.rushyverse.api.configuration.VelocityConfiguration
 import com.github.rushyverse.api.utils.randomString
+import kotlinx.coroutines.test.runTest
 import net.minestom.server.MinecraftServer
 import net.minestom.server.extras.MojangAuth
 import net.minestom.server.extras.bungee.BungeeCordProxy
@@ -20,7 +21,7 @@ import kotlin.test.*
 
 class TestServer(private val configuration: String? = null) : RushyServer() {
 
-    override fun start() {
+    override suspend fun start() {
         start<TestConfiguration>(configuration) {
             registerCommands()
         }
@@ -46,7 +47,7 @@ class RushyServerTest : AbstractTest() {
     inner class CreateOrGetConfiguration {
 
         @Test
-        fun `should create a configuration file if it doesn't exist`() {
+        fun `should create a configuration file if it doesn't exist`() = runTest {
             assertThrows<IOException> {
                 TestServer().start()
             }
@@ -58,7 +59,7 @@ class RushyServerTest : AbstractTest() {
         }
 
         @Test
-        fun `should use the configuration file if exists`() {
+        fun `should use the configuration file if exists`() = runTest {
             val configurationFile = fileOfTmpDirectory(randomString())
             assertTrue { configurationFile.createNewFile() }
 
@@ -77,7 +78,7 @@ class RushyServerTest : AbstractTest() {
     inner class UseConfiguration {
 
         @Test
-        fun `should use configuration to turn on the server`() {
+        fun `should use configuration to turn on the server`() = runTest {
             val configuration = defaultConfigurationOnAvailablePort()
             val configurationFile = fileOfTmpDirectory(randomString())
             configurationToHoconFile(configuration, configurationFile)
@@ -99,7 +100,7 @@ class RushyServerTest : AbstractTest() {
     inner class Command {
 
         @Test
-        fun `should load all commands`() {
+        fun `should load all commands`() = runTest {
             copyWorldInTmpDirectory()
             TestServer().start()
 
@@ -128,16 +129,16 @@ class RushyServerTest : AbstractTest() {
         }
 
         @Test
-        fun `should load velocity`() {
+        fun `should load velocity`() = runTest {
             test(true, "secret")
         }
 
         @Test
-        fun `should not load velocity`() {
+        fun `should not load velocity`() = runTest {
             test(false, "")
         }
 
-        private fun test(enabled: Boolean, secret: String) {
+        private suspend fun test(enabled: Boolean, secret: String) {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 defaultConfiguration.server.copy(
@@ -165,17 +166,17 @@ class RushyServerTest : AbstractTest() {
         }
 
         @Test
-        fun `should load bungeecord`() {
+        fun `should load bungeecord`() = runTest {
             test(true, "test")
             assertTrue(BungeeCordProxy.isValidBungeeGuardToken("test"))
         }
 
         @Test
-        fun `should not load bungeecord`() {
+        fun `should not load bungeecord`() = runTest {
             test(false, "")
         }
 
-        private fun test(enabled: Boolean, secret: String) {
+        private suspend fun test(enabled: Boolean, secret: String) {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 server = defaultConfiguration.server.copy(
@@ -205,16 +206,16 @@ class RushyServerTest : AbstractTest() {
         }
 
         @Test
-        fun `should set online mode`() {
+        fun `should set online mode`() = runTest {
             test(true)
         }
 
         @Test
-        fun `should set offline mode`() {
+        fun `should set offline mode`() = runTest {
             test(false)
         }
 
-        private fun test(onlineMode: Boolean) {
+        private suspend fun test(onlineMode: Boolean) {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 server = defaultConfiguration.server.copy(
