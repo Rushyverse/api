@@ -91,7 +91,10 @@ data class MyConfiguration(
 @Serializable
 data class MyServerConfiguration(
     override val port: Int,
-    override val world: String
+    override val world: String,
+    override val onlineMode: Boolean,
+    override val bungeeCord: BungeeCordConfiguration,
+    override val velocity: VelocityConfiguration
 ) : IServerConfiguration
 ```
 
