@@ -3,36 +3,39 @@ package com.github.rushyverse.api.extension
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
+import net.minestom.server.inventory.AbstractInventory
 import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.condition.InventoryCondition
-import net.minestom.server.inventory.condition.InventoryConditionResult
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
 
 /**
  * Range of slots.
  */
-public val Inventory.slots: IntRange
+public val AbstractInventory.slots: IntRange
     get() = this.itemStacks.indices
 
 /**
  * Remove the condition of interaction with the inventory.
  * @receiver Inventory.
  * @param condition Condition to remove.
+ * @return `true` if the condition was removed, `false` otherwise.
  */
-public fun Inventory.removeCondition(condition: InventoryCondition) {
-    this.inventoryConditions.remove(condition)
-}
+public fun AbstractInventory.removeCondition(condition: InventoryCondition): Boolean =
+    inventoryConditions.remove(condition)
 
 /**
  * Lock the position of all items in the inventory.
  * If a player tries to move an item, the item will not move.
  * @receiver Inventory.
+ * @return Condition of interaction with the inventory.
  */
-public fun Inventory.lockItemPositions() {
-    this.addInventoryCondition { _, _, _, inventoryConditionResult: InventoryConditionResult ->
-        inventoryConditionResult.isCancel = true
+public fun AbstractInventory.lockItemPositions(): InventoryCondition {
+    val condition = InventoryCondition { _, _, _, result ->
+        result.isCancel = true
     }
+    addInventoryCondition(condition)
+    return condition
 }
 
 /**
@@ -40,8 +43,9 @@ public fun Inventory.lockItemPositions() {
  * @receiver Inventory where the handler will be used
  * @param slot Slot that should be clicked.
  * @param handler Handler that will be called when the slot is clicked.
+ * @return Condition of interaction with the inventory.
  */
-public fun Inventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondition): InventoryCondition {
+public fun AbstractInventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondition): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
         if (clickedSlot == slot) {
             handler.accept(player, clickedSlot, clickType, result)
@@ -57,7 +61,10 @@ public fun Inventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondi
  * @param item Item that should be clicked.
  * @param handler Handler that will be called when the item is clicked.
  */
-public fun Inventory.registerClickEventOnItem(item: ItemStack, handler: InventoryCondition): InventoryCondition {
+public fun AbstractInventory.registerClickEventOnItem(
+    item: ItemStack,
+    handler: InventoryCondition
+): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
         if (clickedSlot in slots && item.isSimilar(getItemStack(clickedSlot))) {
             handler.accept(player, clickedSlot, clickType, result)
@@ -74,7 +81,7 @@ public fun Inventory.registerClickEventOnItem(item: ItemStack, handler: Inventor
  * @param item Item that will be added.
  * @param handler Handler that will be called when the item is clicked.
  */
-public fun Inventory.setItemStack(slot: Int, item: ItemStack, handler: InventoryCondition): InventoryCondition {
+public fun AbstractInventory.setItemStack(slot: Int, item: ItemStack, handler: InventoryCondition): InventoryCondition {
     this.setItemStack(slot, item)
     return registerClickEventOnItem(item, handler)
 }
@@ -85,14 +92,14 @@ public fun Inventory.setItemStack(slot: Int, item: ItemStack, handler: Inventory
  * @param slot Slot checked.
  * @return `true` if the slot is empty, `false` otherwise.
  */
-public fun Inventory.isEmpty(slot: Int): Boolean = getItemStack(slot).isAir
+public fun AbstractInventory.isEmpty(slot: Int): Boolean = getItemStack(slot).isAir
 
 /**
  * Get the first available slot.
  * @receiver Inventory.
  * @return The slot number or `-1` if there is no available slot.
  */
-public fun Inventory.firstAvailableSlot(): Int = this.itemStacks.indexOfFirst { it.isAir }
+public fun AbstractInventory.firstAvailableSlot(): Int = this.itemStacks.indexOfFirst { it.isAir }
 
 /**
  * Add the item on the first available slot and add a handler when the player click on the item.
@@ -102,7 +109,7 @@ public fun Inventory.firstAvailableSlot(): Int = this.itemStacks.indexOfFirst { 
  * @param handler Handler that will be called when the item is clicked.
  * @return The created handler or `null` if there is no available slot.
  */
-public fun Inventory.addItemStack(item: ItemStack, handler: InventoryCondition): InventoryCondition? {
+public fun AbstractInventory.addItemStack(item: ItemStack, handler: InventoryCondition): InventoryCondition? {
     return if (addItemStack(item)) {
         registerClickEventOnItem(item, handler)
     } else null
@@ -114,7 +121,7 @@ public fun Inventory.addItemStack(item: ItemStack, handler: InventoryCondition):
  * @param slot Slot where the item will be added.
  * @param backInventory Redirection inventory.
  */
-public fun Inventory.setBackButton(slot: Int, backInventory: Inventory) {
+public fun AbstractInventory.setBackButton(slot: Int, backInventory: Inventory) {
     val backInvTitle = backInventory.title
     val backItem = ItemStack.of(Material.ARROW)
         .withDisplayName(
@@ -140,7 +147,7 @@ public fun Inventory.setBackButton(slot: Int, backInventory: Inventory) {
  * @receiver Inventory where the button will be added.
  * @param slot Slot where the item will be added.
  */
-public fun Inventory.setCloseButton(slot: Int) {
+public fun AbstractInventory.setCloseButton(slot: Int) {
     val closeItem = ItemStack.of(Material.BARRIER)
         .withDisplayName(Component.text("❌").color(NamedTextColor.RED))
 
