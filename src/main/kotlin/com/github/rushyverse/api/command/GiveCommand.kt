@@ -31,10 +31,7 @@ public class GiveCommand : Command("give") {
 
     init {
         setCondition { sender, _ ->
-            if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
-                return@setCondition true
-            }
-            false
+            sender !is Player || sender.hasPermission(Permissions.EXECUTE.permission)
         }
 
         setDefaultExecutor { sender, context ->
