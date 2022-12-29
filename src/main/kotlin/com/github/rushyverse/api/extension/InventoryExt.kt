@@ -41,7 +41,7 @@ public fun Inventory.lockItemPositions() {
  * @param slot Slot that should be clicked.
  * @param handler Handler that will be called when the slot is clicked.
  */
-public fun Inventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondition) : InventoryCondition {
+public fun Inventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondition): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
         if (clickedSlot == slot) {
             handler.accept(player, clickedSlot, clickType, result)
@@ -57,9 +57,9 @@ public fun Inventory.registerClickEventOnSlot(slot: Int, handler: InventoryCondi
  * @param item Item that should be clicked.
  * @param handler Handler that will be called when the item is clicked.
  */
-public fun Inventory.registerClickEventOnItem(item: ItemStack, handler: InventoryCondition) : InventoryCondition {
+public fun Inventory.registerClickEventOnItem(item: ItemStack, handler: InventoryCondition): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
-        if (item.isSimilar(getItemStack(clickedSlot))) {
+        if (clickedSlot in slots && item.isSimilar(getItemStack(clickedSlot))) {
             handler.accept(player, clickedSlot, clickType, result)
         }
     }
@@ -74,7 +74,7 @@ public fun Inventory.registerClickEventOnItem(item: ItemStack, handler: Inventor
  * @param item Item that will be added.
  * @param handler Handler that will be called when the item is clicked.
  */
-public fun Inventory.setItemStack(slot: Int, item: ItemStack, handler: InventoryCondition) : InventoryCondition {
+public fun Inventory.setItemStack(slot: Int, item: ItemStack, handler: InventoryCondition): InventoryCondition {
     this.setItemStack(slot, item)
     return registerClickEventOnItem(item, handler)
 }
@@ -100,12 +100,12 @@ public fun Inventory.firstAvailableSlot(): Int = this.itemStacks.indexOfFirst { 
  * @receiver Inventory.
  * @param item Item that should be added.
  * @param handler Handler that will be called when the item is clicked.
- * @return The slot number or `-1` if there is no available slot.
+ * @return The created handler or `null` if there is no available slot.
  */
-public fun Inventory.addClickableItem(item: ItemStack, handler: InventoryCondition): Pair<Int, InventoryCondition>? {
-    val slot = firstAvailableSlot()
-    if (slot == -1) return null
-    return slot to setItemStack(slot, item, handler)
+public fun Inventory.addItemStack(item: ItemStack, handler: InventoryCondition): InventoryCondition? {
+    return if (addItemStack(item)) {
+        registerClickEventOnItem(item, handler)
+    } else null
 }
 
 /**
@@ -121,7 +121,8 @@ public fun Inventory.setBackButton(slot: Int, backInventory: Inventory) {
             Component.text("˿")
                 .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, true)
-                .append(backInvTitle
+                .append(
+                    backInvTitle
                         .color(NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, true)
                         .decoration(TextDecoration.BOLD, false)
