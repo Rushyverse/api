@@ -40,10 +40,7 @@ public class GamemodeCommand : Command("gamemode") {
         val playerArg = argumentPlayer()
 
         setCondition { sender, _ ->
-            if (sender !is Player || Permissions.values().any { sender.hasPermission(it.permission) }) {
-                return@setCondition true
-            }
-            false
+            sender !is Player || sender.hasPermission(Permissions.SELF.permission) || sender.hasPermission(Permissions.OTHER.permission)
         }
 
         setDefaultExecutor { sender, context ->

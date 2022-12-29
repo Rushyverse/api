@@ -32,10 +32,7 @@ public class StopCommand(
 
     init {
         setCondition { sender, _ ->
-            if (sender !is Player || sender.hasPermission(Permissions.EXECUTE.permission)) {
-                return@setCondition true
-            }
-            false
+            sender !is Player || sender.hasPermission(Permissions.EXECUTE.permission)
         }
 
         setDefaultExecutorSuspend { _, _ ->
