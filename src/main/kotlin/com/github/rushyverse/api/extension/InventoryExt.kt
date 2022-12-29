@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.item.ItemComparator
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -63,10 +64,11 @@ public fun AbstractInventory.registerClickEventOnSlot(slot: Int, handler: Invent
  */
 public fun AbstractInventory.registerClickEventOnItem(
     item: ItemStack,
+    identifier: ItemComparator = ItemComparator.EQUALS,
     handler: InventoryCondition
 ): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
-        if (clickedSlot in slots && item.isSimilar(getItemStack(clickedSlot))) {
+        if (clickedSlot in slots && identifier.areSame(item, getItemStack(clickedSlot))) {
             handler.accept(player, clickedSlot, clickType, result)
         }
     }
@@ -81,9 +83,14 @@ public fun AbstractInventory.registerClickEventOnItem(
  * @param item Item that will be added.
  * @param handler Handler that will be called when the item is clicked.
  */
-public fun AbstractInventory.setItemStack(slot: Int, item: ItemStack, handler: InventoryCondition): InventoryCondition {
+public fun AbstractInventory.setItemStack(
+    slot: Int,
+    item: ItemStack,
+    identifier: ItemComparator = ItemComparator.EQUALS,
+    handler: InventoryCondition,
+): InventoryCondition {
     this.setItemStack(slot, item)
-    return registerClickEventOnItem(item, handler)
+    return registerClickEventOnItem(item, identifier, handler)
 }
 
 /**
@@ -109,9 +116,13 @@ public fun AbstractInventory.firstAvailableSlot(): Int = this.itemStacks.indexOf
  * @param handler Handler that will be called when the item is clicked.
  * @return The created handler or `null` if there is no available slot.
  */
-public fun AbstractInventory.addItemStack(item: ItemStack, handler: InventoryCondition): InventoryCondition? {
+public fun AbstractInventory.addItemStack(
+    item: ItemStack,
+    identifier: ItemComparator = ItemComparator.EQUALS,
+    handler: InventoryCondition,
+): InventoryCondition? {
     return if (addItemStack(item)) {
-        registerClickEventOnItem(item, handler)
+        registerClickEventOnItem(item, identifier, handler)
     } else null
 }
 
