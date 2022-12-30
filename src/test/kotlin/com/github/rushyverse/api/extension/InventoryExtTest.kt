@@ -2,8 +2,10 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.item.ItemComparator
 import com.github.rushyverse.api.utils.randomPos
+import com.github.rushyverse.api.utils.randomString
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import net.minestom.server.inventory.AbstractInventory
 import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.InventoryType
@@ -437,22 +439,25 @@ class InventoryExtTest {
     @Nested
     inner class SetCloseButton {
 
-            @Test
-            fun `should set the close button`(env: Env) {
-                val instance = env.createFlatInstance()
-                val player = env.createPlayer(instance, randomPos())
+        @Test
+        fun `should set the close button`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
 
-                val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
-                val condition = inventory.setCloseButton(0)
-                assertNotNull(condition)
-                assertEquals(1, inventory.inventoryConditions.size)
-                assertEquals(ItemStack.of(Material.BARRIER).withDisplayName(Component.text("❌").color(NamedTextColor.RED)), inventory.getItemStack(0))
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+            val condition = inventory.setCloseButton(0)
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(
+                ItemStack.of(Material.BARRIER).withDisplayName(Component.text("❌").color(NamedTextColor.RED)),
+                inventory.getItemStack(0)
+            )
 
-                player.openInventory(inventory)
-                assertFalse(inventory.leftClick(player, 0))
-                assertFalse(inventory.isViewer(player))
-                assertNull(player.openInventory)
-            }
+            player.openInventory(inventory)
+            assertFalse(inventory.leftClick(player, 0))
+            assertFalse(inventory.isViewer(player))
+            assertNull(player.openInventory)
+        }
 
         @Test
         fun `should set the close button who override item at the slot`(env: Env) {
@@ -470,5 +475,148 @@ class InventoryExtTest {
             assertTrue(inventory.isViewer(player))
             assertEquals(inventory, player.openInventory)
         }
+    }
+
+    @EnvTest
+    @Nested
+    inner class SetPreviousButton {
+
+        private fun getItem(backInventory: Inventory): ItemStack {
+            return getChangeItem("< ", backInventory)
+        }
+
+        @Test
+        fun `should set the previous button`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val backInventory = Inventory(InventoryType.BEACON, randomString())
+            val condition = inventory.setPreviousButton(0, backInventory)
+            val expectedNavItem = getItem(backInventory)
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+
+            player.openInventory(inventory)
+            assertTrue(inventory.isViewer(player))
+            assertEquals(inventory, player.openInventory)
+            assertFalse(inventory.leftClick(player, 0))
+
+            assertFalse(inventory.isViewer(player))
+            assertTrue(backInventory.isViewer(player))
+            assertEquals(backInventory, player.openInventory)
+        }
+
+        @Test
+        fun `should set the previous button who override item at the slot`(env: Env) {
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val backInventory = Inventory(InventoryType.BEACON, randomString())
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            inventory.setPreviousButton(0, backInventory)
+            val expectedNavItem = getItem(backInventory)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class SetNextButton {
+
+        private fun getItem(inventory: Inventory): ItemStack {
+            return getChangeItem("> ", inventory)
+        }
+
+        @Test
+        fun `should set the next button`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val nextInventory = Inventory(InventoryType.BLAST_FURNACE, randomString())
+            val condition = inventory.setNextButton(0, nextInventory)
+            val expectedNavItem = getItem(nextInventory)
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+
+            player.openInventory(inventory)
+            assertTrue(inventory.isViewer(player))
+            assertEquals(inventory, player.openInventory)
+            assertFalse(inventory.leftClick(player, 0))
+
+            assertFalse(inventory.isViewer(player))
+            assertTrue(nextInventory.isViewer(player))
+            assertEquals(nextInventory, player.openInventory)
+        }
+
+        @Test
+        fun `should set the next button who override item at the slot`(env: Env) {
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val nextInventory = Inventory(InventoryType.ENCHANTMENT, randomString())
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            inventory.setNextButton(0, nextInventory)
+            val expectedNavItem = getItem(nextInventory)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class setItemChangeInventory {
+
+        private val textItem = "test"
+
+        private fun getItem(inventory: Inventory): ItemStack {
+            return getChangeItem(textItem, inventory)
+        }
+
+        @Test
+        fun `should set the change button`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val changeInventory = Inventory(InventoryType.BLAST_FURNACE, randomString())
+            val condition = inventory.setItemChangeInventory(0, changeInventory, textItem)
+            val expectedNavItem = getItem(changeInventory)
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+
+            player.openInventory(inventory)
+            assertTrue(inventory.isViewer(player))
+            assertEquals(inventory, player.openInventory)
+            assertFalse(inventory.leftClick(player, 0))
+
+            assertFalse(inventory.isViewer(player))
+            assertTrue(changeInventory.isViewer(player))
+            assertEquals(changeInventory, player.openInventory)
+        }
+
+        @Test
+        fun `should set the change button who override item at the slot`(env: Env) {
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, randomString())
+            val nextInventory = Inventory(InventoryType.ENCHANTMENT, randomString())
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            inventory.setItemChangeInventory(0, nextInventory, textItem)
+            val expectedNavItem = getItem(nextInventory)
+            assertEquals(expectedNavItem, inventory.getItemStack(0))
+        }
+    }
+
+    private fun getChangeItem(text: String, inventory: Inventory): ItemStack {
+        return ItemStack.of(Material.ARROW)
+            .withDisplayName(
+                Component.text(text)
+                    .color(NamedTextColor.GOLD)
+                    .decoration(TextDecoration.BOLD, true)
+                    .append(
+                        inventory.title
+                            .color(NamedTextColor.GRAY)
+                            .decoration(TextDecoration.ITALIC, true)
+                            .decoration(TextDecoration.BOLD, false)
+                    )
+            )
     }
 }
