@@ -1,6 +1,8 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.item.ItemComparator
 import com.github.rushyverse.api.utils.randomPos
+import net.minestom.server.inventory.AbstractInventory
 import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.InventoryType
 import net.minestom.server.inventory.click.ClickType
@@ -10,16 +12,13 @@ import net.minestom.server.item.Material
 import net.minestom.testing.Env
 import net.minestom.testing.EnvTest
 import org.junit.jupiter.api.Nested
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class InventoryExtTest {
 
     @Test
     fun `slots property should return the range of slots`() {
-        val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+        val inventory: AbstractInventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
         assertEquals(0..8, inventory.slots)
     }
 
@@ -28,7 +27,7 @@ class InventoryExtTest {
 
         @Test
         fun `should remove the condition of interaction with the inventory`() {
-            val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+            val inventory: AbstractInventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
             val condition = InventoryCondition { _, _, _, _ -> }
             inventory.addInventoryCondition(condition)
             assertTrue(inventory.removeCondition(condition))
@@ -36,7 +35,7 @@ class InventoryExtTest {
 
         @Test
         fun `should return false if the condition is not present`() {
-            val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+            val inventory: AbstractInventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
             val condition = InventoryCondition { _, _, _, _ -> }
             assertFalse(inventory.removeCondition(condition))
         }
@@ -51,7 +50,7 @@ class InventoryExtTest {
         fun `should lock the item position`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
             val condition = inventory.lockItemPositions()
             inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
 
@@ -71,13 +70,13 @@ class InventoryExtTest {
 
     @EnvTest
     @Nested
-    inner class registerClickEvent {
+    inner class RegisterClickEventOnSlot {
 
         @Test
         fun `should register a click event on a slot`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
 
             val slot = 0
             var count = 0
@@ -86,28 +85,64 @@ class InventoryExtTest {
             }
             assertEquals(1, inventory.inventoryConditions.size)
 
-            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            inventory.setItemStack(slot, ItemStack.of(Material.DIAMOND))
 
             val playerSlot = 36
             assertEquals(0, count)
+
             assertTrue(inventory.leftClick(player, playerSlot))
             assertEquals(1, count)
+
             assertTrue(inventory.rightClick(player, playerSlot))
             assertEquals(2, count)
 
-            assertTrue(inventory.leftClick(player, 37))
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
             assertEquals(2, count)
         }
 
+    }
+
+    @EnvTest
+    @Nested
+    inner class RegisterClickEventOnItem {
+
         @Test
-        fun `should register a click event on an item`(env: Env) {
+        fun `default identifier should be equals`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
 
             val item = ItemStack.of(Material.DIAMOND)
             var count = 0
             inventory.registerClickEventOnItem(item) { _, _, _, _ ->
+                count++
+            }
+
+            val playerSlot = 36
+            inventory.setItemStack(0, item)
+            assertEquals(0, count)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, item.withAmount(2))
+            assertTrue(inventory.rightClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(1, ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var count = 0
+            inventory.registerClickEventOnItem(item, ItemComparator.EQUALS) { _, _, _, _ ->
                 count++
             }
             assertEquals(1, inventory.inventoryConditions.size)
@@ -135,11 +170,11 @@ class InventoryExtTest {
         fun `should trigger the click handler when the item is similar`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
 
             val item = ItemStack.of(Material.DIAMOND)
             var clicked = false
-            inventory.registerClickEventOnItem(item) { playerClicked, slot, type, _ ->
+            inventory.registerClickEventOnItem(item, ItemComparator.SIMILAR) { playerClicked, slot, type, _ ->
                 assertEquals(player, playerClicked)
                 assertEquals(0, slot)
                 assertEquals(ClickType.LEFT_CLICK, type)
@@ -155,31 +190,60 @@ class InventoryExtTest {
 
     @EnvTest
     @Nested
-    inner class setItemStackWithClickHandler {
+    inner class SetItemStackWithClickHandler {
 
         @Test
-        fun `should set the item stack with click handler`(env: Env) {
+        fun `default identifier should be equals`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
 
             val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
             var count = 0
-            inventory.setItemStack(0, item) { playerClicked, _, type, _ ->
-                assertEquals(player, playerClicked)
-                assertEquals(ClickType.LEFT_CLICK, type)
+            inventory.setItemStack(slot, item) { _, _, _, _ ->
                 count++
             }
 
-            assertEquals(1, inventory.inventoryConditions.size)
-            assertEquals(item, inventory.getItemStack(0))
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(slot))
             assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
 
-            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(inventory.leftClick(player, playerSlot))
             assertEquals(1, count)
 
-            inventory.setItemStack(1, item)
-            assertTrue(inventory.leftClick(player, 37))
+            inventory.setItemStack(slot, item.withAmount(2))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
+            var count = 0
+            inventory.setItemStack(slot, item, ItemComparator.EQUALS) { _, _, _, _ ->
+                count++
+            }
+
+            val playerSlot = 36
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(item, inventory.getItemStack(slot))
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, item)
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
             assertEquals(2, count)
         }
 
@@ -187,22 +251,183 @@ class InventoryExtTest {
         fun `should trigger the click handler when the item is similar`(env: Env) {
             val instance = env.createFlatInstance()
             val player = env.createPlayer(instance, randomPos())
-            val inventory = player.inventory
+            val inventory: AbstractInventory = player.inventory
 
             val item = ItemStack.of(Material.ARROW)
+            val slot = 0
             var clicked = false
-            inventory.setItemStack(0, item) { playerClicked, slot, type, _ ->
+            inventory.setItemStack(slot, item, ItemComparator.SIMILAR) { playerClicked, clickedSlot, type, _ ->
                 assertEquals(player, playerClicked)
-                assertEquals(0, slot)
+                assertEquals(slot, clickedSlot)
                 assertEquals(ClickType.LEFT_CLICK, type)
                 clicked = true
             }
 
             val item2 = item.withAmount(10)
-            inventory.setItemStack(0, item2)
+            inventory.setItemStack(slot, item2)
 
             assertTrue(inventory.leftClick(player, 36))
             assertTrue(clicked)
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class SlotIsEmpty {
+
+        @Test
+        fun `should return true if the slot is empty`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            assertTrue(inventory.slotIsEmpty(0))
+        }
+
+        @Test
+        fun `should return false if the slot is not empty`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            assertFalse(inventory.slotIsEmpty(0))
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class FirstAvailableSlot {
+
+        @Test
+        fun `should return the first slot if all slots are empty`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            assertEquals(0, inventory.firstAvailableSlot())
+        }
+
+        @Test
+        fun `should return the first available slot`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            assertEquals(1, inventory.firstAvailableSlot())
+        }
+
+        @Test
+        fun `should return -1 if all slots are full`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            inventory.slots.forEach { inventory.setItemStack(it, ItemStack.of(Material.DIAMOND)) }
+            assertEquals(-1, inventory.firstAvailableSlot())
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class AddItemStackWithClickHandler {
+
+        @Test
+        fun `default identifier should be equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var count = 0
+            val condition = inventory.addItemStack(item) { _, _, _, _ ->
+                count++
+            }
+
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(0))
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, ItemStack.AIR)
+            inventory.addItemStack(item.withAmount(2))
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, ItemStack.AIR)
+            inventory.addItemStack(ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
+            var count = 0
+            val condition = inventory.addItemStack(item, ItemComparator.EQUALS) { _, _, _, _ ->
+                count++
+            }
+
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(slot))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, item)
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is similar`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            var clicked = false
+            val condition = inventory.addItemStack(item, ItemComparator.SIMILAR) { _, _, _, _ ->
+                clicked = true
+            }
+
+            assertNotNull(condition)
+
+            val item2 = item.withAmount(10)
+            inventory.setItemStack(1, item2)
+
+            assertTrue(inventory.leftClick(player, 37))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should not add item and create condition if item can't be added`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            inventory.slots.forEach { inventory.setItemStack(it, item) }
+
+            val diamondItem = ItemStack.of(Material.DIAMOND)
+            val condition = inventory.addItemStack(diamondItem) { _, _, _, _ -> }
+            assertNull(condition)
+            inventory.itemStacks.forEach { assertNotEquals(diamondItem, it) }
         }
     }
 }

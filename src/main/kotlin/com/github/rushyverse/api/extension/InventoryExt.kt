@@ -99,7 +99,7 @@ public fun AbstractInventory.setItemStack(
  * @param slot Slot checked.
  * @return `true` if the slot is empty, `false` otherwise.
  */
-public fun AbstractInventory.isEmpty(slot: Int): Boolean = getItemStack(slot).isAir
+public fun AbstractInventory.slotIsEmpty(slot: Int): Boolean = getItemStack(slot).isAir
 
 /**
  * Get the first available slot.
@@ -155,6 +155,7 @@ public fun AbstractInventory.setBackButton(slot: Int, backInventory: Inventory) 
 
 /**
  * Add a close button to the inventory and a handler to close the inventory.
+ * The item will override the item on the specific slot.
  * @receiver Inventory where the button will be added.
  * @param slot Slot where the item will be added.
  */
