@@ -2,6 +2,8 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.item.ItemComparator
 import com.github.rushyverse.api.utils.randomPos
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.inventory.AbstractInventory
 import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.InventoryType
@@ -428,6 +430,45 @@ class InventoryExtTest {
             val condition = inventory.addItemStack(diamondItem) { _, _, _, _ -> }
             assertNull(condition)
             inventory.itemStacks.forEach { assertNotEquals(diamondItem, it) }
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class SetCloseButton {
+
+            @Test
+            fun `should set the close button`(env: Env) {
+                val instance = env.createFlatInstance()
+                val player = env.createPlayer(instance, randomPos())
+
+                val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+                val condition = inventory.setCloseButton(0)
+                assertNotNull(condition)
+                assertEquals(1, inventory.inventoryConditions.size)
+                assertEquals(ItemStack.of(Material.BARRIER).withDisplayName(Component.text("❌").color(NamedTextColor.RED)), inventory.getItemStack(0))
+
+                player.openInventory(inventory)
+                assertFalse(inventory.leftClick(player, 0))
+                assertFalse(inventory.isViewer(player))
+                assertNull(player.openInventory)
+            }
+
+        @Test
+        fun `should set the close button who override item at the slot`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+
+            val inventory = Inventory(InventoryType.CHEST_1_ROW, "Test")
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            inventory.setCloseButton(0)
+            assertTrue { inventory.getItemStack(0).material() == Material.BARRIER }
+
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+            player.openInventory(inventory)
+            assertTrue(inventory.leftClick(player, 0))
+            assertTrue(inventory.isViewer(player))
+            assertEquals(inventory, player.openInventory)
         }
     }
 }
