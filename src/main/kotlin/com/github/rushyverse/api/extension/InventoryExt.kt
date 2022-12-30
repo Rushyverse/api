@@ -127,29 +127,56 @@ public fun AbstractInventory.addItemStack(
 }
 
 /**
- * Set the item to back in the previous inventory on the specific slot.
+ * Set the item on the specific slot to go back to the previous inventory.
  * @receiver Inventory where the item will be added.
- * @param slot Slot where the item will be added.
+ * @param slot Slot where the item will be set.
  * @param backInventory Redirection inventory.
+ * @return Condition of interaction with the inventory.
  */
-public fun AbstractInventory.setBackButton(slot: Int, backInventory: Inventory) {
-    val backInvTitle = backInventory.title
-    val backItem = ItemStack.of(Material.ARROW)
+public fun AbstractInventory.setPreviousButton(slot: Int, backInventory: Inventory): InventoryCondition {
+    return setItemChangeInventory(slot, backInventory, "< ")
+}
+
+/**
+ * Set the item on the specific slot to go to the next inventory.
+ * @receiver Inventory where the item will be added.
+ * @param slot Slot where the item will be set.
+ * @param nextInventory Redirection inventory.
+ * @return Condition of interaction with the inventory.
+ */
+public fun AbstractInventory.setNextButton(slot: Int, nextInventory: Inventory): InventoryCondition {
+    return setItemChangeInventory(slot, nextInventory, "> ")
+}
+
+/**
+ * Set the item on the specific slot to go to the another inventory.
+ * @receiver Inventory where the item will be added.
+ * @param slot Slot where the item will be set.
+ * @param otherInventory Redirection inventory.
+ * @param textItem Text of the item.
+ * @return Condition of interaction with the inventory.
+ */
+public fun AbstractInventory.setItemChangeInventory(
+    slot: Int,
+    otherInventory: Inventory,
+    textItem: String
+): InventoryCondition {
+    val inventoryTitle = otherInventory.title
+        .color(NamedTextColor.GRAY)
+        .decoration(TextDecoration.ITALIC, true)
+        .decoration(TextDecoration.BOLD, false)
+
+    val item = ItemStack.of(Material.ARROW)
         .withDisplayName(
-            Component.text("˿")
+            Component.text(textItem)
                 .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, true)
-                .append(
-                    backInvTitle
-                        .color(NamedTextColor.GRAY)
-                        .decoration(TextDecoration.ITALIC, true)
-                        .decoration(TextDecoration.BOLD, false)
-                )
+                .append(inventoryTitle)
         )
 
-    setItemStack(slot, backItem) { player, _, _, result ->
+    return setItemStack(slot, item) { player, _, _, result ->
         result.isCancel = true
-        player.openInventory(backInventory)
+        player.openInventory(otherInventory)
     }
 }
 
@@ -158,12 +185,13 @@ public fun AbstractInventory.setBackButton(slot: Int, backInventory: Inventory) 
  * The item will override the item on the specific slot.
  * @receiver Inventory where the button will be added.
  * @param slot Slot where the item will be added.
+ * @return The created handler.
  */
-public fun AbstractInventory.setCloseButton(slot: Int) {
+public fun AbstractInventory.setCloseButton(slot: Int): InventoryCondition {
     val closeItem = ItemStack.of(Material.BARRIER)
         .withDisplayName(Component.text("❌").color(NamedTextColor.RED))
 
-    setItemStack(slot, closeItem) { player, _, _, result ->
+    return setItemStack(slot, closeItem) { player, _, _, result ->
         result.isCancel = true
         player.closeInventory()
     }
