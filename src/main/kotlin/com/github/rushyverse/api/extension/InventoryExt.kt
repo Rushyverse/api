@@ -60,6 +60,7 @@ public fun AbstractInventory.registerClickEventOnSlot(slot: Int, handler: Invent
  * Add a handler when the player click on the item.
  * @receiver Inventory.
  * @param item Item that should be clicked.
+ * @param identifier Allows to identify if an item is equivalent to another.
  * @param handler Handler that will be called when the item is clicked.
  */
 public fun AbstractInventory.registerClickEventOnItem(
@@ -81,6 +82,7 @@ public fun AbstractInventory.registerClickEventOnItem(
  * @receiver Inventory.
  * @param slot Slot where the item will be added.
  * @param item Item that will be added.
+ * @param identifier Allows to identify if an item is equivalent to another.
  * @param handler Handler that will be called when the item is clicked.
  */
 public fun AbstractInventory.setItemStack(
@@ -113,6 +115,7 @@ public fun AbstractInventory.firstAvailableSlot(): Int = this.itemStacks.indexOf
  * If there is no available slot, the item will not be added.
  * @receiver Inventory.
  * @param item Item that should be added.
+ * @param identifier Allows to identify if an item is equivalent to another.
  * @param handler Handler that will be called when the item is clicked.
  * @return The created handler or `null` if there is no available slot.
  */
