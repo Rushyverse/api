@@ -46,7 +46,7 @@ class CubeAreaTest {
     }
 
     @Nested
-    inner class EntitiesInArea {
+    inner class Update {
 
         @Test
         fun `should have filtered entities on type`() {
