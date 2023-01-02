@@ -8,13 +8,13 @@ import net.minestom.server.instance.Instance
 
 /**
  * A cuboid area defined by two positions.
- * @param E The type of entity.
- * @property entityClass The class of the entity.
- * @property instance The instance where is located the area.
- * @property min The minimum position.
- * @property max The maximum position.
+ * @param E Type of entity.
+ * @property entityClass Class of the entity.
+ * @property instance Instance where is located the area.
+ * @property min Minimum position.
+ * @property max Maximum position.
  */
-public class CuboidArea<E : Entity>(
+public class CubeArea<E : Entity>(
     public val entityClass: Class<E>,
     public var instance: Instance,
     position1: Pos,
@@ -26,7 +26,7 @@ public class CuboidArea<E : Entity>(
             instance: Instance,
             position1: Pos,
             position2: Pos
-        ): CuboidArea<E> = CuboidArea(E::class.java, instance, position1, position2)
+        ): CubeArea<E> = CubeArea(E::class.java, instance, position1, position2)
     }
 
     public val min: Pos

@@ -14,14 +14,14 @@ import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class CuboidAreaTest {
+class CubeAreaTest {
 
     @Nested
     inner class Instantiation {
 
         @Test
         fun `should have no entities at the creation`() {
-            val area = CuboidArea<Entity>(mockk(), randomPos(), randomPos())
+            val area = CubeArea<Entity>(mockk(), randomPos(), randomPos())
             assertTrue { area.entitiesInArea.isEmpty() }
         }
 
@@ -29,7 +29,7 @@ class CuboidAreaTest {
         fun `should have the correct min and max positions`() {
             val min = Pos(0.0, 10.0, -10.0)
             val max = Pos(-20.0, 11.0, -16.0)
-            val area = CuboidArea<Entity>(mockk(), min, max)
+            val area = CubeArea<Entity>(mockk(), min, max)
             assertEquals(Pos(-20.0, 10.0, -16.0), area.min)
             assertEquals(Pos(0.0, 11.0, -10.0), area.max)
         }
@@ -38,7 +38,7 @@ class CuboidAreaTest {
         fun `should have the correct min and max positions if min and max are already ordered`() {
             val min = Pos(-1.0, -2.0, -3.0)
             val max = Pos(0.0, 1.0, 2.0)
-            val area = CuboidArea<Entity>(mockk(), min, max)
+            val area = CubeArea<Entity>(mockk(), min, max)
             assertEquals(min, area.min)
             assertEquals(max, area.max)
         }
@@ -64,7 +64,7 @@ class CuboidAreaTest {
             }
 
             val min = Pos(0.0, 0.0, 0.0)
-            val area = CuboidArea<Player>(instance, min, min)
+            val area = CubeArea<Player>(instance, min, min)
             val (added, removed) = area.update()
 
             assertContentEquals(listOf(player, player2), added)
@@ -89,7 +89,7 @@ class CuboidAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val max = Pos(10.0, 10.0, 10.0)
-            val area = CuboidArea<Entity>(instance, min, max)
+            val area = CubeArea<Entity>(instance, min, max)
             val (added, removed) = area.update()
 
             assertContentEquals(listOf(player, entity), added)
@@ -114,7 +114,7 @@ class CuboidAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val max = Pos(10.0, 10.0, 10.0)
-            val area = CuboidArea<Entity>(instance, min, max)
+            val area = CubeArea<Entity>(instance, min, max)
             val (added, removed) = area.update()
 
             assertContentEquals(listOf(player, entity), added)
