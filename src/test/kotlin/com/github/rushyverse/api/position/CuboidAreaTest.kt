@@ -49,6 +49,30 @@ class CuboidAreaTest {
     inner class EntitiesInArea {
 
         @Test
+        fun `should have filtered entities on type`() {
+            val player = mockk<Player>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val player2 = mockk<Player>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val entity = mockk<Entity>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val instance = mockk<Instance>(randomString()) {
+                every { entities } returns setOf(player, player2, entity)
+            }
+
+            val min = Pos(0.0, 0.0, 0.0)
+            val area = CuboidArea<Player>(instance, min, min)
+            val (added, removed) = area.update()
+
+            assertContentEquals(listOf(player, player2), added)
+            assertContentEquals(emptyList(), removed)
+            assertContentEquals(listOf(player, player2), area.entitiesInArea)
+        }
+
+        @Test
         fun `should have entities in the area`() {
             val player = mockk<Player>(randomString()) {
                 every { position } returns Pos(0.0, 0.0, 0.0)
