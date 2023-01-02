@@ -22,18 +22,28 @@ public class SphereArea<E : Entity>(
     public companion object {
         public inline operator fun <reified E : Entity> invoke(
             instance: Instance,
-            position: Pos,
+            center: Pos,
             radius: Double
-        ): SphereArea<E> {
-            return SphereArea(E::class.java, instance, position, radius)
-        }
+        ): SphereArea<E> = SphereArea(E::class.java, instance, center, radius)
     }
 
     public var radius: Double = radius
         set(value) {
-            require(value >= 0.0) { "Radius must be greater than or equal to 0.0" }
+            verifyNewRadiusValue(value)
             field = value
         }
+
+    init {
+        verifyNewRadiusValue(radius)
+    }
+
+    /**
+     * Verifies that the new radius value is greater than or equal to 0.0.
+     * @param value New radius value.
+     */
+    private fun verifyNewRadiusValue(value: Double) {
+        require(value >= 0.0) { "Radius must be greater than or equal to 0.0" }
+    }
 
     override fun update(): Pair<Collection<E>, Collection<E>> {
         return update(instance.getNearbyEntities(center, radius).asSequence().filterIsInstance(entityClass).toSet())
