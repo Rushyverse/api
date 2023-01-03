@@ -55,4 +55,57 @@ class PosExtTest {
             }
         }
     }
+
+    @Nested
+    inner class IsInCylinder {
+
+        @Test
+        fun `should return true if the position is in the cylinder`() {
+            val positionCylinder = Pos(0.0, 0.0, 0.0)
+            val radius = 10.0
+            val limitY = 0.0..10.0
+            for (x in -10..10) {
+                for (y in 0..10) {
+                    val posX = Pos(x.toDouble(), y.toDouble(), 0.0)
+                    assertTrue { posX.isInCylinder(positionCylinder, radius, limitY) }
+
+                    val posZ = Pos(0.0, y.toDouble(), x.toDouble())
+                    assertTrue { posZ.isInCylinder(positionCylinder, radius, limitY) }
+                }
+            }
+        }
+
+        @Test
+        fun `should return false if the position is not in the cylinder`() {
+            val positionCylinder = Pos(0.0, 0.0, 0.0)
+            val radius = 10.0
+            val limitY = 0.0..10.0
+            assertFalse { Pos(-10.1, 0.0, 0.0).isInCylinder(positionCylinder, radius, limitY) }
+            assertFalse { Pos(10.1, 0.0, 0.0).isInCylinder(positionCylinder, radius, limitY) }
+            assertFalse { Pos(0.0, -0.1, 0.0).isInCylinder(positionCylinder, radius, limitY) }
+            assertFalse { Pos(0.0, 10.1, 0.0).isInCylinder(positionCylinder, radius, limitY) }
+            assertFalse { Pos(0.0, 0.0, -10.1).isInCylinder(positionCylinder, radius, limitY) }
+            assertFalse { Pos(0.0, 0.0, 10.1).isInCylinder(positionCylinder, radius, limitY) }
+
+            for (x in -20..-11) {
+                for (y in -10..-1) {
+                    val posX = Pos(x.toDouble(), y.toDouble(), 0.0)
+                    assertFalse { posX.isInCylinder(positionCylinder, radius, limitY) }
+
+                    val posZ = Pos(0.0, y.toDouble(), x.toDouble())
+                    assertFalse { posZ.isInCylinder(positionCylinder, radius, limitY) }
+                }
+            }
+
+            for (x in 11..20) {
+                for (y in 11..20) {
+                    val posX = Pos(x.toDouble(), y.toDouble(), 0.0)
+                    assertFalse { posX.isInCylinder(positionCylinder, radius, limitY) }
+
+                    val posZ = Pos(0.0, y.toDouble(), x.toDouble())
+                    assertFalse { posZ.isInCylinder(positionCylinder, radius, limitY) }
+                }
+            }
+        }
+    }
 }
