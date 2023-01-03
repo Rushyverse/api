@@ -212,5 +212,36 @@ class MultiAreaTest {
             assertEquals(setOf(entity1, entity2), area.entitiesInArea)
         }
 
+        @Test
+        fun `should not change entities in area if entities is always in areas`() {
+            val area = MultiArea<Entity>()
+            val entity1 = mockk<Entity>()
+            val entity2 = mockk<Entity>()
+
+            val area2 = mockk<IArea<Entity>>() {
+                every { updateEntitiesInArea() } returns Pair(listOf(entity1, entity2), emptyList())
+                every { entitiesInArea } returns setOf(entity1, entity2)
+            }
+            val area3 = mockk<IArea<Entity>>() {
+                every { updateEntitiesInArea() } returns Pair(listOf(entity1, entity2), emptyList())
+                every { entitiesInArea } returns setOf(entity1, entity2)
+            }
+
+            area.addArea(area2)
+            area.addArea(area3)
+            area.updateEntitiesInArea()
+
+            every { area2.updateEntitiesInArea() } returns Pair(emptyList(), emptyList())
+            every { area2.entitiesInArea } returns setOf(entity1, entity2)
+            every { area3.updateEntitiesInArea() } returns Pair(emptyList(), emptyList())
+            every { area3.entitiesInArea } returns setOf(entity1, entity2)
+
+            val (added, removed) = area.updateEntitiesInArea()
+
+            assertTrue { removed.isEmpty() }
+            assertTrue { added.isEmpty() }
+            assertEquals(setOf(entity1, entity2), area.entitiesInArea)
+        }
+
     }
 }
