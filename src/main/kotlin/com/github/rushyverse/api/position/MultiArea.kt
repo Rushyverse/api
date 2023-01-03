@@ -8,9 +8,9 @@ import net.minestom.server.entity.Entity
  * @property _areas Mutable collection of areas.
  * @property areas Collection of areas.
  */
-public class MultiArea<E : Entity>(areas: Collection<IArea<E>> = emptyList()) : AbstractArea<E>() {
+public class MultiArea<E : Entity>(areas: MutableSet<IArea<E>> = mutableSetOf()) : AbstractArea<E>() {
 
-    private val _areas: MutableSet<IArea<E>> = areas.toMutableSet()
+    private val _areas: MutableSet<IArea<E>> = areas
     public val areas: Set<IArea<E>> get() = _areas
 
     /**

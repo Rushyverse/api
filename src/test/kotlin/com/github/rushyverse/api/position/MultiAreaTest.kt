@@ -18,7 +18,16 @@ class MultiAreaTest {
         @Test
         fun `should have no entities at the creation`() {
             val area = MultiArea<Entity>()
+            assertTrue { area.areas.isEmpty() }
             assertTrue { area.entitiesInArea.isEmpty() }
+        }
+
+        @Test
+        fun `should have the areas passed in the constructor`() {
+            val area1 = mockk<IArea<Entity>>()
+            val area2 = mockk<IArea<Entity>>()
+            val area = MultiArea(mutableSetOf(area1, area2))
+            assertEquals(setOf(area1, area2), area.areas)
         }
 
     }
