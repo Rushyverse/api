@@ -46,7 +46,7 @@ class CubeAreaTest {
     }
 
     @Nested
-    inner class Update {
+    inner class UpdateEntitiesInArea {
 
         @Test
         fun `should have filtered entities on type`() {
@@ -65,7 +65,7 @@ class CubeAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val area = CubeArea<Player>(instance, min, min)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, player2), added)
             assertContentEquals(emptyList(), removed)
@@ -90,7 +90,7 @@ class CubeAreaTest {
             val min = Pos(0.0, 0.0, 0.0)
             val max = Pos(10.0, 10.0, 10.0)
             val area = CubeArea<Entity>(instance, min, max)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, entity), added)
             assertContentEquals(emptyList(), removed)
@@ -115,7 +115,7 @@ class CubeAreaTest {
             val min = Pos(0.0, 0.0, 0.0)
             val max = Pos(10.0, 10.0, 10.0)
             val area = CubeArea<Entity>(instance, min, max)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, entity), added)
             assertContentEquals(emptyList(), removed)
@@ -124,7 +124,7 @@ class CubeAreaTest {
             every { player.position } returns Pos(11.0, 5.0, 5.0)
             every { entity2.position } returns Pos(0.0, 6.0, 0.0)
 
-            val (added2, removed2) = area.update()
+            val (added2, removed2) = area.updateEntitiesInArea()
             assertContentEquals(listOf(entity2), added2)
             assertContentEquals(listOf(player), removed2)
             assertContentEquals(listOf(entity, entity2), area.entitiesInArea)

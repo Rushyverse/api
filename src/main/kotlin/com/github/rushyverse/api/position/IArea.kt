@@ -15,5 +15,5 @@ public interface IArea<E : Entity> {
      * Compute and update the entities in the area.
      * @return A pair of the entities that were added and the entities that were removed.
      */
-    public fun update(): Pair<Collection<E>, Collection<E>>
+    public fun updateEntitiesInArea(): Pair<Collection<E>, Collection<E>>
 }

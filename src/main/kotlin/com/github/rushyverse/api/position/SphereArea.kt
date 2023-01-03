@@ -45,7 +45,7 @@ public class SphereArea<E : Entity>(
         require(value >= 0.0) { "Radius must be greater than or equal to 0.0" }
     }
 
-    override fun update(): Pair<Collection<E>, Collection<E>> {
+    override fun updateEntitiesInArea(): Pair<Collection<E>, Collection<E>> {
         return update(instance.getNearbyEntities(position, radius).asSequence().filterIsInstance(entityClass).toSet())
     }
 }

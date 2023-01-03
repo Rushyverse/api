@@ -40,7 +40,7 @@ public class CubeArea<E : Entity>(
         this.max = Pos(x2, y2, z2)
     }
 
-    override fun update(): Pair<Collection<E>, Collection<E>> {
+    override fun updateEntitiesInArea(): Pair<Collection<E>, Collection<E>> {
         return update(instance.entities
             .asSequence()
             .filterIsInstance(entityClass)

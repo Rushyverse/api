@@ -47,7 +47,7 @@ class SphereAreaTest {
     }
 
     @Nested
-    inner class Update {
+    inner class UpdateEntitiesInArea {
 
         @Test
         fun `should have filtered entities on type`() {
@@ -71,7 +71,7 @@ class SphereAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val area = SphereArea<Player>(instance, min, 1.0)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, player2), added)
             assertContentEquals(emptyList(), removed)
@@ -100,7 +100,7 @@ class SphereAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val area = SphereArea<Entity>(instance, min, 5.0)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, entity), added)
             assertContentEquals(emptyList(), removed)
@@ -129,7 +129,7 @@ class SphereAreaTest {
 
             val min = Pos(0.0, 0.0, 0.0)
             val area = SphereArea<Entity>(instance, min, 5.0)
-            val (added, removed) = area.update()
+            val (added, removed) = area.updateEntitiesInArea()
 
             assertContentEquals(listOf(player, entity), added)
             assertContentEquals(emptyList(), removed)
@@ -138,7 +138,7 @@ class SphereAreaTest {
             every { player.position } returns Pos(10.0, 0.0, 0.0)
             every { entity2.position } returns Pos(0.0, 5.0, 0.0)
 
-            val (added2, removed2) = area.update()
+            val (added2, removed2) = area.updateEntitiesInArea()
             assertContentEquals(listOf(entity2), added2)
             assertContentEquals(listOf(player), removed2)
             assertContentEquals(listOf(entity, entity2), area.entitiesInArea)
