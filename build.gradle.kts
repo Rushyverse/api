@@ -20,11 +20,13 @@ dependencies {
     val mockkVersion = "1.13.3"
     val coroutinesCoreVersion = "1.6.4"
     val kotlinSerializationVersion = "1.4.1"
+    val commonsNetVersion = "3.9.0"
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
     implementation("com.github.Minestom.Minestom:Minestom:$minestomVersion")
+    implementation("commons-net:commons-net:$commonsNetVersion")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
