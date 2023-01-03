@@ -319,6 +319,35 @@ class CylinderAreaTest {
             assertContentEquals(listOf(entity, entity2), area.entitiesInArea)
         }
 
+        @Test
+        fun `should not change entities in area if entities is always in area`() {
+            val player = mockk<Player>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val entity = mockk<Entity>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val entity2 = mockk<Entity>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val instance = mockk<Instance>(randomString()) {
+                every { entities } returns setOf(player, entity, entity2)
+            }
+
+            val min = Pos(0.0, 0.0, 0.0)
+            val area = CylinderArea<Entity>(instance, min, 5.0, 0.0..3.0)
+            val (added, removed) = area.updateEntitiesInArea()
+
+            assertContentEquals(listOf(player, entity, entity2), added)
+            assertContentEquals(emptyList(), removed)
+            assertContentEquals(listOf(player, entity, entity2), area.entitiesInArea)
+
+            val (added2, removed2) = area.updateEntitiesInArea()
+            assertContentEquals(emptyList(), added2)
+            assertContentEquals(emptyList(), removed2)
+            assertContentEquals(listOf(player, entity, entity2), area.entitiesInArea)
+        }
+
     }
 
 }

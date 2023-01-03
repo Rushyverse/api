@@ -144,6 +144,40 @@ class SphereAreaTest {
             assertContentEquals(listOf(entity, entity2), area.entitiesInArea)
         }
 
+        @Test
+        fun `should not change entities in area if entities is always in areas`() {
+            val player = mockk<Player>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val entity = mockk<Entity>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val entity2 = mockk<Entity>(randomString()) {
+                every { position } returns Pos(0.0, 0.0, 0.0)
+            }
+            val instance = mockk<Instance>(randomString()) {
+                every { entities } returns setOf(player, entity, entity2)
+                every { getNearbyEntities(any(), any()) } answers {
+                    val pos = arg<Pos>(0)
+                    val range = arg<Double>(1)
+                    entities.filter { it.position.distance(pos) <= range }
+                }
+            }
+
+            val min = Pos(0.0, 0.0, 0.0)
+            val area = SphereArea<Entity>(instance, min, 5.0)
+            val (added, removed) = area.updateEntitiesInArea()
+
+            assertContentEquals(listOf(player, entity, entity2), added)
+            assertContentEquals(emptyList(), removed)
+            assertContentEquals(listOf(player, entity, entity2), area.entitiesInArea)
+
+            val (added2, removed2) = area.updateEntitiesInArea()
+            assertContentEquals(emptyList(), added2)
+            assertContentEquals(emptyList(), removed2)
+            assertContentEquals(listOf(player, entity, entity2), area.entitiesInArea)
+        }
+
     }
 
 }

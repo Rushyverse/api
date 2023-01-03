@@ -76,5 +76,29 @@ class AbstractAreaTest {
             assertEquals(entities, area.entitiesInArea)
         }
 
+        @Test
+        fun `should not change entities in area if entities is always in area`() {
+            val entity1 = mockk<Entity>(randomString())
+            val entity2 = mockk<Entity>(randomString())
+            val entity3 = mockk<Entity>(randomString())
+
+            val entities = setOf(entity1, entity2, entity3)
+
+            val area = object : AbstractArea<Entity>() {
+                override fun updateEntitiesInArea(): Pair<Collection<Entity>, Collection<Entity>> {
+                    return update(entities)
+                }
+            }
+            val (added, removed) = area.updateEntitiesInArea()
+            assertEquals(entities, added)
+            assertTrue { removed.isEmpty() }
+            assertEquals(entities, area.entitiesInArea)
+
+            val (added2, removed2) = area.updateEntitiesInArea()
+            assertTrue { added2.isEmpty() }
+            assertTrue { removed2.isEmpty() }
+            assertEquals(entities, area.entitiesInArea)
+        }
+
     }
 }
