@@ -1,10 +1,9 @@
 package com.github.rushyverse.api.position
 
+import com.github.rushyverse.api.extension.isInCylinder
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
 import net.minestom.server.instance.Instance
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 /**
  * An area defined by a cylinder shape.
@@ -51,16 +50,12 @@ public class CylinderArea<E : Entity>(
     }
 
     override fun update(): Pair<Collection<E>, Collection<E>> {
-        val center = position
+        val cylinderPosition = position
         return update(
             instance.entities
                 .asSequence()
                 .filterIsInstance(entityClass)
-                .filter {
-                    val position = it.position
-                    val distance = sqrt((position.x - center.x).pow(2.0) + (position.z - center.z).pow(2.0))
-                    distance <= radius && position.y in limitY
-                }
+                .filter { it.position.isInCylinder(cylinderPosition, radius, limitY) }
                 .toSet()
         )
     }
