@@ -19,7 +19,7 @@ public abstract class TranslationsProvider {
         key: String,
         locale: Locale,
         bundleName: String,
-        replacements: Array<String>
+        replacements: Array<Any>
     ): String
 
     /**
@@ -38,6 +38,6 @@ public abstract class TranslationsProvider {
         key: String,
         locale: Locale,
         bundleName: String,
-        replacements: Collection<String>
+        replacements: Collection<Any>
     ): String = translate(key, locale, bundleName, replacements.toTypedArray())
 }

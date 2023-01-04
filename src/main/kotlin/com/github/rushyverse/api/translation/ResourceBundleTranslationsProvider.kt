@@ -1,7 +1,7 @@
 package com.github.rushyverse.api.translation
 
+import com.ibm.icu.text.MessageFormat
 import mu.KotlinLogging
-import java.text.MessageFormat
 import java.util.*
 
 /**
@@ -35,7 +35,7 @@ public open class ResourceBundleTranslationsProvider : TranslationsProvider() {
         key: String,
         locale: Locale,
         bundleName: String,
-        replacements: Array<String>
+        replacements: Array<Any>
     ): String {
         val string = try {
             get(key, locale, bundleName)
