@@ -12,11 +12,6 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 /**
- * Height of the player's head.
- */
-public const val HEIGHT_EYES_PLAYER: Double = 1.6
-
-/**
  * Async version of [sync].
  * @receiver Entity to lock.
  * @param block The callback to execute once the element has been safely acquired.
