@@ -43,6 +43,65 @@ class CubeAreaTest {
             assertEquals(max, area.max)
         }
 
+        @Test
+        fun `position should be the center of the area`() {
+            val min = Pos(0.0, 10.0, -10.0)
+            val max = Pos(-20.0, 11.0, -16.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            assertEquals(Pos(-10.0, 10.5, -13.0), area.position)
+        }
+
+    }
+
+    @Nested
+    inner class SetPosition {
+
+        @Test
+        fun `should keep the same position if the new value is the same`() {
+            val area = CubeArea<Entity>(mockk(), Pos(0.0, 0.0, 0.0), Pos(10.5, 10.5, 10.5))
+            val oldMin = area.min
+            val oldMax = area.max
+            area.position = area.position
+            assertEquals(oldMin, area.min)
+            assertEquals(oldMax, area.max)
+        }
+
+        @Test
+        fun `should change the position if the new positive value is different`() {
+            val min = Pos(0.0, 0.0, 0.0)
+            val max = Pos(10.0, 10.0, 10.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            val newPosition = Pos(20.0, 20.0, 20.0)
+            area.position = newPosition
+            assertEquals(newPosition, area.position)
+            assertEquals(Pos(15.0, 15.0, 15.0), area.min)
+            assertEquals(Pos(25.0, 25.0, 25.0), area.max)
+        }
+
+        @Test
+        fun `should change the position if the new negative value is different`() {
+            val min = Pos(0.0, 0.0, 0.0)
+            val max = Pos(10.0, 10.0, 10.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            val newPosition = Pos(-20.0, -20.0, -20.0)
+            area.position = newPosition
+            assertEquals(newPosition, area.position)
+            assertEquals(Pos(-25.0, -25.0, -25.0), area.min)
+            assertEquals(Pos(-15.0, -15.0, -15.0), area.max)
+        }
+
+        @Test
+        fun `should change the position if the new mixed value is different`() {
+            val min = Pos(0.0, 0.0, 0.0)
+            val max = Pos(10.0, 10.0, 10.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            val newPosition = Pos(20.0, -20.0, -20.0)
+            area.position = newPosition
+            assertEquals(newPosition, area.position)
+            assertEquals(Pos(15.0, -25.0, -25.0), area.min)
+            assertEquals(Pos(25.0, -15.0, -15.0), area.max)
+        }
+
     }
 
     @Nested

@@ -5,6 +5,14 @@ import kotlin.math.pow
 import kotlin.math.sqrt
 
 /**
+ * Returns the center position between two points.
+ * @receiver The first position.
+ * @param other The second position.
+ * @return The center position between the two points.
+ */
+public fun Pos.centerRelative(other: Pos): Pos = add(other).div(2.0)
+
+/**
  * Returns whether the given [Pos] is in the cube defined by the two given [Pos]s.
  * @receiver The position to check.
  * @param min The minimum position of the cube.
