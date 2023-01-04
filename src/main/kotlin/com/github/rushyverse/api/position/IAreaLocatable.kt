@@ -10,7 +10,7 @@ import net.minestom.server.instance.Instance
  * @property instance Instance where is located the area.
  * @property position Position of the area.
  */
-public interface IAreaLocatable<E: Entity> : IArea<E> {
+public interface IAreaLocatable<E : Entity> : IArea<E> {
 
     public var instance: Instance
 
