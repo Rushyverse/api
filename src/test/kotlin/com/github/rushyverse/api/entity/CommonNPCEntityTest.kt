@@ -31,7 +31,6 @@ abstract class CommonNPCEntityTest {
             }
             val npc = createEntity(area)
             val expectedPos = npc.position
-            println(expectedPos)
 
             npc.lookNearbyPlayer()
             assertEquals(expectedPos, npc.position)
