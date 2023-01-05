@@ -191,5 +191,14 @@ class ResourceBundleTranslationsProviderTest {
             )
         }
 
+        @Test
+        fun `should return the UTF-8 value`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.FRENCH.locale, ResourceBundle::getBundle)
+            assertEquals(
+                "français_value_1",
+                provider.translate("test1", SupportedLanguage.FRENCH.locale, BUNDLE_NAME)
+            )
+        }
+
     }
 }
