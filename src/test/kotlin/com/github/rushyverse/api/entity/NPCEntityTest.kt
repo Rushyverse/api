@@ -2,7 +2,6 @@ package com.github.rushyverse.api.entity
 
 import com.github.rushyverse.api.position.IAreaLocatable
 import io.mockk.*
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Player
 import org.junit.jupiter.api.Nested
@@ -36,10 +35,7 @@ class NPCEntityTest {
 
         @Test
         fun `should look at the player if there is one`() {
-            val player = mockk<Player>() {
-                every { position } returns Pos(10.0, 20.0, 30.0)
-                every { eyeHeight } returns 1.0
-            }
+            val player = mockk<Player>()
 
             val area = mockk<IAreaLocatable<Player>>() {
                 every { entitiesInArea } returns setOf(player)
@@ -51,7 +47,7 @@ class NPCEntityTest {
                 justRun { lookAt(capture(slotPlayer)) }
             }
 
-            npc.lookNearbyPlayer()
+            npcSpyk.lookNearbyPlayer()
 
             verify(exactly = 1) { npcSpyk.lookAt(any<Player>()) }
             assertEquals(player, slotPlayer.captured)

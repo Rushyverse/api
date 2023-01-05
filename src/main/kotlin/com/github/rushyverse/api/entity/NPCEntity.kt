@@ -68,7 +68,6 @@ public open class NPCEntity(
     public open fun lookNearbyPlayer() {
         val area = areaTrigger ?: throw IllegalStateException("An area detector must be set to use this method.")
         val nearbyEntity = area.entitiesInArea.firstOrNull() ?: return
-        println(nearbyEntity.position)
         lookAt(nearbyEntity)
     }
 
