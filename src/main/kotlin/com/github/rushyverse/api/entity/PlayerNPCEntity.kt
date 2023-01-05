@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.entity
 
+import com.github.rushyverse.api.position.IAreaLocatable
 import net.kyori.adventure.text.Component
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.GameMode
@@ -7,6 +8,7 @@ import net.minestom.server.entity.Player
 import net.minestom.server.network.packet.server.play.PlayerInfoPacket
 import net.minestom.server.network.packet.server.play.PlayerInfoPacket.AddPlayer
 import net.minestom.server.network.packet.server.play.PlayerInfoPacket.RemovePlayer
+import java.util.*
 
 /**
  * A non-player character that looks like a player.
@@ -17,7 +19,10 @@ import net.minestom.server.network.packet.server.play.PlayerInfoPacket.RemovePla
 public open class PlayerNPCEntity(
     public val name: String,
     public val properties: List<AddPlayer.Property> = emptyList(),
-) : NPCEntity(EntityType.PLAYER) {
+    areaTrigger: IAreaLocatable<Player>? = null,
+    uuid: UUID = UUID.randomUUID(),
+    public val inTabList: Boolean = false,
+) : NPCEntity(EntityType.PLAYER, areaTrigger, uuid) {
 
     private val playerRemovePacket = PlayerInfoPacket(
         PlayerInfoPacket.Action.REMOVE_PLAYER,
@@ -28,7 +33,10 @@ public open class PlayerNPCEntity(
         val connection = player.playerConnection
         connection.sendPacket(createPlayerAddPacket())
 
-        scheduleNextTick { connection.sendPacket(playerRemovePacket) }
+        if (!inTabList) {
+            scheduleNextTick { connection.sendPacket(playerRemovePacket) }
+        }
+
         super.updateNewViewer(player)
     }
 
