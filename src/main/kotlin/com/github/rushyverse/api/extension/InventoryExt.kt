@@ -69,7 +69,7 @@ public fun AbstractInventory.registerClickEventOnItem(
     handler: InventoryCondition
 ): InventoryCondition {
     val condition = InventoryCondition { player, clickedSlot, clickType, result ->
-        if (clickedSlot in slots && identifier.areSame(item, getItemStack(clickedSlot))) {
+        if (identifier.areSame(item, result.clickedItem)) {
             handler.accept(player, clickedSlot, clickType, result)
         }
     }
