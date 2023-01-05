@@ -13,8 +13,19 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class NPCEntityTest {
+
+    @Nested
+    inner class Instantiation {
+
+        @Test
+        fun `should set area trigger as null if not defined`() {
+            val npc = NPCEntity(EntityType.CREEPER)
+            assertNull(npc.areaTrigger)
+        }
+    }
 
     @Nested
     inner class LookNearbyPlayer {
