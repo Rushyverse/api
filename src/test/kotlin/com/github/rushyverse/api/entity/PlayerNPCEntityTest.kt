@@ -1,10 +1,12 @@
 package com.github.rushyverse.api.entity
 
 import com.github.rushyverse.api.extension.AddPlayerTextureProperty
+import com.github.rushyverse.api.position.IAreaLocatable
 import com.github.rushyverse.api.utils.randomPos
 import com.github.rushyverse.api.utils.randomString
 import net.kyori.adventure.text.Component
 import net.minestom.server.entity.GameMode
+import net.minestom.server.entity.Player
 import net.minestom.server.network.packet.server.play.PlayerInfoPacket
 import net.minestom.server.network.packet.server.play.PlayerInfoPacket.AddPlayer
 import net.minestom.testing.Env
@@ -17,7 +19,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 
-class PlayerNPCEntityTest {
+class PlayerNPCEntityTest : CommonNPCEntityTest() {
 
     @Nested
     inner class Instantiation {
@@ -177,5 +179,7 @@ class PlayerNPCEntityTest {
 
     }
 
-
+    override fun createEntity(area: IAreaLocatable<Player>?): NPCEntity {
+        return PlayerNPCEntity(randomString(), areaTrigger = area)
+    }
 }
