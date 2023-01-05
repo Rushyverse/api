@@ -167,5 +167,38 @@ class ResourceBundleTranslationsProviderTest {
                 provider.translate("test_args", SupportedLanguage.ENGLISH.locale, BUNDLE_NAME)
             )
         }
+
+        @Test
+        fun `should return the value with plural syntax`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+            assertEquals(
+                "Need 2 players.",
+                provider.translate("test_plural", SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, arrayOf(2))
+            )
+        }
+
+        @Test
+        fun `should return the value with singular syntax`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+            assertEquals(
+                "Need 1 player.",
+                provider.translate("test_plural", SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, arrayOf(1))
+            )
+
+            assertEquals(
+                "Need 0 player.",
+                provider.translate("test_plural", SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, arrayOf(0))
+            )
+        }
+
+        @Test
+        fun `should return the UTF-8 value`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.FRENCH.locale, ResourceBundle::getBundle)
+            assertEquals(
+                "français_value_1",
+                provider.translate("test1", SupportedLanguage.FRENCH.locale, BUNDLE_NAME)
+            )
+        }
+
     }
 }
