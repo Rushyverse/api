@@ -1,10 +1,84 @@
 package com.github.rushyverse.api.extension
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class StringExtTest {
+
+    @Nested
+    inner class SequenceToLore {
+
+        @Test
+        fun `should return empty component if sequence is empty`() {
+            assertEquals(Component.empty(), emptySequence<String>().toLore())
+        }
+
+        @Test
+        fun `should return component with all strings`() {
+            val component = sequenceOf("Hello", "World").toLore()
+            assertEquals(
+                Component.text()
+                    .append(Component.text("Hello"))
+                    .append(Component.newline())
+                    .append(Component.text("World"))
+                    .build(),
+                component
+            )
+        }
+
+        @Test
+        fun `should return component with all strings and transform`() {
+            val component = sequenceOf("Hello", "World").toLore { color(NamedTextColor.RED) }
+            assertEquals(
+                Component.text()
+                    .append(Component.text("Hello").color(NamedTextColor.RED))
+                    .append(Component.newline())
+                    .append(Component.text("World").color(NamedTextColor.RED))
+                    .build(),
+                component
+            )
+        }
+
+    }
+
+    @Nested
+    inner class CollectionToLore {
+
+        @Test
+        fun `should return empty component if sequence is empty`() {
+            assertEquals(Component.empty(), emptyList<String>().toLore())
+        }
+
+        @Test
+        fun `should return component with all strings`() {
+            val component = listOf("Hello", "World").toLore()
+            assertEquals(
+                Component.text()
+                    .append(Component.text("Hello"))
+                    .append(Component.newline())
+                    .append(Component.text("World"))
+                    .build(),
+                component
+            )
+        }
+
+        @Test
+        fun `should return component with all strings and transform`() {
+            val component = listOf("Hello", "World").toLore { color(NamedTextColor.RED) }
+            assertEquals(
+                Component.text()
+                    .append(Component.text("Hello").color(NamedTextColor.RED))
+                    .append(Component.newline())
+                    .append(Component.text("World").color(NamedTextColor.RED))
+                    .build(),
+                component
+            )
+        }
+
+    }
 
     @Nested
     inner class ToFormattedLore {
