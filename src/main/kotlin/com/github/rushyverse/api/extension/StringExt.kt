@@ -69,7 +69,7 @@ public fun String.toFormattedLoreSequence(maxSize: Int = DEFAULT_LORE_LINE_LENGT
     return sequence {
         while (index < length) {
             val nextIndex = index + maxSize
-            if(nextIndex >= length) {
+            if (nextIndex >= length) {
                 yield(substring(index))
                 break
             }
