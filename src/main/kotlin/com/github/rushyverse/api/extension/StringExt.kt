@@ -43,32 +43,32 @@ public inline fun Collection<String>.toLore(
 
 /**
  * Transform a string into a list of string by cutting it.
- * If the string is too large and doesn't have any space, it will be cut each [maxSize] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
- * @param maxSize Max size of each string.
- * @return A list with strings with length less or equals to [maxSize].
+ * @param lineLength Max size of each string.
+ * @return A list with strings with length less or equals to [lineLength].
  */
-public fun String.toFormattedLore(maxSize: Int = DEFAULT_LORE_LINE_LENGTH): List<String> {
-    return toFormattedLoreSequence(maxSize).toList()
+public fun String.toFormattedLore(lineLength: Int = DEFAULT_LORE_LINE_LENGTH): List<String> {
+    return toFormattedLoreSequence(lineLength).toList()
 }
 
 /**
  * Transform a string into a sequence of string by cutting.
- * If the string is too large and doesn't have any space, it will be cut each [maxSize] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
- * @param maxSize Max size of each string.
- * @return A sequence with strings with length less or equals to [maxSize].
+ * @param lineLength Max size of each string.
+ * @return A sequence with strings with length less or equals to [lineLength].
  */
-public fun String.toFormattedLoreSequence(maxSize: Int = DEFAULT_LORE_LINE_LENGTH): Sequence<String> {
+public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LENGTH): Sequence<String> {
     if (isEmpty()) return emptySequence()
-    if (length <= maxSize) return sequenceOf(this)
+    if (length <= lineLength) return sequenceOf(this)
 
     var index = 0
     return sequence {
         while (index < length) {
-            val nextIndex = index + maxSize
+            val nextIndex = index + lineLength
             if (nextIndex >= length) {
                 yield(substring(index))
                 break

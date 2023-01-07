@@ -125,7 +125,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is greater than string size`() {
+        fun `should create only one element if line length is greater than string size`() {
             for (i in 1..100) {
                 val string = "a".repeat(i)
                 val sequence = string.toFormattedLore(i + 1)
@@ -134,7 +134,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is equals to the string size`() {
+        fun `should create only one element if line length is equals to the string size`() {
             val sentence = "Hello World"
             assertEquals(listOf(sentence), sentence.toFormattedLore(sentence.length))
         }
@@ -146,7 +146,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create multiple elements by cut on the max size char adding a '-'`() {
+        fun `should create multiple elements by cut on the line length char adding a '-'`() {
             val sequence1 = "Hello World".toFormattedLore(4)
             assertEquals(listOf("Hel-", "lo", "Wor-", "ld"), sequence1)
 
@@ -156,10 +156,10 @@ class StringExtTest {
 
         @Test
         fun `should create multiple element by cut on the previous space char`() {
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(6))
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(7))
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(8))
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(9))
+            // Indexes of "W" to "d" chars
+            for (i in 6..10) {
+                assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(i))
+            }
         }
 
         @Test
@@ -214,7 +214,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is greater than string size`() {
+        fun `should create only one element if line length is greater than string size`() {
             for (i in 1..100) {
                 val string = "a".repeat(i)
                 val sequence = string.toFormattedLoreSequence(i + 1)
@@ -223,7 +223,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is equals to the string size`() {
+        fun `should create only one element if line length is equals to the string size`() {
             val sentence = "Hello World"
             assertEquals(listOf(sentence), sentence.toFormattedLoreSequence(sentence.length).toList())
         }
@@ -235,7 +235,7 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create multiple elements by cut on the max size char adding a '-'`() {
+        fun `should create multiple elements by cut on the line length char adding a '-'`() {
             val sequence1 = "Hello World".toFormattedLoreSequence(4).toList()
             assertEquals(listOf("Hel-", "lo", "Wor-", "ld"), sequence1)
 
@@ -245,10 +245,10 @@ class StringExtTest {
 
         @Test
         fun `should create multiple element by cut on the previous space char`() {
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(6).toList())
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(7).toList())
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(8).toList())
-            assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(9).toList())
+            // Indexes of "W" to "d" chars
+            for (i in 6..10) {
+                assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(i).toList())
+            }
         }
 
         @Test
