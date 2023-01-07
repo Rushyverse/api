@@ -8,37 +8,53 @@ import kotlin.test.assertEquals
 
 class StringExtTest {
 
+    @Test
+    fun `default lore line length`() {
+        assertEquals(30, DEFAULT_LORE_LINE_LENGTH)
+    }
+
     @Nested
     inner class SequenceToLore {
 
         @Test
         fun `should return empty component if sequence is empty`() {
-            assertEquals(Component.empty(), emptySequence<String>().toLore())
+            assertEquals(emptyList(), emptySequence<String>().toLore())
+        }
+
+        @Test
+        fun `should set color gray by default`() {
+            val components = sequenceOf("a", "b", "c").toLore()
+            assertEquals(
+                listOf(
+                    Component.text().content("a").color(NamedTextColor.GRAY).build(),
+                    Component.text().content("b").color(NamedTextColor.GRAY).build(),
+                    Component.text().content("c").color(NamedTextColor.GRAY).build()
+                ),
+                components
+            )
         }
 
         @Test
         fun `should return component with all strings`() {
-            val component = sequenceOf("Hello", "World").toLore()
+            val components = sequenceOf("Hello", "World").toLore() {}
             assertEquals(
-                Component.text()
-                    .append(Component.text("Hello"))
-                    .append(Component.newline())
-                    .append(Component.text("World"))
-                    .build(),
-                component
+                listOf(
+                    Component.text().content("Hello").build(),
+                    Component.text().content("World").build()
+                ),
+                components
             )
         }
 
         @Test
         fun `should return component with all strings and transform`() {
-            val component = sequenceOf("Hello", "World").toLore { color(NamedTextColor.RED) }
+            val components = sequenceOf("Hello", "World").toLore { color(NamedTextColor.RED) }
             assertEquals(
-                Component.text()
-                    .append(Component.text("Hello").color(NamedTextColor.RED))
-                    .append(Component.newline())
-                    .append(Component.text("World").color(NamedTextColor.RED))
-                    .build(),
-                component
+                listOf(
+                    Component.text().content("Hello").color(NamedTextColor.RED).build(),
+                    Component.text().content("World").color(NamedTextColor.RED).build()
+                ),
+                components
             )
         }
 
@@ -49,32 +65,43 @@ class StringExtTest {
 
         @Test
         fun `should return empty component if sequence is empty`() {
-            assertEquals(Component.empty(), emptyList<String>().toLore())
+            assertEquals(emptyList(), emptyList<String>().toLore())
+        }
+
+        @Test
+        fun `should set color gray by default`() {
+            val components = listOf("a", "b", "c").toLore()
+            assertEquals(
+                listOf(
+                    Component.text().content("a").color(NamedTextColor.GRAY).build(),
+                    Component.text().content("b").color(NamedTextColor.GRAY).build(),
+                    Component.text().content("c").color(NamedTextColor.GRAY).build()
+                ),
+                components
+            )
         }
 
         @Test
         fun `should return component with all strings`() {
-            val component = listOf("Hello", "World").toLore()
+            val components = listOf("Hello", "World").toLore() {}
             assertEquals(
-                Component.text()
-                    .append(Component.text("Hello"))
-                    .append(Component.newline())
-                    .append(Component.text("World"))
-                    .build(),
-                component
+                listOf(
+                    Component.text().content("Hello").build(),
+                    Component.text().content("World").build()
+                ),
+                components
             )
         }
 
         @Test
         fun `should return component with all strings and transform`() {
-            val component = listOf("Hello", "World").toLore { color(NamedTextColor.RED) }
+            val components = listOf("Hello", "World").toLore { color(NamedTextColor.RED) }
             assertEquals(
-                Component.text()
-                    .append(Component.text("Hello").color(NamedTextColor.RED))
-                    .append(Component.newline())
-                    .append(Component.text("World").color(NamedTextColor.RED))
-                    .build(),
-                component
+                listOf(
+                    Component.text().content("Hello").color(NamedTextColor.RED).build(),
+                    Component.text().content("World").color(NamedTextColor.RED).build()
+                ),
+                components
             )
         }
 
@@ -107,9 +134,9 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is  equals to the string size`() {
+        fun `should create only one element if max size is equals to the string size`() {
             val sentence = "Hello World"
-            assertEquals(listOf(sentence), sentence.toFormattedLore(sentence.lastIndex))
+            assertEquals(listOf(sentence), sentence.toFormattedLore(sentence.length))
         }
 
         @Test
@@ -148,8 +175,23 @@ class StringExtTest {
             )
 
             assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le", "serveur"),
+                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le serveur"),
                 "Ajoutez, chattez et rejoignez vos amis à travers le serveur".toFormattedLore(30),
+            )
+
+            assertEquals(
+                listOf("Ajoutez, chattez et rejoignez", "v"),
+                "Ajoutez, chattez et rejoignez v".toFormattedLore(30),
+            )
+
+            assertEquals(
+                listOf("Ajoutez, chattez et rejoignez", " "),
+                "Ajoutez, chattez et rejoignez  ".toFormattedLore(30),
+            )
+
+            assertEquals(
+                listOf("Add, chat and join your friends through", "the server"),
+                "Add, chat and join your friends through the server".toFormattedLore(40),
             )
         }
     }
@@ -181,9 +223,9 @@ class StringExtTest {
         }
 
         @Test
-        fun `should create only one element if max size is  equals to the string size`() {
+        fun `should create only one element if max size is equals to the string size`() {
             val sentence = "Hello World"
-            assertEquals(listOf(sentence), sentence.toFormattedLoreSequence(sentence.lastIndex).toList())
+            assertEquals(listOf(sentence), sentence.toFormattedLoreSequence(sentence.length).toList())
         }
 
         @Test
@@ -222,11 +264,24 @@ class StringExtTest {
             )
 
             assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le", "serveur"),
+                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le serveur"),
                 "Ajoutez, chattez et rejoignez vos amis à travers le serveur".toFormattedLoreSequence(30).toList(),
+            )
+
+            assertEquals(
+                listOf("Ajoutez, chattez et rejoignez", "v"),
+                "Ajoutez, chattez et rejoignez v".toFormattedLoreSequence(30).toList(),
+            )
+
+            assertEquals(
+                listOf("Ajoutez, chattez et rejoignez", " "),
+                "Ajoutez, chattez et rejoignez  ".toFormattedLoreSequence(30).toList(),
+            )
+
+            assertEquals(
+                listOf("Add, chat and join your friends through", "the server"),
+                "Add, chat and join your friends through the server".toFormattedLoreSequence(40).toList(),
             )
         }
     }
-
-
 }

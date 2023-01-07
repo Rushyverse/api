@@ -1,9 +1,14 @@
 package com.github.rushyverse.api.extension
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.JoinConfiguration
 import net.kyori.adventure.text.TextComponent
-import kotlin.math.min
+import net.kyori.adventure.text.format.NamedTextColor
+
+/**
+ * Default max line for a lore line.
+ * This value is defined by looking with the default Minecraft size application.
+ */
+public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
  * Transform a sequence of strings to a component.
@@ -12,10 +17,12 @@ import kotlin.math.min
  * @param transform The transform function to apply to each string.
  * @return A component that contains all the strings.
  */
-public inline fun Sequence<String>.toLore(crossinline transform: TextComponent.Builder.() -> Unit = {}): Component {
-    val components = map { Component.text().content(it).apply(transform) }.toList()
-    if(components.isEmpty()) return Component.empty()
-    return Component.join(JoinConfiguration.separator(Component.newline()), components)
+public inline fun Sequence<String>.toLore(
+    crossinline transform: TextComponent.Builder.() -> Unit = {
+        color(NamedTextColor.GRAY)
+    }
+): List<TextComponent> {
+    return map { Component.text().content(it).apply(transform).build() }.toList()
 }
 
 /**
@@ -25,10 +32,13 @@ public inline fun Sequence<String>.toLore(crossinline transform: TextComponent.B
  * @param transform A function that will be applied to each component.
  * @return A component that contains all the strings.
  */
-public inline fun Collection<String>.toLore(crossinline transform: TextComponent.Builder.() -> Unit = {}): Component {
-    if (isEmpty()) return Component.empty()
-    val components = map { Component.text().content(it).apply(transform) }
-    return Component.join(JoinConfiguration.separator(Component.newline()), components)
+public inline fun Collection<String>.toLore(
+    crossinline transform: TextComponent.Builder.() -> Unit = {
+        color(NamedTextColor.GRAY)
+    }
+): List<TextComponent> {
+    if (isEmpty()) return emptyList()
+    return map { Component.text().content(it).apply(transform).build() }
 }
 
 /**
@@ -39,7 +49,7 @@ public inline fun Collection<String>.toLore(crossinline transform: TextComponent
  * @param maxSize Max size of each string.
  * @return A list with strings with length less or equals to [maxSize].
  */
-public fun String.toFormattedLore(maxSize: Int): List<String> {
+public fun String.toFormattedLore(maxSize: Int = DEFAULT_LORE_LINE_LENGTH): List<String> {
     return toFormattedLoreSequence(maxSize).toList()
 }
 
@@ -51,26 +61,30 @@ public fun String.toFormattedLore(maxSize: Int): List<String> {
  * @param maxSize Max size of each string.
  * @return A sequence with strings with length less or equals to [maxSize].
  */
-public fun String.toFormattedLoreSequence(maxSize: Int): Sequence<String> {
+public fun String.toFormattedLoreSequence(maxSize: Int = DEFAULT_LORE_LINE_LENGTH): Sequence<String> {
     if (isEmpty()) return emptySequence()
-    if (lastIndex <= maxSize) return sequenceOf(this)
+    if (length <= maxSize) return sequenceOf(this)
 
     var index = 0
     return sequence {
         while (index < length) {
-            val minSubstringLength = min(length, index + maxSize)
-            val maxStringLine = substring(index, minSubstringLength)
+            val nextIndex = index + maxSize
+            if(nextIndex >= length) {
+                yield(substring(index))
+                break
+            }
 
-            val substringBeforeSpace = maxStringLine.substringBeforeLast(' ')
-            val nextChar = getOrNull(index + substringBeforeSpace.length)
+            val substringToNextIndex = substring(index, nextIndex)
+            val substringBeforeLastSpace = substringToNextIndex.substringBeforeLast(' ')
+            val nextChar = get(index + substringBeforeLastSpace.length)
 
-            index += if (nextChar == null || nextChar.isWhitespace()) {
-                yield(substringBeforeSpace)
+            index += if (nextChar.isWhitespace()) {
+                yield(substringBeforeLastSpace)
                 // +1 to skip the space
-                substringBeforeSpace.length + 1
+                substringBeforeLastSpace.length + 1
             } else {
-                yield(maxStringLine.dropLast(1) + '-')
-                maxStringLine.lastIndex
+                yield(substringToNextIndex.dropLast(1) + '-')
+                substringToNextIndex.lastIndex
             }
         }
     }
