@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.item
 
 import com.github.rushyverse.api.utils.assertCoroutineContextFromScope
+import com.github.rushyverse.api.utils.randomInt
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +23,7 @@ class InventoryConditionSuspendTest {
         @Test
         fun `should use params sent to the native inventory`() {
             val expectedPlayer = mockk<Player>(randomString())
-            val expectedSlot = 420
+            val expectedSlot = randomInt()
             val expectedClickType = mockk<ClickType>(randomString())
             val expectedInventoryConditionResult = mockk<InventoryConditionResult>(randomString())
 
