@@ -74,6 +74,42 @@ class InventoryExtTest {
 
     @EnvTest
     @Nested
+    inner class AddInventoryConditionSuspend {
+
+        @Test
+        fun `should register a suspendable condition`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+            var count = 0
+            inventory.addInventoryConditionSuspend { playerClicker, clickedSlot, type, _ ->
+                assertEquals(player, playerClicker)
+                assertEquals(0, clickedSlot)
+                if(count == 0) {
+                    assertEquals(ClickType.LEFT_CLICK, type)
+                } else {
+                    assertEquals(ClickType.RIGHT_CLICK, type)
+                }
+                count++
+            }
+
+            assertEquals(1, inventory.inventoryConditions.size)
+
+            inventory.setItemStack(0, ItemStack.of(Material.DIAMOND))
+
+            val playerSlot = 36
+            assertEquals(0, count)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            assertTrue(inventory.rightClick(player, playerSlot))
+            assertEquals(2, count)
+        }
+    }
+
+    @EnvTest
+    @Nested
     inner class RegisterClickEventOnSlot {
 
         @Test
