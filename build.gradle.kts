@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    val minestomVersion = "24cc458659"
+    val minestomVersion = "aebf72de90"
     val loggingVersion = "3.0.4"
     val mockkVersion = "1.13.3"
     val coroutinesCoreVersion = "1.6.4"
