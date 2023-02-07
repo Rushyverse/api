@@ -1,6 +1,11 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.coroutine.MinestomSync
+import com.github.rushyverse.api.item.InventoryConditionSuspend
 import com.github.rushyverse.api.item.ItemComparator
+import com.github.rushyverse.api.item.asNative
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -75,6 +80,20 @@ public fun AbstractInventory.registerClickEventOnItem(
     }
     addInventoryCondition(condition)
     return condition
+}
+
+/**
+ * Add a new suspend inventory condition to the inventory.
+ * @receiver Inventory where the condition will be added.
+ * @param coroutineScope Scope to launch action when a new event is received.
+ * @param inventoryConditionSuspend Inventory condition with a suspendable execution.
+ * @return A native [InventoryCondition] added to the inventory.
+ */
+public fun AbstractInventory.addInventoryConditionSuspend(
+    coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope,
+    inventoryConditionSuspend: InventoryConditionSuspend
+): InventoryCondition {
+   return inventoryConditionSuspend.asNative(coroutineScope).apply { addInventoryCondition(this) }
 }
 
 /**
