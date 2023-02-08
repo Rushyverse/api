@@ -1,8 +1,12 @@
 package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.item.ItemComparator
+import com.github.rushyverse.api.utils.assertCoroutineContextFromScope
 import com.github.rushyverse.api.utils.randomPos
 import com.github.rushyverse.api.utils.randomString
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.yield
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -16,8 +20,13 @@ import net.minestom.server.item.Material
 import net.minestom.testing.Env
 import net.minestom.testing.EnvTest
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.coroutineContext
 import kotlin.test.*
 
+@Timeout(5, unit = TimeUnit.SECONDS)
 class InventoryExtTest {
 
     @Test
@@ -85,7 +94,7 @@ class InventoryExtTest {
             inventory.addInventoryConditionSuspend { playerClicker, clickedSlot, type, _ ->
                 assertEquals(player, playerClicker)
                 assertEquals(0, clickedSlot)
-                if(count == 0) {
+                if (count == 0) {
                     assertEquals(ClickType.LEFT_CLICK, type)
                 } else {
                     assertEquals(ClickType.RIGHT_CLICK, type)
@@ -106,6 +115,112 @@ class InventoryExtTest {
             assertTrue(inventory.rightClick(player, playerSlot))
             assertEquals(2, count)
         }
+
+        @Test
+        fun `should stay in current thread before suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            var isCalled = false
+            val thread = Thread.currentThread().id
+            inventory.addInventoryConditionSuspend(CoroutineScope(Dispatchers.Default)) { _, _, _, _ ->
+                assertEquals(thread, Thread.currentThread().id)
+                isCalled = true
+            }
+
+            assertTrue(inventory.leftClick(player, 0))
+            assertTrue(isCalled)
+        }
+
+        @Test
+        fun `should change thread context after suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val latch = CountDownLatch(1)
+            val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+            inventory.addInventoryConditionSuspend(coroutineScope) { _, _, _, _ ->
+                yield()
+                assertCoroutineContextFromScope(coroutineScope, coroutineContext)
+                latch.countDown()
+            }
+
+            assertTrue(inventory.leftClick(player, 0))
+            latch.await()
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class RegisterClickEventOnSlotSuspend {
+
+        @Test
+        fun `should register a click event on a slot`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val slot = 0
+            var count = 0
+            inventory.registerClickEventOnSlotSuspend(slot) { _, _, _, _ ->
+                count++
+            }
+            assertEquals(1, inventory.inventoryConditions.size)
+
+            inventory.setItemStack(slot, ItemStack.of(Material.DIAMOND))
+
+            val playerSlot = 36
+            assertEquals(0, count)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            assertTrue(inventory.rightClick(player, playerSlot))
+            assertEquals(2, count)
+
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should stay in current thread before suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            var isCalled = false
+            val thread = Thread.currentThread().id
+            inventory.registerClickEventOnSlotSuspend(0, CoroutineScope(Dispatchers.Default)) { _, _, _, _ ->
+                assertEquals(thread, Thread.currentThread().id)
+                isCalled = true
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(isCalled)
+        }
+
+        @Test
+        fun `should change thread context after suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val latch = CountDownLatch(1)
+            val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+            inventory.registerClickEventOnSlotSuspend(0, coroutineScope) { _, _, _, _ ->
+                yield()
+                assertCoroutineContextFromScope(coroutineScope, coroutineContext)
+                latch.countDown()
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            latch.await()
+        }
+
     }
 
     @EnvTest
@@ -140,6 +255,146 @@ class InventoryExtTest {
             assertEquals(2, count)
         }
 
+    }
+
+    @EnvTest
+    @Nested
+    inner class RegisterClickEventOnItemSuspend {
+
+        @Test
+        fun `default identifier should be equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var count = 0
+            inventory.registerClickEventOnItemSuspend(
+                item,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+
+            val playerSlot = 36
+            inventory.setItemStack(0, item)
+            assertEquals(0, count)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, item.withAmount(2))
+            assertTrue(inventory.rightClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(1, ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var count = 0
+            inventory.registerClickEventOnItemSuspend(
+                item,
+                ItemComparator.EQUALS,
+                CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+            assertEquals(1, inventory.inventoryConditions.size)
+
+            inventory.setItemStack(0, item)
+            inventory.setItemStack(1, item)
+            inventory.setItemStack(3, item)
+
+            assertEquals(0, count)
+
+            assertTrue(inventory.leftClick(player, 36)) // remove the item
+            assertEquals(1, count)
+
+            assertTrue(inventory.rightClick(player, 37))
+            assertEquals(2, count)
+
+            assertTrue(inventory.leftClick(player, 38))
+            assertEquals(2, count)
+
+            assertTrue(inventory.leftClick(player, 39))
+            assertEquals(3, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is similar`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var clicked = false
+            inventory.registerClickEventOnItemSuspend(
+                item,
+                ItemComparator.SIMILAR,
+                CoroutineScope(Dispatchers.Default)
+            ) { playerClicked, slot, type, _ ->
+                assertEquals(player, playerClicked)
+                assertEquals(0, slot)
+                assertEquals(ClickType.LEFT_CLICK, type)
+                clicked = true
+            }
+
+            val item2 = item.withAmount(20)
+            inventory.setItemStack(0, item2)
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should stay in current thread before suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            var isCalled = false
+            val thread = Thread.currentThread().id
+            val item = ItemStack.of(Material.DIAMOND)
+            inventory.registerClickEventOnItemSuspend(
+                item,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                assertEquals(thread, Thread.currentThread().id)
+                isCalled = true
+            }
+
+            inventory.setItemStack(0, item)
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(isCalled)
+        }
+
+        @Test
+        fun `should change thread context after suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val latch = CountDownLatch(1)
+            val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+            val item = ItemStack.of(Material.DIAMOND)
+            inventory.registerClickEventOnItemSuspend(item, coroutineScope = coroutineScope) { _, _, _, _ ->
+                yield()
+                assertCoroutineContextFromScope(coroutineScope, coroutineContext)
+                latch.countDown()
+            }
+
+            inventory.setItemStack(0, item)
+            assertTrue(inventory.leftClick(player, 36))
+            latch.await()
+        }
     }
 
     @EnvTest
@@ -225,6 +480,148 @@ class InventoryExtTest {
             inventory.setItemStack(0, item2)
             assertTrue(inventory.leftClick(player, 36))
             assertTrue(clicked)
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class SetItemStackSuspendWithClickHandler {
+
+        @Test
+        fun `default identifier should be equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
+            var count = 0
+            inventory.setItemStackSuspend(
+                slot,
+                item,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(slot))
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot, item.withAmount(2))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
+            var count = 0
+            inventory.setItemStackSuspend(
+                slot,
+                item,
+                ItemComparator.EQUALS,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+
+            val playerSlot = 36
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(item, inventory.getItemStack(slot))
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, item)
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is similar`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            val slot = 0
+            var clicked = false
+            inventory.setItemStackSuspend(
+                slot,
+                item,
+                ItemComparator.SIMILAR,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { playerClicked, clickedSlot, type, _ ->
+                assertEquals(player, playerClicked)
+                assertEquals(slot, clickedSlot)
+                assertEquals(ClickType.LEFT_CLICK, type)
+                clicked = true
+            }
+
+            val item2 = item.withAmount(10)
+            inventory.setItemStack(slot, item2)
+
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should stay in current thread before suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            val slot = 0
+            var clicked = false
+            val thread = Thread.currentThread().id
+            inventory.setItemStackSuspend(
+                slot,
+                item,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                assertEquals(thread, Thread.currentThread().id)
+                clicked = true
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should change thread context after suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            val slot = 0
+
+            val latch = CountDownLatch(1)
+            val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+            inventory.setItemStackSuspend(slot, item, coroutineScope = coroutineScope) { _, _, _, _ ->
+                yield()
+                assertCoroutineContextFromScope(coroutineScope, coroutineContext)
+                latch.countDown()
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            latch.await()
         }
     }
 
@@ -366,6 +763,161 @@ class InventoryExtTest {
 
             inventory.slots.forEach { inventory.setItemStack(it, ItemStack.of(Material.DIAMOND)) }
             assertEquals(-1, inventory.firstAvailableSlot())
+        }
+    }
+
+    @EnvTest
+    @Nested
+    inner class AddItemStackSuspendWithClickHandler {
+
+        @Test
+        fun `default identifier should be equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            var count = 0
+            val condition = inventory.addItemStackSuspend(
+                item,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(0))
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, ItemStack.AIR)
+            inventory.addItemStack(item.withAmount(2))
+
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(0, ItemStack.AIR)
+            inventory.addItemStack(ItemStack.of(Material.DIAMOND))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is equals`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.DIAMOND)
+            val slot = 0
+            var count = 0
+            val condition = inventory.addItemStackSuspend(
+                item,
+                ItemComparator.EQUALS,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                count++
+            }
+
+            assertNotNull(condition)
+            assertEquals(1, inventory.inventoryConditions.size)
+            assertEquals(1, inventory.itemStacks.filterNot { it.isAir }.size)
+
+            val playerSlot = 36
+            assertEquals(item, inventory.getItemStack(slot))
+            assertTrue(inventory.leftClick(player, playerSlot))
+            assertEquals(1, count)
+
+            inventory.setItemStack(slot + 1, item)
+            assertTrue(inventory.leftClick(player, playerSlot + 1))
+            assertEquals(2, count)
+        }
+
+        @Test
+        fun `should trigger the click handler when the item is similar`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            var clicked = false
+            val condition = inventory.addItemStackSuspend(
+                item,
+                ItemComparator.SIMILAR,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ ->
+                clicked = true
+            }
+
+            assertNotNull(condition)
+
+            val item2 = item.withAmount(10)
+            inventory.setItemStack(1, item2)
+
+            assertTrue(inventory.leftClick(player, 37))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should not add item and create condition if item can't be added`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            inventory.slots.forEach { inventory.setItemStack(it, item) }
+
+            val diamondItem = ItemStack.of(Material.DIAMOND)
+            val condition = inventory.addItemStackSuspend(
+                diamondItem,
+                coroutineScope = CoroutineScope(Dispatchers.Default)
+            ) { _, _, _, _ -> }
+            assertNull(condition)
+            inventory.itemStacks.forEach { assertNotEquals(diamondItem, it) }
+        }
+
+        @Test
+        fun `should stay in current thread before suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+            var clicked = false
+            val thread = Thread.currentThread().id
+            inventory.addItemStackSuspend(item, coroutineScope = CoroutineScope(Dispatchers.Default)) { _, _, _, _ ->
+                assertEquals(thread, Thread.currentThread().id)
+                clicked = true
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            assertTrue(clicked)
+        }
+
+        @Test
+        fun `should change thread context after suspend point`(env: Env) {
+            val instance = env.createFlatInstance()
+            val player = env.createPlayer(instance, randomPos())
+            val inventory: AbstractInventory = player.inventory
+
+            val item = ItemStack.of(Material.ARROW)
+
+            val latch = CountDownLatch(1)
+            val coroutineScope = CoroutineScope(Dispatchers.Default)
+
+            inventory.addItemStackSuspend(item, coroutineScope = coroutineScope) { _, _, _, _ ->
+                yield()
+                assertCoroutineContextFromScope(coroutineScope, coroutineContext)
+                latch.countDown()
+            }
+
+            assertTrue(inventory.leftClick(player, 36))
+            latch.await()
         }
     }
 
@@ -599,7 +1151,7 @@ class InventoryExtTest {
 
     @EnvTest
     @Nested
-    inner class setItemChangeInventory {
+    inner class SetItemChangeInventory {
 
         private val textItem = "test"
 

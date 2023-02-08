@@ -11,10 +11,13 @@ import net.minestom.server.entity.Player
 import net.minestom.server.inventory.click.ClickType
 import net.minestom.server.inventory.condition.InventoryConditionResult
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Timeout
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.coroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Timeout(5, unit = TimeUnit.SECONDS)
 class InventoryConditionSuspendTest {
 
     @Nested
