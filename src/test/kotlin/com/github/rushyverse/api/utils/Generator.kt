@@ -9,6 +9,10 @@ private val stringGenerator = generateSequence { UUID.randomUUID().toString() }.
 
 fun randomString() = stringGenerator.next()
 
+private val intGenerator = generateSequence { Random.nextInt() }.distinct().iterator()
+
+fun randomInt() = intGenerator.next()
+
 private val posGenerator =
     generateSequence { Pos(Random.nextDouble(), Random.nextDouble(), Random.nextDouble()) }.distinct().iterator()
 
