@@ -1,9 +1,11 @@
 package com.github.rushyverse.api.serializer
 
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import net.minestom.server.coordinate.Pos
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
-import kotlinx.serialization.json.Json
 import kotlin.test.assertEquals
 
 class PosSerializerTest {
@@ -158,6 +160,32 @@ class PosSerializerTest {
             @Test
             fun `with mixed values`() {
                 assertDeserialize(0.5, -0.7, 0.6, 0.1f, -0.2f)
+            }
+
+        }
+
+        @Nested
+        inner class MissingCoordinateField {
+
+            @Test
+            fun `with missing x`() {
+                val json = "{\"y\":0.0,\"z\":0.0,\"yaw\":0.0,\"pitch\":0.0}"
+                val exception = assertThrows<SerializationException> { Json.decodeFromString(PosSerializer, json) }
+                assertEquals("The field x is missing", exception.message)
+            }
+
+            @Test
+            fun `with missing y`() {
+                val json = "{\"x\":0.0,\"z\":0.0,\"yaw\":0.0,\"pitch\":0.0}"
+                val exception = assertThrows<SerializationException> { Json.decodeFromString(PosSerializer, json) }
+                assertEquals("The field y is missing", exception.message)
+            }
+
+            @Test
+            fun `with missing z`() {
+                val json = "{\"x\":0.0,\"y\":0.0,\"yaw\":0.0,\"pitch\":0.0}"
+                val exception = assertThrows<SerializationException> { Json.decodeFromString(PosSerializer, json) }
+                assertEquals("The field z is missing", exception.message)
             }
 
         }
