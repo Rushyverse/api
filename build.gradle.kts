@@ -1,9 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.8.0"
-    kotlin("plugin.serialization") version "1.8.0"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    kotlin("jvm") version "1.8.10"
+    kotlin("plugin.serialization") version "1.8.10"
     id("org.jetbrains.dokka") version "1.7.20"
     `java-library`
     `maven-publish`
@@ -15,26 +14,26 @@ repositories {
 }
 
 dependencies {
-    val minestomVersion = "24cc458659"
-    val loggingVersion = "3.0.4"
-    val mockkVersion = "1.13.3"
+    val minestomVersion = "aebf72de90"
+    val loggingVersion = "3.0.5"
+    val mockkVersion = "1.13.4"
     val coroutinesCoreVersion = "1.6.4"
     val kotlinSerializationVersion = "1.4.1"
     val commonsNetVersion = "3.9.0"
     val icu4jVersion = "72.1"
 
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
-    implementation("com.github.Minestom.Minestom:Minestom:$minestomVersion")
-    implementation("commons-net:commons-net:$commonsNetVersion")
-    implementation("com.ibm.icu:icu4j:$icu4jVersion")
+    api(kotlin("stdlib"))
+    api(kotlin("reflect"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
+    api("com.github.Minestom.Minestom:Minestom:$minestomVersion")
+    api("commons-net:commons-net:$commonsNetVersion")
+    api("com.ibm.icu:icu4j:$icu4jVersion")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
 
     // Logging information
-    implementation("io.github.microutils:kotlin-logging:$loggingVersion")
+    api("io.github.microutils:kotlin-logging:$loggingVersion")
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesCoreVersion")
@@ -68,10 +67,6 @@ tasks {
         useJUnitPlatform()
     }
 
-    build {
-        dependsOn(shadowJar)
-    }
-
     clean {
         delete(dokkaOutputDir)
     }
@@ -84,10 +79,6 @@ tasks {
     dokkaHtml.configure {
         dependsOn(deleteDokkaOutputDir)
         outputDirectory.set(file(dokkaOutputDir))
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
     }
 }
 
@@ -112,7 +103,7 @@ publishing {
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
         create<MavenPublication>(projectName) {
-            shadow.component(this)
+            from(components["kotlin"])
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
