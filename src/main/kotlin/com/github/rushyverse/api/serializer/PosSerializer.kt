@@ -1,7 +1,5 @@
 package com.github.rushyverse.api.serializer
 
-import com.github.rushyverse.api.serializer.PosSerializer.coordinateSerializer
-import com.github.rushyverse.api.serializer.PosSerializer.rotationSerializer
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.nullable
@@ -13,12 +11,17 @@ import net.minestom.server.coordinate.Pos
 
 /**
  * Serializer for [Pos].
- * @property coordinateSerializer Serializer for the coordinates x, y or z.
- * @property rotationSerializer Serializer for the rotations yaw or pitch.
  */
 public object PosSerializer : KSerializer<Pos> {
 
+    /**
+     * Serializer for the coordinates x, y or z.
+     */
     private val coordinateSerializer get() = Double.serializer()
+
+    /**
+     * Serializer for the rotations yaw or pitch.
+     */
     private val rotationSerializer get() = Float.serializer().nullable
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("pos") {
