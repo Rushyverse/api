@@ -188,6 +188,19 @@ class PosSerializerTest {
                 assertEquals("The field z is missing", exception.message)
             }
 
+            @Test
+            fun `with missing yaw`() {
+                val json = "{\"x\":1.0,\"y\":2.0,\"z\":3.0,\"pitch\":4.0}"
+                val pos = Json.decodeFromString(PosSerializer, json)
+                assertEquals(Pos(1.0, 2.0, 3.0, 0.0f, 4.0f), pos)
+            }
+
+            @Test
+            fun `with missing pitch`() {
+                val json = "{\"x\":1.0,\"y\":2.0,\"z\":3.0,\"yaw\":4.0}"
+                val pos = Json.decodeFromString(PosSerializer, json)
+                assertEquals(Pos(1.0, 2.0, 3.0, 4.0f, 0.0f), pos)
+            }
         }
 
         private fun assertDeserialize(x: Double, y: Double, z: Double, yaw: Float = 0f, pitch: Float = 0f) {
