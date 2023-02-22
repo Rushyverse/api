@@ -165,7 +165,7 @@ class PosSerializerTest {
         }
 
         @Nested
-        inner class MissingCoordinateField {
+        inner class MissingField {
 
             @Test
             fun `with missing x`() {
