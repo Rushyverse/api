@@ -36,6 +36,7 @@ dependencies {
     api("io.github.microutils:kotlin-logging:$loggingVersion")
 
     testImplementation(kotlin("test-junit5"))
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesCoreVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.Minestom.Minestom:testing:$minestomVersion")
