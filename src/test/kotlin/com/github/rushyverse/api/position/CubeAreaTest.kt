@@ -9,6 +9,7 @@ import net.minestom.server.entity.Entity
 import net.minestom.server.entity.Player
 import net.minestom.server.instance.Instance
 import org.junit.jupiter.api.Nested
+import kotlin.math.roundToInt
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
@@ -102,6 +103,42 @@ class CubeAreaTest {
             assertEquals(Pos(25.0, -15.0, -15.0), area.max)
         }
 
+    }
+
+    @Nested
+    inner class GetPosition {
+
+        @Test
+        fun `should return the center of the area with positive values`() {
+            val min = Pos(10.0, 10.0, 10.0)
+            val max = Pos(20.0, 20.0, 20.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            assertEquals(Pos(15.0, 15.0, 15.0), area.position)
+        }
+
+        @Test
+        fun `should return the center of the area with negative values`() {
+            val min = Pos(-20.0, -20.0, -20.0)
+            val max = Pos(-10.0, -10.0, -10.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            assertEquals(Pos(-15.0, -15.0, -15.0), area.position)
+        }
+
+        @Test
+        fun `should return the center of the area with mixed values`() {
+            val min = Pos(-20.0, 10.0, -20.0)
+            val max = Pos(-10.0, 20.0, -10.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            assertEquals(Pos(-15.0, 15.0, -15.0), area.position)
+        }
+
+        @Test
+        fun `should return the center of the area with decimal value`() {
+            val min = Pos(10.6, 10.8, 10.4)
+            val max = Pos(10.0, 10.0, 20.0)
+            val area = CubeArea<Entity>(mockk(), min, max)
+            assertEquals(Pos(10.3, 10.4, 15.2), area.position)
+        }
     }
 
     @Nested
