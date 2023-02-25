@@ -52,8 +52,8 @@ public open class NPCEntity(
             it.position = position
             it.instance = instance
             val (enter, quit) = it.updateEntitiesInArea()
-            enter.forEach { player -> onEnterArea(player) }
-            quit.forEach { player -> onLeaveArea(player) }
+            enter.forEach(this::onEnterArea)
+            quit.forEach(this::onLeaveArea)
         }
     }
 
