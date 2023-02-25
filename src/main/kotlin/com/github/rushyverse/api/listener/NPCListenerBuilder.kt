@@ -29,12 +29,12 @@ public object NPCListenerBuilder {
     private fun addInteractListener(node: EventNode<Event>) {
         node.addListener(
             EventListener.builder(PlayerEntityInteractEvent::class.java)
-            .filter { it.target is NPCEntity && it.hand == Player.Hand.MAIN }
-            .handler {
-                val npc = it.target as NPCEntity
-                npc.onInteract(it)
-            }
-            .build()
+                .filter { it.target is NPCEntity && it.hand == Player.Hand.MAIN }
+                .handler {
+                    val npc = it.target as NPCEntity
+                    npc.onInteract(it)
+                }
+                .build()
         )
     }
 }

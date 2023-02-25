@@ -2,20 +2,21 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.utils.assertCoroutineContextFromScope
 import com.github.rushyverse.api.utils.randomString
-import io.mockk.*
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.Player
-import net.minestom.server.event.Event
 import net.minestom.server.event.EventFilter
 import net.minestom.server.event.EventListener
 import net.minestom.server.event.EventNode
 import net.minestom.server.event.entity.EntityAttackEvent
 import net.minestom.server.event.item.ItemDropEvent
 import net.minestom.server.event.trait.EntityEvent
-import net.minestom.server.item.ItemStack
 import net.minestom.server.thread.Acquirable
 import net.minestom.server.thread.Acquired
 import org.junit.jupiter.api.Nested

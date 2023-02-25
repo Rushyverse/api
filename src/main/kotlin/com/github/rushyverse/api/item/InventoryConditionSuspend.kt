@@ -18,10 +18,10 @@ import net.minestom.server.inventory.condition.InventoryConditionResult
  * @param coroutineScope Coroutine scope where the inventory condition will be handled.
  * @return The native inventory condition.
  */
-public fun InventoryConditionSuspend.asNative(coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope) : InventoryCondition {
+public fun InventoryConditionSuspend.asNative(coroutineScope: CoroutineScope = Dispatchers.MinestomSync.scope): InventoryCondition {
     return InventoryCondition { player, clickedSlot, clickType, result ->
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-           this@asNative.accept(player, clickedSlot, clickType, result)
+            this@asNative.accept(player, clickedSlot, clickType, result)
         }
     }
 
@@ -42,6 +42,11 @@ public fun interface InventoryConditionSuspend {
      * @param clickType Click type.
      * @param inventoryConditionResult Result of this callback.
      */
-    public suspend fun accept(player: Player, slot: Int, clickType: ClickType, inventoryConditionResult: InventoryConditionResult)
+    public suspend fun accept(
+        player: Player,
+        slot: Int,
+        clickType: ClickType,
+        inventoryConditionResult: InventoryConditionResult
+    )
 
 }
