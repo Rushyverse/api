@@ -44,7 +44,7 @@ abstract class AbstractTest {
                 DEFAULT_WORLD,
                 false,
                 VelocityConfiguration(false, ""),
-                BungeeCordConfiguration(false, "")
+                BungeeCordConfiguration(false, emptySet())
             )
         )
 

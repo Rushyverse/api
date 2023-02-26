@@ -1,15 +1,12 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.github.rushyverse.api.configuration
 
 import com.github.rushyverse.api.AbstractTest
-import com.github.rushyverse.api.TestConfiguration
 import com.github.rushyverse.api.configuration.IConfiguration.Companion.getOrCreateConfigurationFile
 import com.github.rushyverse.api.utils.randomString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.MissingFieldException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import java.io.File
@@ -89,35 +86,6 @@ class IConfigurationTest : AbstractTest() {
 
                 inputStreamOfDefaultConfiguration().bufferedReader().use {
                     assertEquals(it.readText(), configurationFile.readText())
-                }
-            }
-        }
-
-        @Nested
-        inner class ReadHoconConfiguration {
-            @Test
-            fun `should create default configuration and read it`() = runTest {
-                val configurationFile = getOrCreateConfigurationFile()
-
-                val configuration = IConfiguration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
-                assertEquals(expectedDefaultConfiguration, configuration)
-            }
-
-            @Test
-            fun `should throw exception if file not found`() = runTest {
-                assertThrows<MissingFieldException> {
-                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(getRandomFileInTmpDirectory())
-                }
-            }
-
-            @Test
-            fun `should throw exception if fields missing`() = runTest {
-                val file = getRandomFileInTmpDirectory()
-                assertTrue { file.createNewFile() }
-                file.writeText("server { }")
-
-                assertThrows<MissingFieldException> {
-                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(file)
                 }
             }
         }

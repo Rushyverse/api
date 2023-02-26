@@ -1,10 +1,7 @@
 package com.github.rushyverse.api.configuration
 
 import com.github.rushyverse.api.utils.workingDirectory
-import com.typesafe.config.ConfigFactory
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.hocon.Hocon
-import kotlinx.serialization.hocon.decodeFromConfig
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -66,15 +63,6 @@ public interface IConfiguration {
                     }
                 }
             }
-
-        /**
-         * Load the configuration from the given file with HOCON format.
-         * @param configFile Configuration file to load.
-         * @return The configuration loaded from the given file.
-         */
-        public inline fun <reified T> readHoconConfigurationFile(configFile: File): T =
-            Hocon.decodeFromConfig(ConfigFactory.parseFile(configFile))
-
     }
 
     public val server: IServerConfiguration
@@ -127,13 +115,13 @@ public data class VelocityConfiguration(
 /**
  * Configuration to connect the server to the bungeeCord proxy.
  * @property enabled Whether the server should connect to the bungeeCord proxy.
- * @property secret Secret to verify if the client comes from the proxy.
+ * @property secrets Secrets to verify if the client comes from the proxy.
  */
 public interface IBungeeCordConfiguration {
 
     public val enabled: Boolean
 
-    public val secret: String
+    public val secrets: Set<String>
 
 }
 
@@ -143,5 +131,5 @@ public interface IBungeeCordConfiguration {
 @Serializable
 public data class BungeeCordConfiguration(
     override val enabled: Boolean,
-    override val secret: String
+    override val secrets: Set<String>
 ) : IBungeeCordConfiguration

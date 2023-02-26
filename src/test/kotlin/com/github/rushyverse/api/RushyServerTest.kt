@@ -4,9 +4,7 @@ import com.github.rushyverse.api.command.GamemodeCommand
 import com.github.rushyverse.api.command.GiveCommand
 import com.github.rushyverse.api.command.KickCommand
 import com.github.rushyverse.api.command.StopCommand
-import com.github.rushyverse.api.configuration.BungeeCordConfiguration
-import com.github.rushyverse.api.configuration.IConfiguration
-import com.github.rushyverse.api.configuration.VelocityConfiguration
+import com.github.rushyverse.api.configuration.*
 import com.github.rushyverse.api.utils.randomString
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.MinecraftServer
@@ -54,7 +52,7 @@ class RushyServerTest : AbstractTest() {
             val configurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
             assertTrue { configurationFile.isFile }
 
-            val configuration = IConfiguration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
+            val configuration = HoconConfigurationReader().readConfigurationFile<TestConfiguration>(configurationFile)
             assertEquals(expectedDefaultConfiguration, configuration)
         }
 
@@ -180,7 +178,7 @@ class RushyServerTest : AbstractTest() {
             val defaultConfiguration = expectedDefaultConfiguration
             val configuration = expectedDefaultConfiguration.copy(
                 server = defaultConfiguration.server.copy(
-                    bungeeCord = BungeeCordConfiguration(enabled, secret)
+                    bungeeCord = BungeeCordConfiguration(enabled, setOf(secret))
                 )
             )
 
