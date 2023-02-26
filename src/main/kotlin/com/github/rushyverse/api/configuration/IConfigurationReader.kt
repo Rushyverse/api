@@ -51,7 +51,7 @@ public interface IConfigurationReader {
                 }
 
                 val defaultConfiguration =
-                    IConfiguration::class.java.classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE_NAME)
+                    IConfigurationReader::class.java.classLoader.getResourceAsStream(DEFAULT_CONFIG_FILE_NAME)
                         ?: error("Unable to find default configuration file in server resources")
 
                 defaultConfiguration.use { inputStream ->
