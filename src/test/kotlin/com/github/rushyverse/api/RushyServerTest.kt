@@ -49,7 +49,7 @@ class RushyServerTest : AbstractTest() {
             assertThrows<IOException> {
                 TestServer().start()
             }
-            val configurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+            val configurationFile = fileOfTmpDirectory(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
             assertTrue { configurationFile.isFile }
 
             val configuration = HoconConfigurationReader().readConfigurationFile<TestConfiguration>(configurationFile)

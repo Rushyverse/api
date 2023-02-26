@@ -60,11 +60,10 @@ public abstract class RushyServer {
      */
     protected suspend inline fun <reified T : IConfiguration> start(
         configurationPath: String? = null,
-        configurationReader: ConfigurationReader = HoconConfigurationReader(),
         init: T.(InstanceContainer) -> Unit
     ) {
         logger.info { "Loading configuration from $configurationPath" }
-        val config = loadConfiguration<T>(configurationReader, configurationPath)
+        val config = loadConfiguration<T>(configurationPath)
         logger.info { "Configuration loaded" }
 
         val minecraftServer = MinecraftServer.init()
@@ -139,31 +138,28 @@ public abstract class RushyServer {
 
     /**
      * Load the configuration using the file or the default config file.
-     * @param configurationReader Configuration reader to use.
+     * Will use the [HoconConfigurationReader] to load the configuration.
      * @param configFile Path of the configuration file.
      * @return The configuration of the server.
      */
     protected suspend inline fun <reified T : Any> loadConfiguration(
-        configurationReader: ConfigurationReader,
         configFile: String?
     ): T {
-        return loadConfiguration(T::class, configurationReader, configFile)
+        return loadConfiguration(T::class, configFile)
     }
 
     /**
      * Load the configuration using the file or the default config file.
      * @param clazz Type of configuration class to load.
-     * @param configurationReader Configuration reader to use.
      * @param configFile Path of the configuration file.
      * @return The configuration of the server.
      */
     protected open suspend fun <T : Any> loadConfiguration(
         clazz: KClass<T>,
-        configurationReader: ConfigurationReader,
         configFile: String?
     ): T {
-        val configurationFile = IConfiguration.getOrCreateConfigurationFile(configFile)
-        return configurationReader.readConfigurationFile(clazz, configurationFile)
+        val configurationFile = IConfigurationReader.getOrCreateConfigurationFile(configFile)
+        return HoconConfigurationReader().readConfigurationFile(clazz, configurationFile)
     }
 
     /**

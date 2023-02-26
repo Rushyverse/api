@@ -24,7 +24,7 @@ public inline fun <reified T> HoconConfigurationReader.readConfigurationFile(con
  * Read configuration from HOCON file.
  * @property hocon [Hocon] configuration to use.
  */
-public class HoconConfigurationReader(public val hocon: Hocon = hoconDefault) : ConfigurationReader {
+public class HoconConfigurationReader(public val hocon: Hocon = hoconDefault) : IConfigurationReader {
 
     public companion object {
         /**

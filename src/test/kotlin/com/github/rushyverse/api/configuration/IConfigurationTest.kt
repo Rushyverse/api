@@ -3,7 +3,7 @@
 package com.github.rushyverse.api.configuration
 
 import com.github.rushyverse.api.AbstractTest
-import com.github.rushyverse.api.configuration.IConfiguration.Companion.getOrCreateConfigurationFile
+import com.github.rushyverse.api.configuration.IConfigurationReader.Companion.getOrCreateConfigurationFile
 import com.github.rushyverse.api.utils.randomString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -20,7 +20,7 @@ class IConfigurationTest : AbstractTest() {
 
     @Test
     fun `name of default configuration file is correct`() = runTest {
-        assertEquals("server.conf", IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+        assertEquals("server.conf", IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
     }
 
     @Nested
@@ -38,7 +38,7 @@ class IConfigurationTest : AbstractTest() {
 
             @Test
             fun `should return the default config file without edit it`() = runTest {
-                createConfigFileAndCheckIfFound(IConfiguration.DEFAULT_CONFIG_FILE_NAME) {
+                createConfigFileAndCheckIfFound(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME) {
                     getOrCreateConfigurationFile()
                 }
             }
@@ -81,7 +81,7 @@ class IConfigurationTest : AbstractTest() {
                 val configurationFile = getOrCreateConfigurationFile()
                 assertTrue { configurationFile.isFile }
 
-                val expectedConfigurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+                val expectedConfigurationFile = fileOfTmpDirectory(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
                 assertEquals(expectedConfigurationFile, configurationFile)
 
                 inputStreamOfDefaultConfiguration().bufferedReader().use {
@@ -94,6 +94,6 @@ class IConfigurationTest : AbstractTest() {
     }
 
     private fun inputStreamOfDefaultConfiguration() =
-        IConfiguration::class.java.classLoader.getResourceAsStream(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+        IConfiguration::class.java.classLoader.getResourceAsStream(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
             ?: error("Unable to find default configuration file in server resources")
 }
