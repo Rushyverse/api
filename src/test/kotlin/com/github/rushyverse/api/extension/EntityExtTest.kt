@@ -15,6 +15,7 @@ import net.minestom.server.event.EventFilter
 import net.minestom.server.event.EventListener
 import net.minestom.server.event.EventNode
 import net.minestom.server.event.entity.EntityAttackEvent
+import net.minestom.server.event.entity.EntityDeathEvent
 import net.minestom.server.event.item.ItemDropEvent
 import net.minestom.server.event.trait.EntityEvent
 import net.minestom.server.thread.Acquirable
@@ -214,6 +215,24 @@ class EntityExtTest {
 
             node.call(event)
             assertTrue(called)
+        }
+
+        @Test
+        fun `should not call body when another event type is fired`() {
+            val node = EventNode.type("test", EventFilter.ENTITY)
+            val entity = mockk<Entity>() {
+                every { eventNode() } returns node
+            }
+
+            val event = mockk<EntityAttackEvent>()
+            var called = false
+            entity.onEvent<EntityDeathEvent> {
+                called = true
+                EventListener.Result.SUCCESS
+            }
+
+            node.call(event)
+            assertFalse(called)
         }
     }
 
