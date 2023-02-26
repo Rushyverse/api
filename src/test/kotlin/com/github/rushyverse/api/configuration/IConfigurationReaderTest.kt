@@ -16,7 +16,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class IConfigurationTest : AbstractTest() {
+class IConfigurationReaderTest : AbstractTest() {
 
     @Test
     fun `name of default configuration file is correct`() = runTest {
