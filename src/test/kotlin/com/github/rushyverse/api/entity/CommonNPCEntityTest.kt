@@ -1,11 +1,14 @@
 package com.github.rushyverse.api.entity
 
+import com.github.rushyverse.api.extension.acquirable
 import com.github.rushyverse.api.position.IAreaLocatable
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.*
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import net.minestom.server.event.player.PlayerEntityInteractEvent
+import net.minestom.server.thread.Acquirable
+import net.minestom.server.thread.Acquired
 import net.minestom.testing.Env
 import net.minestom.testing.EnvTest
 import org.junit.jupiter.api.Nested
@@ -21,18 +24,18 @@ abstract class CommonNPCEntityTest {
         @Test
         fun `should throw exception if area is null`() {
             val npc = createEntity(null)
-            assertThrows<IllegalStateException> { npc.lookNearbyPlayer() }
+            assertThrows<IllegalStateException> { npc.lookNearestPlayer() }
         }
 
         @Test
-        fun `should keep the position if no player is near`() {
+        fun `should keep the position if no player is in area`() {
             val area = mockk<IAreaLocatable<Player>> {
                 every { entitiesInArea } returns emptySet()
             }
             val npc = createEntity(area)
             val expectedPos = npc.position
 
-            npc.lookNearbyPlayer()
+            npc.lookNearestPlayer()
             assertEquals(expectedPos, npc.position)
         }
 
@@ -50,16 +53,18 @@ abstract class CommonNPCEntityTest {
                 justRun { lookAt(capture(slotPlayer)) }
             }
 
-            npcSpy.lookNearbyPlayer()
+            npcSpy.lookNearestPlayer()
 
             verify(exactly = 1) { npcSpy.lookAt(any<Player>()) }
             assertEquals(player, slotPlayer.captured)
         }
 
         @Test
-        fun `should look at the near player in the list`() {
-            val player1 = mockk<Player>()
-            val player2 = mockk<Player>()
+        fun `should look at the nearest player in the list`() {
+            val player1 = mockPlayerWithAcquirableMocks()
+            every { player1.position } returns Pos(100.0, 0.0, 0.0)
+            val player2 = mockPlayerWithAcquirableMocks()
+            every { player2.position } returns Pos(50.0, 0.0, 0.0)
 
             val area = mockk<IAreaLocatable<Player>> {
                 every { entitiesInArea } returns setOf(player1, player2)
@@ -69,14 +74,28 @@ abstract class CommonNPCEntityTest {
             val slotPlayer = slot<Player>()
             val npcSpy = spyk(npc) {
                 justRun { lookAt(capture(slotPlayer)) }
+                every { position } returns Pos.ZERO
             }
 
-            npcSpy.lookNearbyPlayer()
+            npcSpy.lookNearestPlayer()
 
             verify(exactly = 1) { npcSpy.lookAt(any<Player>()) }
-            assertEquals(player1, slotPlayer.captured)
+            assertEquals(player2, slotPlayer.captured)
         }
 
+    }
+
+    private fun mockPlayerWithAcquirableMocks(): Player {
+        return mockk<Player>().also {
+            val acquired = mockk<Acquired<Player>>() {
+                every { get() } returns it
+                justRun { unlock() }
+            }
+            val acquirable = mockk<Acquirable<Player>>() {
+                every { lock() } returns acquired
+            }
+            every { it.acquirable } returns acquirable
+        }
     }
 
     @Nested

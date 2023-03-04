@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.entity
 
 import com.extollit.gaming.ai.path.HydrazinePathFinder
+import com.github.rushyverse.api.extension.sync
 import com.github.rushyverse.api.position.IAreaLocatable
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.EntityType
@@ -56,11 +57,20 @@ public open class NPCEntity(
 
     /**
      * Look at the nearest player.
+     * Will retrieve the entities in [areaTrigger] and look at the nearest one by comparing the distance between the entity and the player.
+     * @throws IllegalStateException If the [areaTrigger] is null.
      */
-    public open fun lookNearbyPlayer() {
+    public open fun lookNearestPlayer() {
         val area = areaTrigger ?: throw IllegalStateException("An area detector must be set to use this method.")
-        val nearbyEntity = area.entitiesInArea.firstOrNull() ?: return
-        lookAt(nearbyEntity)
+        val entities = area.entitiesInArea
+        if (entities.isEmpty()) return
+
+        val npcPosition = position
+        val nearestEntity = entities.minByOrNull {
+            it.sync { position.distance(npcPosition) }
+        } ?: return
+
+        lookAt(nearestEntity)
     }
 
     /**
