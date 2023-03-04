@@ -44,7 +44,7 @@ abstract class AbstractTest {
                 DEFAULT_WORLD,
                 false,
                 VelocityConfiguration(false, ""),
-                BungeeCordConfiguration(false, "")
+                BungeeCordConfiguration(false, emptySet())
             )
         )
 
@@ -66,7 +66,7 @@ abstract class AbstractTest {
 
     protected fun configurationToHoconFile(
         configuration: TestConfiguration,
-        file: File = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+        file: File = fileOfTmpDirectory(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
     ) =
         file.writeText(configurationToHocon(configuration).root().render())
 

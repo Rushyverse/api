@@ -74,7 +74,6 @@ class EntityExtTest {
             val ex = assertThrows<Exception> {
                 player.sync {
                     throw Exception("Test")
-                    Unit
                 }
             }
 
@@ -149,9 +148,8 @@ class EntityExtTest {
             every { player.acquirable } returns acquirable
             val scope = CoroutineScope(Dispatchers.Default)
 
-            val deferred = player.async(scope) {
+            val deferred = player.async<Player, Unit>(scope) {
                 throw Exception("Test")
-                Unit
             }
 
             val ex = try {
