@@ -4,10 +4,9 @@ import com.github.rushyverse.api.command.GamemodeCommand
 import com.github.rushyverse.api.command.GiveCommand
 import com.github.rushyverse.api.command.KickCommand
 import com.github.rushyverse.api.command.StopCommand
-import com.github.rushyverse.api.configuration.IBungeeCordConfiguration
-import com.github.rushyverse.api.configuration.IConfiguration
-import com.github.rushyverse.api.configuration.IVelocityConfiguration
+import com.github.rushyverse.api.configuration.*
 import com.github.rushyverse.api.translation.ResourceBundleTranslationsProvider
+import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationsProvider
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.rushyverse.api.utils.workingDirectory
@@ -22,6 +21,7 @@ import net.minestom.server.instance.AnvilLoader
 import net.minestom.server.instance.InstanceContainer
 import java.io.File
 import java.util.*
+import kotlin.reflect.KClass
 
 public val logger: KLogger = KotlinLogging.logger { }
 
@@ -82,6 +82,10 @@ public abstract class RushyServer {
         minecraftServer.start("0.0.0.0", serverConfig.port)
     }
 
+    /**
+     * Enable the online mode if [enabled] is true.
+     * @param enabled If the online mode should be enabled.
+     */
     protected open suspend fun applyOnlineMode(enabled: Boolean) {
         if (enabled) {
             logger.info { "Enabling Online mode" }
@@ -110,7 +114,7 @@ public abstract class RushyServer {
         if (bungeeCord.enabled) {
             logger.info { "Enabling BungeeCord support" }
             BungeeCordProxy.enable()
-            BungeeCordProxy.setBungeeGuardTokens(setOf(bungeeCord.secret))
+            BungeeCordProxy.setBungeeGuardTokens(bungeeCord.secrets)
             logger.info { "BungeeCord support enabled" }
         }
     }
@@ -134,16 +138,33 @@ public abstract class RushyServer {
 
     /**
      * Load the configuration using the file or the default config file.
+     * Will use the [HoconConfigurationReader] to load the configuration.
      * @param configFile Path of the configuration file.
      * @return The configuration of the server.
      */
-    protected inline fun <reified T> loadConfiguration(configFile: String?): T {
-        val configurationFile = IConfiguration.getOrCreateConfigurationFile(configFile)
-        return IConfiguration.readHoconConfigurationFile(configurationFile)
+    protected suspend inline fun <reified T : Any> loadConfiguration(
+        configFile: String?
+    ): T {
+        return loadConfiguration(T::class, configFile)
+    }
+
+    /**
+     * Load the configuration using the file or the default config file.
+     * @param clazz Type of configuration class to load.
+     * @param configFile Path of the configuration file.
+     * @return The configuration of the server.
+     */
+    protected open suspend fun <T : Any> loadConfiguration(
+        clazz: KClass<T>,
+        configFile: String?
+    ): T {
+        val configurationFile = IConfigurationReader.getOrCreateConfigurationFile(configFile)
+        return HoconConfigurationReader().readConfigurationFile(clazz, configurationFile)
     }
 
     /**
      * Create a translation provider to provide translations for the [supported languages][SupportedLanguage].
+     * @param bundles Bundles to load.
      * @return New translation provider.
      */
     protected open suspend fun createTranslationsProvider(bundles: Iterable<String>): TranslationsProvider {

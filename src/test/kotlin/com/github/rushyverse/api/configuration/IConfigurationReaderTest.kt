@@ -1,15 +1,12 @@
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalSerializationApi::class)
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
 package com.github.rushyverse.api.configuration
 
 import com.github.rushyverse.api.AbstractTest
-import com.github.rushyverse.api.TestConfiguration
-import com.github.rushyverse.api.configuration.IConfiguration.Companion.getOrCreateConfigurationFile
+import com.github.rushyverse.api.configuration.IConfigurationReader.Companion.getOrCreateConfigurationFile
 import com.github.rushyverse.api.utils.randomString
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.MissingFieldException
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import java.io.File
@@ -19,11 +16,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class IConfigurationTest : AbstractTest() {
+class IConfigurationReaderTest : AbstractTest() {
 
     @Test
     fun `name of default configuration file is correct`() = runTest {
-        assertEquals("server.conf", IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+        assertEquals("server.conf", IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
     }
 
     @Nested
@@ -41,7 +38,7 @@ class IConfigurationTest : AbstractTest() {
 
             @Test
             fun `should return the default config file without edit it`() = runTest {
-                createConfigFileAndCheckIfFound(IConfiguration.DEFAULT_CONFIG_FILE_NAME) {
+                createConfigFileAndCheckIfFound(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME) {
                     getOrCreateConfigurationFile()
                 }
             }
@@ -84,7 +81,7 @@ class IConfigurationTest : AbstractTest() {
                 val configurationFile = getOrCreateConfigurationFile()
                 assertTrue { configurationFile.isFile }
 
-                val expectedConfigurationFile = fileOfTmpDirectory(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+                val expectedConfigurationFile = fileOfTmpDirectory(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
                 assertEquals(expectedConfigurationFile, configurationFile)
 
                 inputStreamOfDefaultConfiguration().bufferedReader().use {
@@ -93,39 +90,10 @@ class IConfigurationTest : AbstractTest() {
             }
         }
 
-        @Nested
-        inner class ReadHoconConfiguration {
-            @Test
-            fun `should create default configuration and read it`() = runTest {
-                val configurationFile = getOrCreateConfigurationFile()
-
-                val configuration = IConfiguration.readHoconConfigurationFile<TestConfiguration>(configurationFile)
-                assertEquals(expectedDefaultConfiguration, configuration)
-            }
-
-            @Test
-            fun `should throw exception if file not found`() = runTest {
-                assertThrows<MissingFieldException> {
-                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(getRandomFileInTmpDirectory())
-                }
-            }
-
-            @Test
-            fun `should throw exception if fields missing`() = runTest {
-                val file = getRandomFileInTmpDirectory()
-                assertTrue { file.createNewFile() }
-                file.writeText("server { }")
-
-                assertThrows<MissingFieldException> {
-                    IConfiguration.readHoconConfigurationFile<TestConfiguration>(file)
-                }
-            }
-        }
-
         private fun getRandomFileInTmpDirectory() = fileOfTmpDirectory(randomString())
     }
 
     private fun inputStreamOfDefaultConfiguration() =
-        IConfiguration::class.java.classLoader.getResourceAsStream(IConfiguration.DEFAULT_CONFIG_FILE_NAME)
+        IConfiguration::class.java.classLoader.getResourceAsStream(IConfigurationReader.DEFAULT_CONFIG_FILE_NAME)
             ?: error("Unable to find default configuration file in server resources")
 }
