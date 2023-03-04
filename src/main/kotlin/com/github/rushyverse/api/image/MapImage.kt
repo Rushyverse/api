@@ -1,5 +1,8 @@
 package com.github.rushyverse.api.image
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.withContext
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
@@ -13,6 +16,7 @@ import net.minestom.server.network.packet.server.SendablePacket
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
+import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 /**
@@ -68,13 +72,16 @@ public class MapImage(
      * ```
      * @return The packets list to send to new players.
      */
-    public fun buildPackets(
+    public suspend fun buildPackets(
+        loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
         modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
     ): Array<SendablePacket> {
-        val inputStream = MapImage::class.java.getResourceAsStream("/$resourceImageName")
-            ?: error("Unable to retrieve the image $resourceImageName in resources.")
+        val image = withContext(loadImageCoroutineContext) {
+            val inputStream = MapImage::class.java.getResourceAsStream("/$resourceImageName")
+                ?: error("Unable to retrieve the image $resourceImageName in resources.")
 
-        val image = inputStream.buffered().use { ImageIO.read(it) }
+            inputStream.buffered().use { ImageIO.read(it) }
+        }
         val imageWidth = image.width
         val imageHeight = image.height
         blocksPerLine = imageWidth shr MAP_ITEM_FRAME_PIXELS_BITWISE
@@ -113,7 +120,7 @@ public class MapImage(
      * @param instance The instance where you want to create the frame.
      * @param pos The position of the frame.
      */
-    private fun createItemFrames(instance: Instance, pos: Pos, orientation: ItemFrameMeta.Orientation) {
+    private suspend fun createItemFrames(instance: Instance, pos: Pos, orientation: ItemFrameMeta.Orientation) {
         val imageMath = MapImageMath.getFromOrientation(orientation)
         val beginX = pos.blockX()
         val beginY = pos.blockY()
@@ -121,24 +128,28 @@ public class MapImage(
         val yaw = imageMath.yaw
         val pitch = imageMath.pitch
 
-        repeat(numberOfItemFrames) { i ->
+        repeat(numberOfItemFrames) { numberOfFrame ->
             // We need to calculate the position of the item frame.
             // The position is calculated from the top left corner of the image.
             // The item frames are place to the right and bottom of the beginning position.
-            val x = imageMath.computeX(beginX, i, blocksPerLine)
-            val y = imageMath.computeY(beginY, i, blocksPerLine)
-            val z = imageMath.computeZ(beginZ, i, blocksPerLine)
+            val x = imageMath.computeX(beginX, numberOfFrame, blocksPerLine)
+            val y = imageMath.computeY(beginY, numberOfFrame, blocksPerLine)
+            val z = imageMath.computeZ(beginZ, numberOfFrame, blocksPerLine)
 
             val itemFrame = Entity(EntityType.ITEM_FRAME)
-            itemFrame.setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch))
-
             with(itemFrame.entityMeta as ItemFrameMeta) {
                 setNotifyAboutChanges(false)
+                
                 this.orientation = orientation
                 isInvisible = true
-                item = ItemStack.builder(Material.FILLED_MAP).meta(MapMeta::class.java) { it.mapId(i) }.build()
+                item = ItemStack.builder(Material.FILLED_MAP)
+                    .meta(MapMeta::class.java) { it.mapId(numberOfFrame) }
+                    .build()
+
                 setNotifyAboutChanges(true)
             }
+
+            itemFrame.setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).await()
         }
     }
 }
