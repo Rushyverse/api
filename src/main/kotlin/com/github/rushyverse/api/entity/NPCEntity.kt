@@ -1,7 +1,6 @@
 package com.github.rushyverse.api.entity
 
 import com.extollit.gaming.ai.path.HydrazinePathFinder
-import com.github.rushyverse.api.extension.sync
 import com.github.rushyverse.api.position.IAreaLocatable
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.EntityType
@@ -30,15 +29,8 @@ public open class NPCEntity(
     override fun getNavigator(): Navigator = navigator
 
     override fun update(time: Long) {
-        val position: Pos
-        val instance: Instance
-        sync {
-            super.update(time)
-            navigator.tick()
-            position = this.position
-            instance = this.instance
-        }
-
+        super.update(time)
+        navigator.tick()
         updateAreaEntities(position, instance)
     }
 
