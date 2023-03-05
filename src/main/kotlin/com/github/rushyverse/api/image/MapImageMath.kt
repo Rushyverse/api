@@ -16,20 +16,26 @@ import net.minestom.server.entity.metadata.other.ItemFrameMeta
 public sealed interface MapImageMath {
 
     public companion object {
+
+        /**
+         * Link the item frame orientation to the [MapImageMath] instance.
+         */
+        private val orientations = mapOf(
+            ItemFrameMeta.Orientation.DOWN to Down,
+            ItemFrameMeta.Orientation.UP to Up,
+            ItemFrameMeta.Orientation.NORTH to North,
+            ItemFrameMeta.Orientation.SOUTH to South,
+            ItemFrameMeta.Orientation.WEST to West,
+            ItemFrameMeta.Orientation.EAST to East
+        )
+
         /**
          * Get the [MapImageMath] linked to the orientation.
          * @param orientation The orientation of the item frame.
          * @return The [MapImageMath] for the orientation.
          */
         public fun getFromOrientation(orientation: ItemFrameMeta.Orientation): MapImageMath {
-            return when (orientation) {
-                ItemFrameMeta.Orientation.DOWN -> Down
-                ItemFrameMeta.Orientation.UP -> Up
-                ItemFrameMeta.Orientation.NORTH -> North
-                ItemFrameMeta.Orientation.SOUTH -> South
-                ItemFrameMeta.Orientation.WEST -> West
-                ItemFrameMeta.Orientation.EAST -> East
-            }
+            return orientations[orientation] ?: throw IllegalArgumentException("Unsupported orientation: $orientation")
         }
     }
 

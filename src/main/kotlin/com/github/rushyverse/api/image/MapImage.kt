@@ -15,9 +15,55 @@ import net.minestom.server.map.framebuffers.LargeGraphics2DFramebuffer
 import net.minestom.server.network.packet.server.SendablePacket
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
+import java.io.InputStream
 import javax.imageio.ImageIO
 import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
+
+/**
+ * Read an image from the resources and build the packets to send to the players.
+ * @see buildPacketsFromInputStream
+ * @receiver Object to display image on the server.
+ * @param resourceImage Path of the image in the resources.
+ * @param loadImageCoroutineContext Coroutine context to load the image. We recommend to use Dispatchers.IO.
+ * @param modifyTransform Function to modify the transform of the image.
+ * @return The packets list to send to players.
+ */
+public suspend fun MapImage.buildPacketsFromResources(
+    resourceImage: String,
+    loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
+    modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
+): Array<SendablePacket> {
+    val inputStream = withContext(loadImageCoroutineContext) {
+        MapImage::class.java.getResourceAsStream("/$resourceImage")
+            ?: error("Unable to retrieve the image $resourceImage in resources.")
+    }
+
+    return inputStream.buffered().use { buildPacketsFromInputStream(it, loadImageCoroutineContext, modifyTransform) }
+}
+
+/**
+ * Read an image from an input stream and build the packets to send to the players.
+ * **This method does not close the provided [inputStream] after the read operation has completed.
+ * It is the responsibility of the caller to close the stream, if desired.**
+ * @see [MapImage.buildPacketsFromImage]
+ * @receiver Object to display image on the server.
+ * @param inputStream Input stream to retrieve the image's data.
+ * @param loadImageCoroutineContext Coroutine context to load the image. We recommend to use Dispatchers.IO.
+ * @param modifyTransform Function to modify the transform of the image.
+ * @return The packets list to send to players.
+ */
+public suspend fun MapImage.buildPacketsFromInputStream(
+    inputStream: InputStream,
+    loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
+    modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
+): Array<SendablePacket> {
+    val image = withContext(loadImageCoroutineContext) {
+        @Suppress("BlockingMethodInNonBlockingContext")
+        ImageIO.read(inputStream)
+    }
+    return buildPacketsFromImage(image, modifyTransform)
+}
 
 /**
  * A class that allows you to create an Image as Map Item Frame on the server.
@@ -25,17 +71,17 @@ import kotlin.properties.Delegates
  * @property pos The position where the item frames will be created.
  * The position is the top left corner of the image.
  * @property orientation The orientation of the item frames.
- * @property resourceImageName The resource that used to be printed as map.
  * @property packets The packets list to send to new players.
- * @property blocksPerLine The width blocks size desired for the item frame. The value define the number of item frames by line.
- * @property blocksPerColumn The height blocks size desired for the item frame. The value define the number of item frames by column.
+ * @property itemFramesPerLine The width blocks size desired for the item frame. The value define the number of item frames by line.
+ * @property itemFramesPerColumn The height blocks size desired for the item frame. The value define the number of item frames by column.
  * @property numberOfItemFrames The number of item frames needed to display the image.
+ * @property isLoaded `true` if the image is loaded, `false` otherwise.
+ * @property itemFrames The list of item frames created.
  */
 public class MapImage(
     public val instance: Instance,
     public val pos: Pos,
-    public val orientation: ItemFrameMeta.Orientation,
-    private val resourceImageName: String,
+    public val orientation: ItemFrameMeta.Orientation
 ) {
 
     public companion object {
@@ -49,20 +95,29 @@ public class MapImage(
     public lateinit var packets: Array<SendablePacket>
         private set
 
-    public var blocksPerLine: Int by Delegates.notNull()
+    public var itemFramesPerLine: Int by Delegates.notNull()
         private set
 
-    public var blocksPerColumn: Int by Delegates.notNull()
+    public var itemFramesPerColumn: Int by Delegates.notNull()
         private set
+
+    public val isLoaded: Boolean
+        get() = ::packets.isInitialized || ::itemFrames.isInitialized
+
+    public lateinit var itemFrames: List<Entity>
 
     private val numberOfItemFrames: Int
-        get() = blocksPerLine * blocksPerColumn
+        get() = itemFramesPerLine * itemFramesPerColumn
 
     /**
      * Create the packets list to send to new players.
      * The image data are loaded from the resource file [resourceImageName].
      * Item frames are created at the position [pos] with the orientation [orientation] to display the image.
      * The result is stored in the [packets] property.
+     *
+     * **This method does not close the provided [inputStream] after the read operation has completed.
+     * It is the responsibility of the caller to close the stream, if desired.**
+     *
      * @param modifyTransform The function to apply transformation to the image. By default, the image is turned upside down.
      * For example, to rotate the image of 90° clockwise, you can use the following code:
      * ```
@@ -70,22 +125,18 @@ public class MapImage(
      * // 'it' is the Image instance.
      * rotate(Math.toRadians(90.0), it.width / 2.0, it.height / 2.0)
      * ```
-     * @return The packets list to send to new players.
+     * @return The packets list to send to players.
      */
-    public suspend fun buildPackets(
-        loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
+    public suspend fun buildPacketsFromImage(
+        image: BufferedImage,
         modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
     ): Array<SendablePacket> {
-        val image = withContext(loadImageCoroutineContext) {
-            val inputStream = MapImage::class.java.getResourceAsStream("/$resourceImageName")
-                ?: error("Unable to retrieve the image $resourceImageName in resources.")
+        require(!isLoaded) { "An image is already loaded using this instance." }
 
-            inputStream.buffered().use { ImageIO.read(it) }
-        }
         val imageWidth = image.width
         val imageHeight = image.height
-        blocksPerLine = imageWidth shr MAP_ITEM_FRAME_PIXELS_BITWISE
-        blocksPerColumn = imageHeight shr MAP_ITEM_FRAME_PIXELS_BITWISE
+        itemFramesPerLine = imageWidth shr MAP_ITEM_FRAME_PIXELS_BITWISE
+        itemFramesPerColumn = imageHeight shr MAP_ITEM_FRAME_PIXELS_BITWISE
 
         val transform = AffineTransform.getScaleInstance(1.0, 1.0).apply {
             modifyTransform(image)
@@ -106,8 +157,8 @@ public class MapImage(
      */
     private fun createPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket> {
         return Array(numberOfItemFrames) {
-            val x = it % blocksPerLine
-            val y = it / blocksPerLine
+            val x = it % itemFramesPerLine
+            val y = it / itemFramesPerLine
             framebuffer.createSubView(
                 x shl MAP_ITEM_FRAME_PIXELS_BITWISE,
                 y shl MAP_ITEM_FRAME_PIXELS_BITWISE
@@ -125,31 +176,34 @@ public class MapImage(
         val beginX = pos.blockX()
         val beginY = pos.blockY()
         val beginZ = pos.blockZ()
+
+        // Workaround to avoid unpredictable rotation of the item frames.
         val yaw = imageMath.yaw
         val pitch = imageMath.pitch
 
-        repeat(numberOfItemFrames) { numberOfFrame ->
+        itemFrames = (0..<numberOfItemFrames).map { numberOfFrame ->
             // We need to calculate the position of the item frame.
             // The position is calculated from the top left corner of the image.
             // The item frames are place to the right and bottom of the beginning position.
-            val x = imageMath.computeX(beginX, numberOfFrame, blocksPerLine)
-            val y = imageMath.computeY(beginY, numberOfFrame, blocksPerLine)
-            val z = imageMath.computeZ(beginZ, numberOfFrame, blocksPerLine)
+            val x = imageMath.computeX(beginX, numberOfFrame, itemFramesPerLine)
+            val y = imageMath.computeY(beginY, numberOfFrame, itemFramesPerLine)
+            val z = imageMath.computeZ(beginZ, numberOfFrame, itemFramesPerLine)
 
-            val itemFrame = Entity(EntityType.ITEM_FRAME)
-            with(itemFrame.entityMeta as ItemFrameMeta) {
-                setNotifyAboutChanges(false)
-                
-                this.orientation = orientation
-                isInvisible = true
-                item = ItemStack.builder(Material.FILLED_MAP)
-                    .meta(MapMeta::class.java) { it.mapId(numberOfFrame) }
-                    .build()
+            Entity(EntityType.ITEM_FRAME).apply {
+                with(entityMeta as ItemFrameMeta) {
+                    setNotifyAboutChanges(false)
 
-                setNotifyAboutChanges(true)
+                    this.orientation = orientation
+                    isInvisible = true
+                    item = ItemStack.builder(Material.FILLED_MAP)
+                        .meta(MapMeta::class.java) { it.mapId(numberOfFrame) }
+                        .build()
+
+                    setNotifyAboutChanges(true)
+                }
+
+                setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).await()
             }
-
-            itemFrame.setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).await()
         }
     }
 }
