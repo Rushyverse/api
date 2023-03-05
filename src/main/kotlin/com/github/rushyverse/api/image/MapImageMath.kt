@@ -70,23 +70,6 @@ public sealed interface MapImageMath {
     public fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int
 
     /**
-     * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.DOWN].
-     */
-    public object Down : MapImageMath {
-        override val yaw: Float = 0f
-        override val pitch: Float = 90f
-
-        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginX + (frameNumber % itemFramesPerLine)
-
-        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginY
-
-        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginZ - (frameNumber / itemFramesPerLine)
-    }
-
-    /**
      * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.UP].
      */
     public object Up : MapImageMath {
@@ -101,6 +84,23 @@ public sealed interface MapImageMath {
 
         override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginZ + (frameNumber / itemFramesPerLine)
+    }
+
+    /**
+     * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.DOWN].
+     */
+    public object Down : MapImageMath {
+        override val yaw: Float = 0f
+        override val pitch: Float = 90f
+
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX + (frameNumber % itemFramesPerLine)
+
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY
+
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ - (frameNumber / itemFramesPerLine)
     }
 
     /**
@@ -138,23 +138,6 @@ public sealed interface MapImageMath {
     }
 
     /**
-     * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.WEST].
-     */
-    public object West : MapImageMath {
-        override val yaw: Float = 90f
-        override val pitch: Float = 0f
-
-        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginX
-
-        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginY - (frameNumber / itemFramesPerLine)
-
-        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
-            beginZ + (frameNumber % itemFramesPerLine)
-    }
-
-    /**
      * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.EAST].
      */
     public object East : MapImageMath {
@@ -169,5 +152,22 @@ public sealed interface MapImageMath {
 
         override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginZ - (frameNumber % itemFramesPerLine)
+    }
+
+    /**
+     * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.WEST].
+     */
+    public object West : MapImageMath {
+        override val yaw: Float = 90f
+        override val pitch: Float = 0f
+
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX
+
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY - (frameNumber / itemFramesPerLine)
+
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ + (frameNumber % itemFramesPerLine)
     }
 }
