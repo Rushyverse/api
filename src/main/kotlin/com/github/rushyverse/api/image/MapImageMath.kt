@@ -46,28 +46,28 @@ public sealed interface MapImageMath {
      * Compute the x position of the item frame.
      * @param beginX Initial x position.
      * @param frameNumber Number of the item frame.
-     * @param blocksPerLine Number of blocks by line.
+     * @param itemFramesPerLine Number of blocks by line.
      * @return The x position of the item frame.
      */
-    public fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int
+    public fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int
 
     /**
      * Compute the y position of the item frame.
      * @param beginY Initial y position.
      * @param frameNumber Number of the item frame.
-     * @param blocksPerLine Number of blocks by line.
+     * @param itemFramesPerLine Number of blocks by line.
      * @return The y position of the item frame.
      */
-    public fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int
+    public fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int
 
     /**
      * Compute the z position of the item frame.
      * @param beginZ Initial z position.
      * @param frameNumber Number of the item frame.
-     * @param blocksPerLine Number of blocks by line.
+     * @param itemFramesPerLine Number of blocks by line.
      * @return The z position of the item frame.
      */
-    public fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int
+    public fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int
 
     /**
      * Use to calculate the position of the item frame when the orientation is [ItemFrameMeta.Orientation.DOWN].
@@ -76,14 +76,14 @@ public sealed interface MapImageMath {
         override val yaw: Float = 0f
         override val pitch: Float = 90f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginX + (frameNumber % blocksPerLine)
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX + (frameNumber % itemFramesPerLine)
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginY
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginZ - (frameNumber / blocksPerLine)
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ - (frameNumber / itemFramesPerLine)
     }
 
     /**
@@ -93,14 +93,14 @@ public sealed interface MapImageMath {
         override val yaw: Float = 0f
         override val pitch: Float = 270f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginX + (frameNumber % blocksPerLine)
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX + (frameNumber % itemFramesPerLine)
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginY
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginZ + (frameNumber / blocksPerLine)
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ + (frameNumber / itemFramesPerLine)
     }
 
     /**
@@ -110,13 +110,13 @@ public sealed interface MapImageMath {
         override val yaw: Float = 180f
         override val pitch: Float = 0f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginX - (frameNumber % blocksPerLine)
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX - (frameNumber % itemFramesPerLine)
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginY - (frameNumber / blocksPerLine)
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY - (frameNumber / itemFramesPerLine)
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginZ
     }
 
@@ -127,13 +127,13 @@ public sealed interface MapImageMath {
         override val yaw: Float = 0f
         override val pitch: Float = 0f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginX + (frameNumber % blocksPerLine)
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginX + (frameNumber % itemFramesPerLine)
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginY - (frameNumber / blocksPerLine)
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY - (frameNumber / itemFramesPerLine)
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginZ
     }
 
@@ -144,14 +144,14 @@ public sealed interface MapImageMath {
         override val yaw: Float = 90f
         override val pitch: Float = 0f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginX
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginY - (frameNumber / blocksPerLine)
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY - (frameNumber / itemFramesPerLine)
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginZ + (frameNumber % blocksPerLine)
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ + (frameNumber % itemFramesPerLine)
     }
 
     /**
@@ -161,13 +161,13 @@ public sealed interface MapImageMath {
         override val yaw: Float = 270f
         override val pitch: Float = 0f
 
-        override fun computeX(beginX: Int, frameNumber: Int, blocksPerLine: Int): Int =
+        override fun computeX(beginX: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
             beginX
 
-        override fun computeY(beginY: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginY - (frameNumber / blocksPerLine)
+        override fun computeY(beginY: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginY - (frameNumber / itemFramesPerLine)
 
-        override fun computeZ(beginZ: Int, frameNumber: Int, blocksPerLine: Int): Int =
-            beginZ - (frameNumber % blocksPerLine)
+        override fun computeZ(beginZ: Int, frameNumber: Int, itemFramesPerLine: Int): Int =
+            beginZ - (frameNumber % itemFramesPerLine)
     }
 }
