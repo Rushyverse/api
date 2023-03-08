@@ -1,5 +1,9 @@
 package com.github.rushyverse.api.image
 
+import com.github.rushyverse.api.image.exception.ImageNotLoadedException
+import com.github.rushyverse.api.image.exception.ItemFramesAlreadyExistException
+import io.mockk.every
+import io.mockk.spyk
 import kotlinx.coroutines.test.runTest
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.metadata.other.ItemFrameMeta
@@ -9,23 +13,51 @@ import net.minestom.server.utils.Rotation
 import net.minestom.testing.Env
 import net.minestom.testing.EnvTest
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 import java.awt.image.BufferedImage
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import java.awt.image.BufferedImage.TYPE_INT_ARGB
+import kotlin.test.*
 
-@EnvTest
 class MapImageTest {
 
     @Nested
+    @EnvTest
     inner class CreateItemFrames {
 
         @Test
-        fun `should create one item frame if image is 128x128 max`(env: Env) = runTest {
+        fun `should throw exception when image size is 0x0`(env: Env) = runTest {
+            val instance = env.createFlatInstance()
+            val mapImage = MapImage()
+            val image = BufferedImage(1, 1, TYPE_INT_ARGB)
+            mapImage.loadImageAsPackets(image)
+
+            val spyMapImage = spyk(mapImage) {
+                every { itemFramesPerLine } returns 0
+                every { itemFramesPerColumn } returns 0
+            }
+            val returnedFrame =
+                spyMapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+            assertTrue { returnedFrame.isEmpty() }
+            assertTrue { spyMapImage.itemFrames!!.isEmpty() }
+        }
+
+        @Test
+        fun `should return and set the property of item frames`(env: Env) = runTest {
+            val instance = env.createFlatInstance()
+            val mapImage = MapImage()
+            val image = BufferedImage(512, 1024, TYPE_INT_ARGB)
+            mapImage.loadImageAsPackets(image)
+
+            val returnedFrame = mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+            assertEquals(returnedFrame, mapImage.itemFrames)
+        }
+
+        @Test
+        fun `should create one item frame if image is between 1x1 and 128x128`(env: Env) = runTest {
             val instance = env.createFlatInstance()
             (1..128).forEach { width ->
                 val mapImage = MapImage()
-                mapImage.loadImageAsPackets(BufferedImage(width, width, BufferedImage.TYPE_INT_ARGB))
+                mapImage.loadImageAsPackets(BufferedImage(width, width, TYPE_INT_ARGB))
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation = ItemFrameMeta.Orientation.NORTH)
 
                 val itemFrames = mapImage.itemFrames
@@ -39,7 +71,7 @@ class MapImageTest {
             val instance = env.createFlatInstance()
             val mapImage = MapImage()
             val orientation = ItemFrameMeta.Orientation.NORTH
-            mapImage.loadImageAsPackets(BufferedImage(129, 128, BufferedImage.TYPE_INT_ARGB))
+            mapImage.loadImageAsPackets(BufferedImage(129, 128, TYPE_INT_ARGB))
             mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
             val math = MapImageMath.getFromOrientation(orientation)
 
@@ -57,7 +89,7 @@ class MapImageTest {
             val instance = env.createFlatInstance()
             val mapImage = MapImage()
             val orientation = ItemFrameMeta.Orientation.NORTH
-            mapImage.loadImageAsPackets(BufferedImage(128, 129, BufferedImage.TYPE_INT_ARGB))
+            mapImage.loadImageAsPackets(BufferedImage(128, 129, TYPE_INT_ARGB))
             mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
             val math = MapImageMath.getFromOrientation(orientation)
 
@@ -74,7 +106,7 @@ class MapImageTest {
         fun `should spawn item frame at the target instance`(env: Env) = runTest {
             val instance = env.createFlatInstance()
             val mapImage = MapImage()
-            mapImage.loadImageAsPackets(BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB))
+            mapImage.loadImageAsPackets(BufferedImage(128, 128, TYPE_INT_ARGB))
             mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation = ItemFrameMeta.Orientation.NORTH)
             assertEquals(instance, mapImage.itemFrames!!.first().instance)
         }
@@ -87,7 +119,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.NORTH
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
 
                 repeat(10) { x ->
                     repeat(10) { y ->
@@ -113,7 +145,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.NORTH
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -130,7 +162,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.EAST
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -147,7 +179,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.SOUTH
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -164,7 +196,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.WEST
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -181,7 +213,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.UP
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -198,7 +230,7 @@ class MapImageTest {
                 val instance = env.createFlatInstance()
                 val orientation = ItemFrameMeta.Orientation.DOWN
                 val math = MapImageMath.getFromOrientation(orientation)
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
                 mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), orientation)
@@ -217,7 +249,7 @@ class MapImageTest {
             @Test
             fun `should custom meta of item frame if needed`(env: Env) = runTest {
                 val instance = env.createFlatInstance()
-                val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
 
@@ -237,7 +269,7 @@ class MapImageTest {
             @Test
             fun `should spawn item frame with the target orientation`(env: Env) = runTest {
                 val instance = env.createFlatInstance()
-                val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
 
                 ItemFrameMeta.Orientation.values().forEach { orientation ->
                     val mapImage = MapImage()
@@ -251,7 +283,7 @@ class MapImageTest {
             @Test
             fun `should spawn item frame with invisibility by default`(env: Env) = runTest {
                 val instance = env.createFlatInstance()
-                val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
 
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
@@ -263,7 +295,7 @@ class MapImageTest {
             @Test
             fun `should spawn item frame with map item in meta`(env: Env) = runTest {
                 val instance = env.createFlatInstance()
-                val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
 
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
@@ -279,7 +311,7 @@ class MapImageTest {
             @Test
             fun `should spawn item frame with map id`(env: Env) = runTest {
                 val instance = env.createFlatInstance()
-                val image = BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB)
+                val image = BufferedImage(256, 256, TYPE_INT_ARGB)
 
                 val mapImage = MapImage()
                 mapImage.loadImageAsPackets(image)
@@ -298,5 +330,65 @@ class MapImageTest {
             }
 
         }
+
+        @Nested
+        inner class WithImageNotLoaded {
+
+            @Test
+            fun `should throw exception if image is not loaded`(env: Env) = runTest {
+                val instance = env.createFlatInstance()
+                val mapImage = MapImage()
+                val ex = assertThrows<ImageNotLoadedException> {
+                    mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+                }
+                assertEquals("An image must be loaded before creating the item frames.", ex.message)
+            }
+        }
+
+        @Nested
+        inner class ItemFramesAlreadyExist {
+
+            @Test
+            fun `should throw exception if all item frames already exist`(env: Env) = runTest {
+                val instance = env.createFlatInstance()
+                val image = BufferedImage(128, 128, TYPE_INT_ARGB)
+                val mapImage = MapImage()
+                mapImage.loadImageAsPackets(image)
+                mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+
+                val ex = assertThrows<ItemFramesAlreadyExistException> {
+                    mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+                }
+
+                assertEquals("The item frames are already present in the instance.", ex.message)
+            }
+
+            @Test
+            fun `should throw exception if at least one item frames already exist`(env: Env) = runTest {
+                val instance = env.createFlatInstance()
+                val image = BufferedImage(1024, 1024, TYPE_INT_ARGB)
+                val mapImage = MapImage()
+                mapImage.loadImageAsPackets(image)
+                mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+
+                val itemFrames = mapImage.itemFrames
+                assertNotNull(itemFrames)
+                itemFrames.drop(1).forEach { it.remove() }
+                assertTrue { itemFrames.drop(1).all { it.isRemoved } }
+                assertFalse { itemFrames.first().isRemoved }
+
+                val ex = assertThrows<ItemFramesAlreadyExistException> {
+                    mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+                }
+
+                assertEquals("The item frames are already present in the instance.", ex.message)
+            }
+
+        }
+    }
+
+    @Test
+    fun `constant value should be correct`() {
+        assertEquals(128, MapImage.MAP_ITEM_FRAME_PIXELS)
     }
 }
