@@ -387,6 +387,77 @@ class MapImageTest {
         }
     }
 
+    @Nested
+    @EnvTest
+    inner class LoadImageAsPackets {
+
+        @Nested
+        inner class ItemFramesPerLine {
+
+            @Test
+            fun `should set property according to the width`(env: Env) {
+                TODO()
+            }
+
+        }
+
+        @Nested
+        inner class ItemFramesPerColumn {
+
+            @Test
+            fun `should set property according to the height`(env: Env) {
+                TODO()
+            }
+
+        }
+
+        @Test
+        fun `should throw exception if an image is already loaded`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should create one packet if the image is between 1x1 and 128x128`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should create two packets if the image width is between 129 and 256`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should create two packets if the image height is between 129 and 256`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should create four packets if the image is between 129x129 and 256x256`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should have same content than the image for one packet`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should have same content than the image for two packets`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should have same content than the image for four packets`(env: Env) {
+            TODO()
+        }
+
+        @Test
+        fun `should apply transformation on packets`(env: Env) {
+            TODO()
+        }
+
+    }
+
     @Test
     fun `constant value should be correct`() {
         assertEquals(128, MapImage.MAP_ITEM_FRAME_PIXELS)
