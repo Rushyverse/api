@@ -1,8 +1,6 @@
 package com.github.rushyverse.api.image
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.withContext
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
@@ -13,56 +11,49 @@ import net.minestom.server.item.Material
 import net.minestom.server.item.metadata.MapMeta
 import net.minestom.server.map.framebuffers.LargeGraphics2DFramebuffer
 import net.minestom.server.network.packet.server.SendablePacket
+import org.jetbrains.annotations.Blocking
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
 import java.io.InputStream
 import javax.imageio.ImageIO
-import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 /**
  * Read an image from the resources and build the packets to send to the players.
- * @see buildPacketsFromInputStream
+ * @see loadImageAsPacketsFromInputStream
  * @receiver Object to display image on the server.
  * @param resourceImage Path of the image in the resources.
- * @param loadImageCoroutineContext Coroutine context to load the image. We recommend to use Dispatchers.IO.
  * @param modifyTransform Function to modify the transform of the image.
  * @return The packets list to send to players.
  */
-public suspend fun MapImage.buildPacketsFromResources(
+@Blocking
+public fun MapImage.loadImageAsPacketsFromResources(
     resourceImage: String,
-    loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
     modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
 ): Array<SendablePacket> {
-    val inputStream = withContext(loadImageCoroutineContext) {
-        MapImage::class.java.getResourceAsStream("/$resourceImage")
-            ?: error("Unable to retrieve the image $resourceImage in resources.")
-    }
+    val inputStream = MapImage::class.java.getResourceAsStream("/$resourceImage")
+        ?: error("Unable to retrieve the image $resourceImage in resources.")
 
-    return inputStream.buffered().use { buildPacketsFromInputStream(it, loadImageCoroutineContext, modifyTransform) }
+    return inputStream.buffered().use { loadImageAsPacketsFromInputStream(it, modifyTransform) }
 }
 
 /**
  * Read an image from an input stream and build the packets to send to the players.
  * **This method does not close the provided [inputStream] after the read operation has completed.
  * It is the responsibility of the caller to close the stream, if desired.**
- * @see [MapImage.buildPacketsFromImage]
+ * @see [MapImage.loadImageAsPackets]
  * @receiver Object to display image on the server.
  * @param inputStream Input stream to retrieve the image's data.
- * @param loadImageCoroutineContext Coroutine context to load the image. We recommend to use Dispatchers.IO.
  * @param modifyTransform Function to modify the transform of the image.
  * @return The packets list to send to players.
  */
-public suspend fun MapImage.buildPacketsFromInputStream(
+@Blocking
+public fun MapImage.loadImageAsPacketsFromInputStream(
     inputStream: InputStream,
-    loadImageCoroutineContext: CoroutineContext = Dispatchers.IO,
     modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
 ): Array<SendablePacket> {
-    val image = withContext(loadImageCoroutineContext) {
-        @Suppress("BlockingMethodInNonBlockingContext")
-        ImageIO.read(inputStream)
-    }
-    return buildPacketsFromImage(image, modifyTransform)
+    val image = ImageIO.read(inputStream)
+    return loadImageAsPackets(image, modifyTransform)
 }
 
 /**
@@ -71,7 +62,7 @@ public suspend fun MapImage.buildPacketsFromInputStream(
  * @property itemFramesPerLine The width blocks size desired for the item frame. The value define the number of item frames by line.
  * @property itemFramesPerColumn The height blocks size desired for the item frame. The value define the number of item frames by column.
  * @property numberOfItemFrames The number of item frames needed to display the image.
- * @property isLoaded `true` if the image is loaded, `false` otherwise.
+ * @property imageLoaded `true` if the image is loaded, `false` otherwise.
  * @property itemFrames The list of item frames created.
  */
 public class MapImage {
@@ -90,7 +81,7 @@ public class MapImage {
         private const val MAP_ITEM_FRAME_PIXELS_BITWISE = 7
     }
 
-    public lateinit var packets: Array<SendablePacket>
+    public var packets: Array<SendablePacket>? = null
         private set
 
     public var itemFramesPerLine: Int by Delegates.notNull()
@@ -99,18 +90,19 @@ public class MapImage {
     public var itemFramesPerColumn: Int by Delegates.notNull()
         private set
 
-    public val isLoaded: Boolean
-        get() = ::packets.isInitialized
+    public val imageLoaded: Boolean
+        get() = packets != null
 
-    public var itemFrames: List<Entity>? = null
+    private var _itemFrames: List<Entity>? = null
+
+    public val itemFrames: List<Entity>?
+        get() = _itemFrames
 
     private val numberOfItemFrames: Int
         get() = itemFramesPerLine * itemFramesPerColumn
 
     /**
      * Create the packets list to send to new players.
-     * The image data are loaded from the resource file [resourceImageName].
-     * Item frames are created at the position [pos] with the orientation [orientation] to display the image.
      * The result is stored in the [packets] property.
      *
      * **This method does not close the provided [inputStream] after the read operation has completed.
@@ -125,11 +117,11 @@ public class MapImage {
      * ```
      * @return The packets list to send to players.
      */
-    public fun buildPacketsFromImage(
+    public fun loadImageAsPackets(
         image: BufferedImage,
         modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
     ): Array<SendablePacket> {
-        require(!isLoaded) { "An image is already loaded using this instance." }
+        require(!imageLoaded) { "An image is already loaded using this instance." }
 
         val imageWidth = image.width
         val imageHeight = image.height
@@ -158,6 +150,7 @@ public class MapImage {
      * @return The list of packets.
      */
     private fun createPackets(framebuffer: LargeGraphics2DFramebuffer): Array<SendablePacket> {
+        val itemFramesPerLine = itemFramesPerLine
         return Array(numberOfItemFrames) {
             val x = it % itemFramesPerLine
             val y = it / itemFramesPerLine
@@ -170,9 +163,12 @@ public class MapImage {
 
     /**
      * Create necessary item frames on which the image will be displayed.
+     *
+     * **Before calling this method, you must have loaded an image using [loadImageAsPackets].**
      * @param instance The instance where you want to create the frame.
      * @param pos The position of the frame.
      * @param orientation The orientation of the frame.
+     * @param metaModifier The function to modify the item frame meta.
      */
     public suspend fun createItemFrames(
         instance: Instance,
@@ -182,9 +178,10 @@ public class MapImage {
             isInvisible = true
         }
     ) {
+        require(imageLoaded) { "An image must be loaded before creating the item frames." }
         require(!atLeastOneItemFrameIsPresent()) { "The item frames are already created." }
-        if(numberOfItemFrames == 0) {
-            itemFrames = emptyList()
+        if (numberOfItemFrames == 0) {
+            _itemFrames = emptyList()
             return
         }
 
@@ -197,7 +194,7 @@ public class MapImage {
         val yaw = imageMath.yaw
         val pitch = imageMath.pitch
 
-        itemFrames = (0..<numberOfItemFrames).map { numberOfFrame ->
+        _itemFrames = (0..<numberOfItemFrames).map { numberOfFrame ->
             // We need to calculate the position of the item frame.
             // The position is calculated from the top left corner of the image.
             // The item frames are place to the right and bottom of the beginning position.
@@ -233,11 +230,12 @@ public class MapImage {
     public fun removeItemFrames() {
         val itemFrames = itemFrames ?: return
         itemFrames.forEach(Entity::remove)
-        this.itemFrames = null
+        _itemFrames = null
     }
 
     /**
-     * Check if at least one item frame is present in the [instance].
+     * Check if all item frames are present.
+     * If at least one item frame is not present, the function will return `false`.
      * @return `true` if at least one item frame is present, `false` otherwise.
      */
     private fun atLeastOneItemFrameIsPresent() = itemFrames?.any { it.isRemoved } == false
