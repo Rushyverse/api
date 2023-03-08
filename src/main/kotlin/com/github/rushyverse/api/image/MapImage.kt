@@ -67,10 +67,6 @@ public suspend fun MapImage.buildPacketsFromInputStream(
 
 /**
  * A class that allows you to create an Image as Map Item Frame on the server.
- * @property instance The instance where the item frames will be created.
- * @property pos The position where the item frames will be created.
- * The position is the top left corner of the image.
- * @property orientation The orientation of the item frames.
  * @property packets The packets list to send to new players.
  * @property itemFramesPerLine The width blocks size desired for the item frame. The value define the number of item frames by line.
  * @property itemFramesPerColumn The height blocks size desired for the item frame. The value define the number of item frames by column.
@@ -78,13 +74,15 @@ public suspend fun MapImage.buildPacketsFromInputStream(
  * @property isLoaded `true` if the image is loaded, `false` otherwise.
  * @property itemFrames The list of item frames created.
  */
-public class MapImage(
-    public val instance: Instance,
-    public val pos: Pos,
-    public val orientation: ItemFrameMeta.Orientation
-) {
+public class MapImage {
 
     public companion object {
+
+        /**
+         * The number of pixels per item frame is 128x128.
+         */
+        private const val MAP_ITEM_FRAME_PIXELS = 128
+
         /**
          * The number of pixels per item frame is 128.
          * So to improve the performance, we will use the bitwise operator to divide by 128.
@@ -102,9 +100,9 @@ public class MapImage(
         private set
 
     public val isLoaded: Boolean
-        get() = ::packets.isInitialized || ::itemFrames.isInitialized
+        get() = ::packets.isInitialized
 
-    public lateinit var itemFrames: List<Entity>
+    public var itemFrames: List<Entity>? = null
 
     private val numberOfItemFrames: Int
         get() = itemFramesPerLine * itemFramesPerColumn
@@ -127,7 +125,7 @@ public class MapImage(
      * ```
      * @return The packets list to send to players.
      */
-    public suspend fun buildPacketsFromImage(
+    public fun buildPacketsFromImage(
         image: BufferedImage,
         modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
     ): Array<SendablePacket> {
@@ -135,8 +133,13 @@ public class MapImage(
 
         val imageWidth = image.width
         val imageHeight = image.height
-        itemFramesPerLine = imageWidth shr MAP_ITEM_FRAME_PIXELS_BITWISE
-        itemFramesPerColumn = imageHeight shr MAP_ITEM_FRAME_PIXELS_BITWISE
+        // We need to round the value to the nearest integer.
+        // For example :
+        // If the image is 1x1, we need 1 item frame by line and 1 item frame by column.
+        // If the image is 129x129, we need 2 item frames by line and 2 item frames by column.
+        // If the  image is 129x128, we need 2 item frames by line and 1 item frame by column.
+        itemFramesPerLine = (imageWidth + MAP_ITEM_FRAME_PIXELS - 1) ushr MAP_ITEM_FRAME_PIXELS_BITWISE
+        itemFramesPerColumn = (imageHeight + MAP_ITEM_FRAME_PIXELS - 1) ushr MAP_ITEM_FRAME_PIXELS_BITWISE
 
         val transform = AffineTransform.getScaleInstance(1.0, 1.0).apply {
             modifyTransform(image)
@@ -146,7 +149,6 @@ public class MapImage(
             renderer.drawRenderedImage(image, transform)
         }
 
-        createItemFrames(instance, pos, orientation)
         return createPackets(framebuffer).also { packets = it }
     }
 
@@ -170,8 +172,22 @@ public class MapImage(
      * Create necessary item frames on which the image will be displayed.
      * @param instance The instance where you want to create the frame.
      * @param pos The position of the frame.
+     * @param orientation The orientation of the frame.
      */
-    private suspend fun createItemFrames(instance: Instance, pos: Pos, orientation: ItemFrameMeta.Orientation) {
+    public suspend fun createItemFrames(
+        instance: Instance,
+        pos: Pos,
+        orientation: ItemFrameMeta.Orientation,
+        metaModifier: ItemFrameMeta.() -> Unit = {
+            isInvisible = true
+        }
+    ) {
+        require(!atLeastOneItemFrameIsPresent()) { "The item frames are already created." }
+        if(numberOfItemFrames == 0) {
+            itemFrames = emptyList()
+            return
+        }
+
         val imageMath = MapImageMath.getFromOrientation(orientation)
         val beginX = pos.blockX()
         val beginY = pos.blockY()
@@ -193,11 +209,12 @@ public class MapImage(
                 with(entityMeta as ItemFrameMeta) {
                     setNotifyAboutChanges(false)
 
-                    this.orientation = orientation
-                    isInvisible = true
                     item = ItemStack.builder(Material.FILLED_MAP)
                         .meta(MapMeta::class.java) { it.mapId(numberOfFrame) }
                         .build()
+
+                    this.orientation = orientation
+                    metaModifier()
 
                     setNotifyAboutChanges(true)
                 }
@@ -206,4 +223,22 @@ public class MapImage(
             }
         }
     }
+
+    /**
+     * Remove all item frames linked to the image.
+     * Do nothing if the item frames are not present.
+     * Will set the [itemFrames] property to `null`.
+     * @see [Entity.remove]
+     */
+    public fun removeItemFrames() {
+        val itemFrames = itemFrames ?: return
+        itemFrames.forEach(Entity::remove)
+        this.itemFrames = null
+    }
+
+    /**
+     * Check if at least one item frame is present in the [instance].
+     * @return `true` if at least one item frame is present, `false` otherwise.
+     */
+    private fun atLeastOneItemFrameIsPresent() = itemFrames?.any { it.isRemoved } == false
 }
