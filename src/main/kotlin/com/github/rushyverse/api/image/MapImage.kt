@@ -1,5 +1,8 @@
 package com.github.rushyverse.api.image
 
+import com.github.rushyverse.api.image.exception.ImageAlreadyLoadedException
+import com.github.rushyverse.api.image.exception.ImageNotLoadedException
+import com.github.rushyverse.api.image.exception.ItemFramesAlreadyExistException
 import kotlinx.coroutines.future.await
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
@@ -72,7 +75,7 @@ public class MapImage {
         /**
          * The number of pixels per item frame is 128x128.
          */
-        private const val MAP_ITEM_FRAME_PIXELS = 128
+        public const val MAP_ITEM_FRAME_PIXELS: Int = 128
 
         /**
          * The number of pixels per item frame is 128.
@@ -121,7 +124,9 @@ public class MapImage {
         image: BufferedImage,
         modifyTransform: AffineTransform.(BufferedImage) -> Unit = {}
     ): Array<SendablePacket> {
-        require(!imageLoaded) { "An image is already loaded using this instance." }
+        if (imageLoaded) {
+            throw ImageAlreadyLoadedException("An image is already loaded using this instance.")
+        }
 
         val imageWidth = image.width
         val imageHeight = image.height
@@ -177,12 +182,16 @@ public class MapImage {
         metaModifier: ItemFrameMeta.() -> Unit = {
             isInvisible = true
         }
-    ) {
-        require(imageLoaded) { "An image must be loaded before creating the item frames." }
-        require(!atLeastOneItemFrameIsPresent()) { "The item frames are already created." }
+    ): List<Entity> {
+        if (!imageLoaded) {
+            throw ImageNotLoadedException("An image must be loaded before creating the item frames.")
+        }
+        if (atLeastOneItemFrameIsPresent()) {
+            throw ItemFramesAlreadyExistException("The item frames are already present in the instance.")
+        }
+
         if (numberOfItemFrames == 0) {
-            _itemFrames = emptyList()
-            return
+            return emptyList<Entity>().also { _itemFrames = it }
         }
 
         val imageMath = MapImageMath.getFromOrientation(orientation)
@@ -194,7 +203,7 @@ public class MapImage {
         val yaw = imageMath.yaw
         val pitch = imageMath.pitch
 
-        _itemFrames = (0..<numberOfItemFrames).map { numberOfFrame ->
+        return (0..<numberOfItemFrames).map { numberOfFrame ->
             // We need to calculate the position of the item frame.
             // The position is calculated from the top left corner of the image.
             // The item frames are place to the right and bottom of the beginning position.
@@ -218,7 +227,7 @@ public class MapImage {
 
                 setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).await()
             }
-        }
+        }.also { _itemFrames = it }
     }
 
     /**
@@ -238,5 +247,7 @@ public class MapImage {
      * If at least one item frame is not present, the function will return `false`.
      * @return `true` if at least one item frame is present, `false` otherwise.
      */
-    private fun atLeastOneItemFrameIsPresent() = itemFrames?.any { it.isRemoved } == false
+    private fun atLeastOneItemFrameIsPresent(): Boolean {
+        return itemFrames?.any { !it.isRemoved } ?: return false
+    }
 }
