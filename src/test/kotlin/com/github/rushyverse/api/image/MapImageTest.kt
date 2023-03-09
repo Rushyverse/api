@@ -10,17 +10,23 @@ import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.metadata.other.ItemFrameMeta
 import net.minestom.server.item.Material
 import net.minestom.server.item.metadata.MapMeta
+import net.minestom.server.network.packet.server.SendablePacket
 import net.minestom.server.network.packet.server.play.MapDataPacket
 import net.minestom.server.utils.Rotation
 import net.minestom.testing.Env
 import net.minestom.testing.EnvTest
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
+import java.awt.Color
 import java.awt.image.BufferedImage
 import java.awt.image.BufferedImage.TYPE_INT_ARGB
 import kotlin.test.*
 
 class MapImageTest {
+
+    companion object {
+        private const val BLACK_COLOR_PACKET = 119.toByte()
+    }
 
     @Nested
     @EnvTest
@@ -512,32 +518,170 @@ class MapImageTest {
 
         @Test
         fun `should have same content than the image for one packet`() {
-            TODO()
+            val mapImage = MapImage()
+            val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB)
+
+            val colors = listOf(
+                Color.PINK.rgb to (-110).toByte(),
+                Color.BLUE.rgb to (49).toByte(),
+                Color.GREEN.rgb to (-122).toByte()
+            )
+
+            for (y in 0 until image.height) {
+                for (x in 0 until image.width) {
+                    val colorIndex = x % colors.size
+                    image.setRGB(x, y, colors[colorIndex].first)
+                }
+            }
+
+            mapImage.loadImageAsPackets(image)
+            val packets = assertNotNull(mapImage.packets)
+            assertEquals(1, packets.size)
+            val packet = packets[0] as MapDataPacket
+
+            val data = packet.colorContent!!.data
+            assertEquals(128 * 128, data.size)
+
+            for (y in 0 until 128) {
+                for (x in 0 until 128) {
+                    val colorIndex = x % colors.size
+                    assertEquals(colors[colorIndex].second, data[y * 128 + x])
+                }
+            }
         }
 
         @Test
         fun `should have same content than the image for two packets`() {
-            TODO()
-        }
+            val mapImage = MapImage()
+            val image = BufferedImage(256, 128, BufferedImage.TYPE_INT_RGB)
 
-        @Test
-        fun `should have same content than the image for four packets`() {
-            TODO()
+            val colorsFirstFrame = listOf(
+                Color.PINK.rgb to (-110).toByte(),
+                Color.BLUE.rgb to (49).toByte(),
+                Color.GREEN.rgb to (-122).toByte()
+            )
+
+            val colorsSecondFrame = listOf(
+                Color.DARK_GRAY.rgb to (85).toByte(),
+                Color.YELLOW.rgb to (74).toByte(),
+                Color.CYAN.rgb to (126).toByte()
+            )
+
+            // horizontal stripes
+            for (y in 0 until image.height) {
+                for (x in 0 until 128) {
+                    val colorIndex = x % colorsFirstFrame.size
+                    image.setRGB(x, y, colorsFirstFrame[colorIndex].first)
+                }
+            }
+
+            // vertical stripes
+            for (x in 128 until 256) {
+                for (y in 0 until image.height) {
+                    val colorIndex = x % colorsSecondFrame.size
+                    image.setRGB(x, y, colorsSecondFrame[colorIndex].first)
+                }
+            }
+
+            mapImage.loadImageAsPackets(image)
+            val packets = assertNotNull(mapImage.packets)
+            assertEquals(2, packets.size)
+
+            val packet1 = packets[0] as MapDataPacket
+            val data1 = packet1.colorContent!!.data
+            assertTrue { data1.all { it != BLACK_COLOR_PACKET } }
+            assertEquals(128 * 128, data1.size)
+
+            for (y in 0 until 128) {
+                for (x in 0 until image.height) {
+                    val colorIndex = x % colorsFirstFrame.size
+                    assertEquals(colorsFirstFrame[colorIndex].second, data1[y * 128 + x])
+                }
+            }
+
+            val packet2 = packets[1] as MapDataPacket
+            val data2 = packet2.colorContent!!.data
+            assertTrue { data2.all { it != BLACK_COLOR_PACKET } }
+            assertEquals(128 * 128, data2.size)
+
+            for (x in 128 until 256) {
+                for (y in 0 until image.height) {
+                    val colorIndex = x % colorsSecondFrame.size
+                    assertEquals(colorsSecondFrame[colorIndex].second, data2[y * 128 + (x - 128)])
+                }
+            }
         }
 
         @Test
         fun `should apply transformation on packets`() {
-            TODO()
+            val mapImage = MapImage()
+            val image = BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB)
+
+            val colors = listOf(
+                Color.PINK.rgb to (-110).toByte(),
+                Color.BLUE.rgb to (49).toByte(),
+                Color.GREEN.rgb to (-122).toByte()
+            )
+
+            for (y in 0 until image.height) {
+                for (x in 0 until image.width) {
+                    val colorIndex = x % colors.size
+                    image.setRGB(x, y, colors[colorIndex].first)
+                }
+            }
+
+            mapImage.loadImageAsPackets(image) {
+                rotate(Math.toRadians(90.0), it.width / 2.0, it.height / 2.0)
+            }
+
+            val packets = assertNotNull(mapImage.packets)
+            assertEquals(1, packets.size)
+            val packet = packets[0] as MapDataPacket
+
+            val data = packet.colorContent!!.data
+            assertEquals(128 * 128, data.size)
+
+            for (x in 0 until 128) {
+                for (y in 0 until 128) {
+                    // Use Y due to rotation
+                    val colorIndex = y % colors.size
+                    assertEquals(colors[colorIndex].second, data[y * 128 + x])
+                }
+            }
         }
 
         @Test
         fun `should load image from resources`() {
-            TODO()
+            val mapImage = MapImage()
+            val packets = mapImage.loadImageAsPacketsFromResources("map_image.png")
+            assertImagePacket(packets)
         }
 
         @Test
-        fun `should load image from inputstream`() {
-            TODO()
+        fun `should load image from input stream`() {
+            val mapImage = MapImage()
+            MapImageTest::class.java.getResourceAsStream("/map_image.png")!!.buffered().use {
+                val packets = mapImage.loadImageAsPacketsFromInputStream(it)
+                assertImagePacket(packets)
+            }
+        }
+
+        private fun assertImagePacket(packets: Array<SendablePacket>) {
+            val colors = listOf(
+                Color(84, 70, 162) to (23).toByte(),
+                Color(55, 215, 61) to (-122).toByte(),
+                Color(215, 55, 214) to (66).toByte(),
+                Color(49, 61, 50) to (84).toByte(),
+            )
+
+            assertNotNull(packets)
+            assertEquals(4, packets.size)
+            packets.zip(colors).forEach { (packet, color) ->
+                val data = (packet as MapDataPacket).colorContent!!.data
+                data.forEach {
+                    assertEquals(color.second, it)
+                }
+            }
         }
 
     }
