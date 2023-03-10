@@ -3,7 +3,8 @@ package com.github.rushyverse.api.image
 import com.github.rushyverse.api.image.exception.ImageAlreadyLoadedException
 import com.github.rushyverse.api.image.exception.ImageNotLoadedException
 import com.github.rushyverse.api.image.exception.ItemFramesAlreadyExistException
-import kotlinx.coroutines.future.await
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.future.asDeferred
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
@@ -190,7 +191,6 @@ public class MapImage {
         if (atLeastOneItemFrameIsPresent()) {
             throw ItemFramesAlreadyExistException("The item frames are already present in the instance.")
         }
-
         if (numberOfItemFrames == 0) {
             return emptyList<Entity>().also { _itemFrames = it }
         }
@@ -204,20 +204,13 @@ public class MapImage {
         val yaw = imageMath.yaw
         val pitch = imageMath.pitch
 
-        return (0..<numberOfItemFrames).map { numberOfFrame ->
-            // We need to calculate the position of the item frame.
-            // The position is calculated from the top left corner of the image.
-            // The item frames are place to the right and bottom of the beginning position.
-            val x = imageMath.computeX(beginX, numberOfFrame, itemFramesPerLine)
-            val y = imageMath.computeY(beginY, numberOfFrame, itemFramesPerLine)
-            val z = imageMath.computeZ(beginZ, numberOfFrame, itemFramesPerLine)
-
+        val entities = List(numberOfItemFrames) { frameNumber ->
             Entity(EntityType.ITEM_FRAME).apply {
                 with(entityMeta as ItemFrameMeta) {
                     setNotifyAboutChanges(false)
 
                     item = ItemStack.builder(Material.FILLED_MAP)
-                        .meta(MapMeta::class.java) { it.mapId(numberOfFrame) }
+                        .meta(MapMeta::class.java) { it.mapId(frameNumber) }
                         .build()
 
                     this.orientation = orientation
@@ -225,10 +218,17 @@ public class MapImage {
 
                     setNotifyAboutChanges(true)
                 }
-
-                setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).await()
             }
-        }.also { _itemFrames = it }
+        }
+
+        entities.mapIndexed { frameNumber, entity ->
+            val x = imageMath.computeX(beginX, frameNumber, itemFramesPerLine)
+            val y = imageMath.computeY(beginY, frameNumber, itemFramesPerLine)
+            val z = imageMath.computeZ(beginZ, frameNumber, itemFramesPerLine)
+            entity.setInstance(instance, Pos(x.toDouble(), y.toDouble(), z.toDouble(), yaw, pitch)).asDeferred()
+        }.awaitAll()
+
+        return entities.also { _itemFrames = it }
     }
 
     /**
