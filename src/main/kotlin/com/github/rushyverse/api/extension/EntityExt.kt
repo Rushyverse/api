@@ -6,6 +6,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import net.minestom.server.entity.Entity
+import net.minestom.server.event.EventListener
+import net.minestom.server.event.trait.EntityEvent
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
@@ -45,4 +47,26 @@ public inline fun <reified E : Entity, reified T> E.sync(block: E.() -> T): T {
     } finally {
         acquirable.unlock()
     }
+}
+
+/**
+ * Registers an event listener for this entity.
+ * @param block Handler of event.
+ * @return The registered event listener.
+ */
+public inline fun <reified T : EntityEvent> Entity.onEvent(
+    crossinline block: Entity.(T) -> EventListener.Result
+): EventListener<T> {
+    val listener = object : EventListener<T> {
+
+        override fun eventType(): Class<T> {
+            return T::class.java
+        }
+
+        override fun run(event: T): EventListener.Result {
+            return block(event)
+        }
+    }
+    eventNode().addListener(listener)
+    return listener
 }

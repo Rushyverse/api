@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.position
 
+import com.github.rushyverse.api.extension.centerRelative
 import com.github.rushyverse.api.extension.isInCube
 import com.github.rushyverse.api.extension.minMaxOf
 import net.minestom.server.coordinate.Pos
@@ -10,16 +11,16 @@ import net.minestom.server.instance.Instance
  * A cuboid area defined by two positions.
  * @param E Type of entity.
  * @property entityClass Class of the entity.
- * @property instance Instance where is located the area.
  * @property min Minimum position.
  * @property max Maximum position.
+ * @property position Center position of the cube
  */
 public class CubeArea<E : Entity>(
     public val entityClass: Class<E>,
-    public var instance: Instance,
+    public override var instance: Instance,
     position1: Pos,
     position2: Pos
-) : AbstractArea<E>() {
+) : AbstractArea<E>(), IAreaLocatable<E> {
 
     public companion object {
         public inline operator fun <reified E : Entity> invoke(
@@ -29,8 +30,20 @@ public class CubeArea<E : Entity>(
         ): CubeArea<E> = CubeArea(E::class.java, instance, position1, position2)
     }
 
-    public val min: Pos
-    public val max: Pos
+    override var position: Pos
+        get() = max.centerRelative(min)
+        set(value) {
+            // The new position becomes the center of the cube.
+            val halfSize = max.centerRelative(min)
+            min = value.sub(halfSize)
+            max = value.add(halfSize)
+        }
+
+    public var min: Pos
+        private set
+
+    public var max: Pos
+        private set
 
     init {
         val (x1, x2) = minMaxOf(position1.x(), position2.x())

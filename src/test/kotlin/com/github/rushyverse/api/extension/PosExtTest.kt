@@ -3,10 +3,42 @@ package com.github.rushyverse.api.extension
 import net.minestom.server.coordinate.Pos
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class PosExtTest {
+
+    @Nested
+    inner class CenterRelative {
+
+        @Test
+        fun `should return the center relative to the other position with positive`() {
+            val pos = Pos(1.0, 2.0, 3.0)
+            val other = Pos(2.0, 3.0, 4.0)
+            val expected = Pos(1.5, 2.5, 3.5)
+            val actual = pos.centerRelative(other)
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun `should return the center relative to the other position with negative`() {
+            val pos = Pos(-1.0, -2.0, -3.0)
+            val other = Pos(-2.0, -3.0, -4.0)
+            val expected = Pos(-1.5, -2.5, -3.5)
+            val actual = pos.centerRelative(other)
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun `should return the center relative to the other position with mixed`() {
+            val pos = Pos(1.0, -2.0, 3.0)
+            val other = Pos(-2.0, 3.0, -4.0)
+            val expected = Pos(-0.5, 0.5, -0.5)
+            val actual = pos.centerRelative(other)
+            assertEquals(expected, actual)
+        }
+    }
 
     @Nested
     inner class IsInCube {

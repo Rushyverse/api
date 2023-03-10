@@ -9,7 +9,15 @@ import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import net.minestom.server.entity.Entity
 import net.minestom.server.entity.Player
+import net.minestom.server.event.EventFilter
+import net.minestom.server.event.EventListener
+import net.minestom.server.event.EventNode
+import net.minestom.server.event.entity.EntityAttackEvent
+import net.minestom.server.event.entity.EntityDeathEvent
+import net.minestom.server.event.item.ItemDropEvent
+import net.minestom.server.event.trait.EntityEvent
 import net.minestom.server.thread.Acquirable
 import net.minestom.server.thread.Acquired
 import org.junit.jupiter.api.Nested
@@ -165,6 +173,64 @@ class EntityExtTest {
             verify(exactly = 1) { acquired.get() }
             verify(exactly = 1) { acquirable.lock() }
             verify(exactly = 1) { acquired.unlock() }
+        }
+    }
+
+    @Nested
+    inner class OnEvent {
+
+        @Test
+        fun `should register new event listener on the entity event node`() {
+            val node = mockk<EventNode<EntityEvent>>() {
+                every { addListener(any()) } returns this
+            }
+            val entity = mockk<Entity>() {
+                every { eventNode() } returns node
+            }
+
+            val listener = entity.onEvent<ItemDropEvent> {
+                error("Should not be called")
+            }
+
+            verify(exactly = 1) { entity.eventNode() }
+            verify(exactly = 1) { node.addListener(listener) }
+        }
+
+        @Test
+        fun `should call body when event is fired`() {
+            val node = EventNode.type("test", EventFilter.ENTITY)
+            val entity = mockk<Entity>() {
+                every { eventNode() } returns node
+            }
+
+            val event = mockk<EntityAttackEvent>()
+            var called = false
+            entity.onEvent<EntityAttackEvent> {
+                called = true
+                assertEquals(event, it)
+                EventListener.Result.SUCCESS
+            }
+
+            node.call(event)
+            assertTrue(called)
+        }
+
+        @Test
+        fun `should not call body when another event type is fired`() {
+            val node = EventNode.type("test", EventFilter.ENTITY)
+            val entity = mockk<Entity>() {
+                every { eventNode() } returns node
+            }
+
+            val event = mockk<EntityAttackEvent>()
+            var called = false
+            entity.onEvent<EntityDeathEvent> {
+                called = true
+                EventListener.Result.SUCCESS
+            }
+
+            node.call(event)
+            assertFalse(called)
         }
     }
 

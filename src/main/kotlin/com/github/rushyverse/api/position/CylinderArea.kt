@@ -9,18 +9,16 @@ import net.minestom.server.instance.Instance
  * An area defined by a cylinder shape.
  * @param E Type of entity.
  * @property entityClass Class of the entity.
- * @property instance Instance where is located the area.
- * @property position Position of the cylinder.
  * @property limitY Limit of the y-axis.
  * @property radius Radius.
  */
 public class CylinderArea<E : Entity>(
     public val entityClass: Class<E>,
-    public var instance: Instance,
-    public var position: Pos,
+    public override var instance: Instance,
+    public override var position: Pos,
     radius: Double,
     public var limitY: ClosedRange<Double>,
-) : AbstractArea<E>() {
+) : AbstractArea<E>(), IAreaLocatable<E> {
 
     public companion object {
         public inline operator fun <reified E : Entity> invoke(
