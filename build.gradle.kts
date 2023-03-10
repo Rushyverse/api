@@ -17,14 +17,15 @@ dependencies {
     val minestomVersion = "aebf72de90"
     val loggingVersion = "3.0.5"
     val mockkVersion = "1.13.4"
-    val coroutinesCoreVersion = "1.6.4"
+    val coroutinesVersion = "1.6.4"
     val kotlinSerializationVersion = "1.5.0"
     val commonsNetVersion = "3.9.0"
     val icu4jVersion = "72.1"
 
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesCoreVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
     api("com.github.Minestom.Minestom:Minestom:$minestomVersion")
     api("commons-net:commons-net:$commonsNetVersion")
     api("com.ibm.icu:icu4j:$icu4jVersion")
@@ -37,7 +38,7 @@ dependencies {
 
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesCoreVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     testImplementation("com.github.Minestom.Minestom:testing:$minestomVersion")
 }
