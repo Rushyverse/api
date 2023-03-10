@@ -1,10 +1,14 @@
 package com.github.rushyverse.api.extension
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import org.junit.jupiter.api.Nested
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class StringExtTest {
 
@@ -283,5 +287,55 @@ class StringExtTest {
                 "Add, chat and join your friends through the server".toFormattedLoreSequence(40).toList(),
             )
         }
+    }
+
+    @Nested
+    inner class AsMiniComponent {
+
+        @Test
+        fun `should return simple component text with simple string`() {
+            val string = "Hello World!"
+            val component = string.asMiniComponent()
+            component as TextComponent
+            assertEquals("Hello World!", component.content())
+        }
+
+        @Test
+        fun `should return component text with color`() {
+            val string = "<red>Hello World!</red>"
+            val component = string.asMiniComponent()
+            component as TextComponent
+
+            assertEquals("Hello World!", component.content())
+
+            val color = component.color()
+            assertNotNull(color)
+            assertEquals("#ff5555", color.asHexString())
+        }
+
+        @Test
+        fun `should return component with click event`() {
+            val string = "<click:run_command:/test>Click me!</click>"
+            val component = string.asMiniComponent()
+            component as TextComponent
+
+            assertEquals("Click me!", component.content())
+
+            val clickEvent = component.clickEvent()
+            assertNotNull(clickEvent)
+            assertEquals(ClickEvent.Action.RUN_COMMAND, clickEvent.action())
+            assertEquals("/test", clickEvent.value())
+        }
+
+        @Test
+        fun `should return component with custom tag`() {
+            val string = "Hello <test>!"
+            val component = string.asMiniComponent(
+                Placeholder.unparsed("test", "my test")
+            )
+            component as TextComponent
+            assertEquals("Hello my test!", component.content())
+        }
+
     }
 }

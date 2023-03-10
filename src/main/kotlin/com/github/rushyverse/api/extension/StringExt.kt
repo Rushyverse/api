@@ -3,6 +3,8 @@ package com.github.rushyverse.api.extension
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 
 /**
  * Default max line for a lore line.
@@ -89,3 +91,14 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
         }
     }
 }
+
+/**
+ * Transforms a string into a component using MiniMessage.
+ * Will set the color according to the tag in the string.
+ * The [tagResolver] will be used to resolve the custom tags and replace values.
+ * @receiver The string used to create the component.
+ * @param tagResolver The tag resolver used to resolve the custom tags.
+ * @return The component created from the string.
+ */
+public fun String.asMiniComponent(vararg tagResolver: TagResolver): Component =
+    MiniMessage.miniMessage().deserialize(this, *tagResolver)
