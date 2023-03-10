@@ -686,6 +686,35 @@ class MapImageTest {
 
     }
 
+    @Nested
+    @EnvTest
+    inner class RemoveItemFrames {
+
+        @Test
+        fun `should do nothing if no item frames`(env: Env) {
+            val mapImage = MapImage()
+            assertNull(mapImage.itemFrames)
+            mapImage.removeItemFrames()
+            assertNull(mapImage.itemFrames)
+        }
+
+        @Test
+        fun `should remove item frames`(env: Env) = runTest {
+            val instance = env.createFlatInstance()
+            val mapImage = MapImage()
+            mapImage.loadImageAsPackets(BufferedImage(512, 512, BufferedImage.TYPE_INT_RGB))
+            mapImage.createItemFrames(instance, Pos(0.0, 0.0, 0.0), ItemFrameMeta.Orientation.NORTH)
+
+            val frames = assertNotNull(mapImage.itemFrames)
+
+            assertTrue { frames.all { !it.isRemoved } }
+            mapImage.removeItemFrames()
+            assertTrue { frames.all { it.isRemoved } }
+
+            assertNull(mapImage.itemFrames)
+        }
+    }
+
     @Test
     fun `constant value should be correct`() {
         assertEquals(128, MapImage.MAP_ITEM_FRAME_PIXELS)
