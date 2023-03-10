@@ -111,6 +111,7 @@ public class MapImage {
      * **This method does not close the provided [inputStream] after the read operation has completed.
      * It is the responsibility of the caller to close the stream, if desired.**
      *
+     * @param image The image to display.
      * @param modifyTransform The function to apply transformation to the image. By default, the image is turned upside down.
      * For example, to rotate the image of 90° clockwise, you can use the following code:
      * ```
