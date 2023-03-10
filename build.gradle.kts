@@ -21,17 +21,19 @@ dependencies {
     val kotlinSerializationVersion = "1.5.0"
     val commonsNetVersion = "3.9.0"
     val icu4jVersion = "72.1"
+    val minimessageVersion = "4.12.0"
 
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
+    api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
+
     api("com.github.Minestom.Minestom:Minestom:$minestomVersion")
     api("commons-net:commons-net:$commonsNetVersion")
     api("com.ibm.icu:icu4j:$icu4jVersion")
-
-    api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
-    api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
+    api("net.kyori:adventure-text-minimessage:$minimessageVersion")
 
     // Logging information
     api("io.github.microutils:kotlin-logging:$loggingVersion")
