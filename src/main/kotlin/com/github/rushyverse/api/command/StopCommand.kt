@@ -15,9 +15,11 @@ import net.minestom.server.permission.Permission
  * Command to stop the server.
  */
 public class StopCommand(
+    name: String,
+    vararg aliases: String,
     private val serverProcess: ServerProcess = MinecraftServer.process(),
     private val instanceManager: InstanceManager? = MinecraftServer.getInstanceManager()
-) : Command("stop") {
+) : Command(name, *aliases) {
 
     /**
      * Enum of permission to perform [command][StopCommand].

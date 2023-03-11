@@ -16,7 +16,7 @@ import net.minestom.server.permission.Permission
 /**
  * Command to give item to a player.
  */
-public class GiveCommand : Command("give") {
+public class GiveCommand(name: String = "give", vararg aliases: String) : Command(name, *aliases) {
 
     /**
      * Enum of permission to perform [command][GiveCommand].

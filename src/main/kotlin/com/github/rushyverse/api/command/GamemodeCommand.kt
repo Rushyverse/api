@@ -17,7 +17,7 @@ import net.minestom.server.permission.Permission
 /**
  * Command to define the game mode of a player.
  */
-public class GamemodeCommand : Command("gamemode") {
+public class GamemodeCommand(name: String = "gamemode", vararg aliases: String) : Command(name, *aliases) {
 
     /**
      * Enum of permission to perform [command][GamemodeCommand].

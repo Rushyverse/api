@@ -17,10 +17,12 @@ import net.minestom.server.permission.Permission
  * @param isProtected Lambda to check if a player is protected from being kicked.
  */
 public class KickCommand(
+    name: String = "kick",
+    vararg aliases: String,
     private val isProtected: (CommandSender, Player) -> Boolean = { _, target ->
         target.sync { hasPermission(Permissions.EXECUTE.permission) }
     }
-) : Command("kick") {
+) : Command(name, *aliases) {
 
     /**
      * Enum of permission to perform [command][KickCommand].
