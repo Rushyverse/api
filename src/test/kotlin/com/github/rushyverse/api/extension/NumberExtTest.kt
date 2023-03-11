@@ -9,6 +9,38 @@ import kotlin.test.assertEquals
 
 class NumberExtTest {
 
+    @Test
+    fun `roman numerals values associate all numbers to their roman numerals`() {
+        val expected = mapOf(
+            1000 to "M",
+            900 to "CM",
+            500 to "D",
+            400 to "CD",
+            100 to "C",
+            90 to "XC",
+            50 to "L",
+            40 to "XL",
+            10 to "X",
+            9 to "IX",
+            5 to "V",
+            4 to "IV",
+            1 to "I"
+        )
+        assertEquals(expected, ROMAN_NUMERALS_VALUES)
+    }
+
+    @Test
+    fun `roman numerals array should be ordered from the largest to the smallest`() {
+        val expected = listOf("M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I")
+        assertEquals(expected, ROMAN_NUMERALS.toList())
+    }
+
+    @Test
+    fun `roman values array should be ordered from the largest to the smallest`() {
+        val expected = listOf(1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
+        assertEquals(expected, ROMAN_VALUES.toList())
+    }
+
     @Nested
     inner class IntTest {
 
