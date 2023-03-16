@@ -16,9 +16,9 @@ import net.minestom.server.permission.Permission
  */
 public class StopCommand(
     name: String = "stop",
-    vararg aliases: String,
     private val serverProcess: ServerProcess = MinecraftServer.process(),
-    private val instanceManager: InstanceManager? = MinecraftServer.getInstanceManager()
+    private val instanceManager: InstanceManager? = MinecraftServer.getInstanceManager(),
+    vararg aliases: String
 ) : Command(name, *aliases) {
 
     /**
