@@ -2,8 +2,8 @@ package com.github.rushyverse.api.command
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.minestom.server.command.CommandSender
-import net.minestom.server.entity.Player
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 
 /**
  * Utils class to send specific messages.
