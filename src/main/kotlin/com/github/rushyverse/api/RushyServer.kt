@@ -38,13 +38,9 @@ public abstract class RushyServer {
 
         /**
          * Register the API commands in the [CommandManager].
-         * @param manager CommandManager to register the commands in.
          */
-        public fun registerCommands(manager: CommandManager = MinecraftServer.getCommandManager()) {
-            manager.register(StopCommand())
-            manager.register(KickCommand())
-            manager.register(GiveCommand())
-            manager.register(GamemodeCommand())
+        public fun registerCommands( ) {
+            // New commands here
         }
     }
 
