@@ -12,10 +12,13 @@ repositories {
     mavenCentral()
     maven("https://jitpack.io")
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.org/repository/maven-public/")
+    maven("https://libraries.minecraft.net")
 }
 
 dependencies {
     val paperVersion = "1.19.4-R0.1-SNAPSHOT"
+    val commandApiVersion = "8.8.0"
     val loggingVersion = "3.0.5"
     val mockkVersion = "1.13.4"
     val coroutinesVersion = "1.6.4"
@@ -32,6 +35,10 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
 
     api("io.papermc.paper:paper-api:$paperVersion")
+    api("dev.jorel:commandapi-kotlin:$commandApiVersion")
+    api("dev.jorel:commandapi-shade:$commandApiVersion")
+    api("com.mojang:brigadier:1.0.18")
+
     api("commons-net:commons-net:$commonsNetVersion")
     api("com.ibm.icu:icu4j:$icu4jVersion")
     api("net.kyori:adventure-text-minimessage:$minimessageVersion")
