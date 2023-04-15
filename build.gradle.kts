@@ -11,10 +11,11 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://repo.papermc.io/repository/maven-public/")
 }
 
 dependencies {
-    val minestomVersion = "aebf72de90"
+    val paperVersion = "1.19.4-R0.1-SNAPSHOT"
     val loggingVersion = "3.0.5"
     val mockkVersion = "1.13.4"
     val coroutinesVersion = "1.6.4"
@@ -30,7 +31,7 @@ dependencies {
     api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializationVersion")
     api("org.jetbrains.kotlinx:kotlinx-serialization-hocon:$kotlinSerializationVersion")
 
-    api("com.github.Minestom.Minestom:Minestom:$minestomVersion")
+    api("io.papermc.paper:paper-api:$paperVersion")
     api("commons-net:commons-net:$commonsNetVersion")
     api("com.ibm.icu:icu4j:$icu4jVersion")
     api("net.kyori:adventure-text-minimessage:$minimessageVersion")
@@ -42,7 +43,6 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("com.github.Minestom.Minestom:testing:$minestomVersion")
 }
 
 kotlin {
