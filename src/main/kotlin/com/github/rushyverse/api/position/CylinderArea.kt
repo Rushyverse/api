@@ -1,9 +1,9 @@
 package com.github.rushyverse.api.position
 
 import com.github.rushyverse.api.extension.isInCylinder
-import net.minestom.server.coordinate.Pos
-import net.minestom.server.entity.Entity
-import net.minestom.server.instance.Instance
+import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.entity.Entity
 
 /**
  * An area defined by a cylinder shape.
@@ -14,19 +14,19 @@ import net.minestom.server.instance.Instance
  */
 public class CylinderArea<E : Entity>(
     public val entityClass: Class<E>,
-    public override var instance: Instance,
-    public override var position: Pos,
+    public override var world: World,
+    public override var location: Location,
     radius: Double,
     public var limitY: ClosedRange<Double>,
 ) : AbstractArea<E>(), IAreaLocatable<E> {
 
     public companion object {
         public inline operator fun <reified E : Entity> invoke(
-            instance: Instance,
-            position: Pos,
+            world: World,
+            location: Location,
             radius: Double,
             limitY: ClosedRange<Double>
-        ): CylinderArea<E> = CylinderArea(E::class.java, instance, position, radius, limitY)
+        ): CylinderArea<E> = CylinderArea(E::class.java, world, location, radius, limitY)
     }
 
     public var radius: Double = radius
@@ -48,12 +48,12 @@ public class CylinderArea<E : Entity>(
     }
 
     override fun updateEntitiesInArea(): Pair<Collection<E>, Collection<E>> {
-        val cylinderPosition = position
+        val cylinderPosition = location
         return update(
-            instance.entities
+            world.entities
                 .asSequence()
                 .filterIsInstance(entityClass)
-                .filter { it.position.isInCylinder(cylinderPosition, radius, limitY) }
+                .filter { it.location.isInCylinder(cylinderPosition, radius, limitY) }
                 .toSet()
         )
     }

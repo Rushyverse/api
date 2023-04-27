@@ -1,8 +1,8 @@
 package com.github.rushyverse.api.position
 
-import net.minestom.server.coordinate.Pos
-import net.minestom.server.entity.Entity
-import net.minestom.server.instance.Instance
+import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.entity.Entity
 
 /**
  * An area defined by a sphere shape.
@@ -12,17 +12,17 @@ import net.minestom.server.instance.Instance
  */
 public class SphereArea<E : Entity>(
     public val entityClass: Class<E>,
-    public override var instance: Instance,
-    public override var position: Pos,
+    public override var world: World,
+    public override var location: Location,
     radius: Double
 ) : AbstractArea<E>(), IAreaLocatable<E> {
 
     public companion object {
         public inline operator fun <reified E : Entity> invoke(
-            instance: Instance,
-            position: Pos,
+            world: World,
+            location: Location,
             radius: Double
-        ): SphereArea<E> = SphereArea(E::class.java, instance, position, radius)
+        ): SphereArea<E> = SphereArea(E::class.java, world, location, radius)
     }
 
     public var radius: Double = radius
@@ -44,6 +44,6 @@ public class SphereArea<E : Entity>(
     }
 
     override fun updateEntitiesInArea(): Pair<Collection<E>, Collection<E>> {
-        return update(instance.getNearbyEntities(position, radius).asSequence().filterIsInstance(entityClass).toSet())
+        return update(world.getNearbyEntities(location, radius, radius, radius).asSequence().filterIsInstance(entityClass).toSet())
     }
 }

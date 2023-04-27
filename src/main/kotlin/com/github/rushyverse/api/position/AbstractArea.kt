@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.position
 
-import net.minestom.server.entity.Entity
+import org.bukkit.entity.Entity
 import java.util.*
 
 /**
