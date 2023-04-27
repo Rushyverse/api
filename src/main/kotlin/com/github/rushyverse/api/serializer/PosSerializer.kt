@@ -7,7 +7,8 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.*
-import net.minestom.server.coordinate.Pos
+import org.bukkit.Location
+import org.bukkit.World
 
 /**
  * Serializer for [Pos].
@@ -88,4 +89,24 @@ public object PosSerializer : KSerializer<Pos> {
             )
         }
     }
+}
+
+/**
+ * Represents a position in a 3D space with additional yaw and pitch rotations.
+ * Can be converted to a Bukkit [Location] with the provided [toLocation] method.
+ *
+ * @property x The x-coordinate of the position.
+ * @property y The y-coordinate of the position.
+ * @property z The z-coordinate of the position.
+ * @property yaw The yaw rotation (horizontal rotation) in degrees.
+ * @property pitch The pitch rotation (vertical rotation) in degrees.
+ */
+public data class Pos(val x: Double, val y: Double, val z: Double, val yaw: Float, val pitch: Float) {
+    /**
+     * Converts this [Pos] object to a Bukkit [Location] object.
+     *
+     * @param world The [World] in which the position is located.
+     * @return A new [Location] object representing the same position and rotation as this [Pos] object.
+     */
+    public fun toLocation(world: World): Location = Location(world, x, y, z, yaw, pitch)
 }
