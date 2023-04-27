@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.serializer.Pos
 import org.bukkit.Location
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -36,3 +37,12 @@ public fun Location.isInCylinder(locationCylinder: Location, radius: Double, lim
     val distance = sqrt((x - locationCylinder.x).pow(2.0) + (z - locationCylinder.z).pow(2.0))
     return distance <= radius && y in limitY
 }
+
+/**
+ * Converts this [Location] object to a [Pos] object.
+ * This function allows serializing coordinates without taking the world into account.
+ *
+ * @receiver The [Location] to convert.
+ * @return A new [Pos] object with the same position and rotation as this [Location] object.
+ */
+public fun Location.toPos(): Pos = Pos(x, y, z, yaw, pitch)
