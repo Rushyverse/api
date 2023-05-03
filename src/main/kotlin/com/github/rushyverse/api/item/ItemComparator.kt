@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.item
 
-import net.minestom.server.item.ItemStack
+import org.bukkit.inventory.ItemStack
 
 /**
  * Allows to identify if an item is equivalent to another.
