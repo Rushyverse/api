@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.image
 
-import net.minestom.server.entity.metadata.other.ItemFrameMeta
+import org.bukkit.block.BlockFace
 
 /**
  * This class is used to calculate the position of the map image.
@@ -21,12 +21,12 @@ public sealed interface MapImageMath {
          * Link the item frame orientation to the [MapImageMath] instance.
          */
         private val orientations = mapOf(
-            ItemFrameMeta.Orientation.DOWN to Down,
-            ItemFrameMeta.Orientation.UP to Up,
-            ItemFrameMeta.Orientation.NORTH to North,
-            ItemFrameMeta.Orientation.SOUTH to South,
-            ItemFrameMeta.Orientation.WEST to West,
-            ItemFrameMeta.Orientation.EAST to East
+            BlockFace.DOWN to Down,
+            BlockFace.UP to Up,
+            BlockFace.NORTH to North,
+            BlockFace.SOUTH to South,
+            BlockFace.WEST to West,
+            BlockFace.EAST to East
         )
 
         /**
@@ -34,7 +34,7 @@ public sealed interface MapImageMath {
          * @param orientation The orientation of the item frame.
          * @return The [MapImageMath] for the orientation.
          */
-        public fun getFromOrientation(orientation: ItemFrameMeta.Orientation): MapImageMath {
+        public fun getFromOrientation(orientation: BlockFace): MapImageMath {
             return orientations[orientation] ?: throw IllegalArgumentException("Unsupported orientation: $orientation")
         }
     }
