@@ -3,7 +3,7 @@ package com.github.rushyverse.api.extension
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
-import net.minestom.server.item.ItemStack
+import org.bukkit.inventory.ItemStack
 
 /**
  * Format the string [loreString] using [toFormattedLoreSequence] and transform it into a [TextComponent] using [toLore].
@@ -13,13 +13,18 @@ import net.minestom.server.item.ItemStack
  * @param transform A function that will be applied to each component.
  * @return The same builder with the lore modified.
  */
-public inline fun ItemStack.Builder.formattedLore(
+public inline fun ItemStack.formattedLore(
     loreString: String,
     lineLength: Int = DEFAULT_LORE_LINE_LENGTH,
     crossinline transform: TextComponent.Builder.() -> Unit = {
         color(NamedTextColor.GRAY)
     }
-): ItemStack.Builder = lore(loreString.toFormattedLoreSequence(lineLength).toLore(transform))
+): ItemStack {
+    val meta = this.itemMeta
+    meta.lore(loreString.toFormattedLoreSequence(lineLength).toLore(transform))
+    this.itemMeta = meta
+    return this
+}
 
 /**
  * Format the string [loreString] using [toFormattedLoreSequence] and transform it into a [TextComponent] using [toLore].
@@ -35,7 +40,12 @@ public inline fun ItemStack.withFormattedLore(
     crossinline transform: TextComponent.Builder.() -> Unit = {
         color(NamedTextColor.GRAY)
     }
-): ItemStack = withLore(loreString.toFormattedLoreSequence(lineLength).toLore(transform))
+): ItemStack {
+    val meta = this.itemMeta
+    meta.lore(loreString.toFormattedLoreSequence(lineLength).toLore(transform))
+    this.itemMeta = meta
+    return this
+}
 
 /**
  * Define an unique component as lore.
@@ -43,4 +53,6 @@ public inline fun ItemStack.withFormattedLore(
  * @param lore Lore to set.
  * @return The same item.
  */
-public fun ItemStack.withLore(lore: Component): ItemStack = withLore(listOf(lore))
+public fun ItemStack.withLore(lore: Component): ItemStack = apply {
+    itemMeta = itemMeta.apply { lore(listOf(lore)) }
+}
