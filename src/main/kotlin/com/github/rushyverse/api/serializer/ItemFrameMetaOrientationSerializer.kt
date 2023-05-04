@@ -7,23 +7,23 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import net.minestom.server.entity.metadata.other.ItemFrameMeta
+import org.bukkit.block.BlockFace
 
 /**
  * Serializer for [ItemFrameMeta.Orientation].
  * To deserialize the orientation, it will be case-insensitive.
  */
-public object ItemFrameMetaOrientationSerializer : KSerializer<ItemFrameMeta.Orientation> {
+public object ItemFrameMetaOrientationSerializer : KSerializer<BlockFace> {
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("orientation", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: ItemFrameMeta.Orientation) {
+    override fun serialize(encoder: Encoder, value: BlockFace) {
         encoder.encodeString(value.name)
     }
 
-    override fun deserialize(decoder: Decoder): ItemFrameMeta.Orientation {
+    override fun deserialize(decoder: Decoder): BlockFace {
         val decodeString = decoder.decodeString()
-        return ItemFrameMeta.Orientation.values()
+        return BlockFace.values()
             .find { it.name.equals(decodeString, true) }
             ?: throw SerializationException("Invalid orientation")
     }
