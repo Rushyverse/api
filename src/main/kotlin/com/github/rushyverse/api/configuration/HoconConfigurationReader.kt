@@ -1,12 +1,12 @@
 package com.github.rushyverse.api.configuration
 
+import com.github.rushyverse.api.serializer.Pos
 import com.github.rushyverse.api.serializer.PosSerializer
 import com.typesafe.config.ConfigFactory
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
-import net.minestom.server.coordinate.Pos
 import java.io.File
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createType
