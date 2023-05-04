@@ -10,7 +10,7 @@ import kotlinx.serialization.encoding.Encoder
 import org.bukkit.block.BlockFace
 
 /**
- * Serializer for [ItemFrameMeta.Orientation].
+ * Serializer for ItemFrame [BlockFace] orientation.
  * To deserialize the orientation, it will be case-insensitive.
  */
 public object ItemFrameMetaOrientationSerializer : KSerializer<BlockFace> {
