@@ -21,7 +21,7 @@ dependencies {
     val kotlinSerializationVersion = "1.5.0"
     val commonsNetVersion = "3.9.0"
     val icu4jVersion = "72.1"
-    val minimessageVersion = "4.13.0"
+    val minimessageVersion = "4.14.0"
 
     api(kotlin("stdlib"))
     api(kotlin("reflect"))
