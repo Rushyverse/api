@@ -20,7 +20,7 @@ dependencies {
     val coroutinesVersion = "1.6.4"
     val kotlinSerializationVersion = "1.5.0"
     val commonsNetVersion = "3.9.0"
-    val icu4jVersion = "72.1"
+    val icu4jVersion = "73.2"
     val minimessageVersion = "4.13.0"
 
     api(kotlin("stdlib"))
