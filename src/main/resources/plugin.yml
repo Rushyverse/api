@@ -1,5 +1,7 @@
-name: bukkit-api
+name: paper-api
 version: 1.0
 author: Distractic
 api-version: 1.19
-main: io.github.distractic.bukkit.api.APIPlugin
+main: com.github.rushyverse.api.APIPlugin
+depend:
+  - CommandAPI
