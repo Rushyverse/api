@@ -1,4 +1,4 @@
-package com.github.rushyverse.api.extension
+package com.github.rushyverse.api.extension.event
 
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
