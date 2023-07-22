@@ -129,7 +129,7 @@ val javadocJar = tasks.register<Jar>("javadocJar") {
 
 publishing {
     publications {
-        val projectOrganizationPath = "Distractic/${project.name}"
+        val projectOrganizationPath = "Rushyverse/${project.name}"
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
         create<MavenPublication>(project.name) {
@@ -159,6 +159,12 @@ publishing {
                 }
 
                 developers {
+                    developer {
+                        name.set("Quentixx")
+                        email.set("Quentixx@outlook.fr")
+                        url.set("https://github.com/Quentixx")
+                    }
+
                     developer {
                         name.set("Distractic")
                         email.set("Distractic@outlook.fr")
