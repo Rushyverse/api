@@ -1,9 +1,8 @@
 plugins {
-    kotlin("jvm") version "1.8.22"
-    kotlin("plugin.serialization") version "1.8.22"
+    embeddedKotlin("jvm")
+    embeddedKotlin("plugin.serialization")
     id("org.jetbrains.dokka") version "1.8.20"
-    id("com.github.johnrengelman.shadow") version "7.1.2"
-    id("net.researchgate.release") version "3.0.2"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
     `maven-publish`
     `java-library`
 }
@@ -15,16 +14,18 @@ repositories {
     maven("https://jitpack.io")
 }
 
-val coroutineVersion: String by project
-val loggingVersion: String by project
-val koinVersion: String by project
-val mccoroutineVersion: String by project
-val paperVersion: String by project
-val junitVersion: String by project
-val mockkVersion: String by project
-val slf4jVersion: String by project
-
 dependencies {
+    val coroutineVersion = "1.6.4"
+    val loggingVersion = "2.1.23"
+    val koinVersion = "3.2.0"
+    val mccoroutineVersion = "2.4.0"
+    val paperVersion = "1.19-R0.1-SNAPSHOT"
+    val junitVersion = "5.9.0"
+    val mockkVersion = "1.12.5"
+    val slf4jVersion = "2.0.0-alpha6"
+    val fastboardVersion = "2.0.0"
+    val commandApiVersion = "9.0.3"
+
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
@@ -44,13 +45,13 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:$paperVersion")
 
     // Scoreboard framework
-    implementation("fr.mrmicky:fastboard:2.0.0")
+    implementation("fr.mrmicky:fastboard:$fastboardVersion")
 
     // CommandAPI framework
     // The CommandAPI dependency used for Bukkit and it's forks
-    api("dev.jorel:commandapi-bukkit-core:9.0.3")
+    api("dev.jorel:commandapi-bukkit-core:$commandApiVersion")
     // Due to all functions available in the kotlindsl being inlined, we only need this dependency at compile-time
-    api("dev.jorel:commandapi-bukkit-kotlin:9.0.3")
+    api("dev.jorel:commandapi-bukkit-kotlin:$commandApiVersion")
 
     api("com.github.Rushyverse:core:6ae31a9250")
 
@@ -177,8 +178,4 @@ publishing {
             }
         }
     }
-}
-
-release {
-    tagTemplate.set("v${version}")
 }
