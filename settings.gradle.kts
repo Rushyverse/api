@@ -1,1 +1,1 @@
-rootProject.name = "bukkit-api"
+rootProject.name = "api"
