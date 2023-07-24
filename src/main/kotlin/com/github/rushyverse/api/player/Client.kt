@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.player
 
+import com.github.rushyverse.api.API
 import fr.mrmicky.fastboard.FastBoard
 import com.github.rushyverse.api.delegate.DelegatePlayer
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
@@ -23,7 +24,7 @@ public open class Client(
 
     public val player: Player? by DelegatePlayer(pluginId, playerUUID)
 
-    public val fastBoard: FastBoard by lazy { FastBoard(player) }
+    public val fastBoard: FastBoard by lazy { API.getOrInitFastBoard(requirePlayer()) }
 
     public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
 
