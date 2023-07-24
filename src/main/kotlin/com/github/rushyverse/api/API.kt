@@ -18,13 +18,17 @@ public object API {
         if (existingFastBoard == null) {
             existingFastBoard = FastBoard(player)
             fastBoards.add(existingFastBoard)
-            println("API: FastBoards: Create new for ${player.name}")
-        } else {
-            println("API: FastBoards: Get existing for ${player.name}")
         }
 
-        println("API: FastBoards list: $fastBoards")
-
         return existingFastBoard
+    }
+
+    /**
+     * Deletes and removes an existing FastBoard.
+     */
+    public fun removeFastBoard(fastBoard: FastBoard) {
+        if (!fastBoard.isDeleted)
+            fastBoard.delete()
+        fastBoards.remove(fastBoard)
     }
 }
