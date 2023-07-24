@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.listener
 
+import com.github.rushyverse.api.API
 import com.github.rushyverse.api.Plugin
 import com.github.rushyverse.api.coroutine.exception.SilentCancellationException
 import com.github.rushyverse.api.koin.inject
@@ -72,9 +73,10 @@ public class PlayerListener(
 
         plugin.clientEvents.onQuit(client, quitMessage)
 
-        client.fastBoard.delete()
         client.cancel(SilentCancellationException("The player ${player.name} (${player.uniqueId}) left"))
 
         event.quitMessage(quitMessage.get())
+
+        API.removeFastBoard(client.fastBoard)
     }
 }
