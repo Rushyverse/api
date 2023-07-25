@@ -18,10 +18,7 @@ public abstract class AbstractScheduler(
         get() = job?.isActive == true
 
     override fun start() {
-        if (running) {
-            throw IllegalStateException("The scheduling is already running")
-        }
-
+        require(!running) { "The scheduling is already running" }
         job = coroutineScope.launch {
             run()
         }

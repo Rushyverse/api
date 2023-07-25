@@ -1,21 +1,19 @@
 package com.github.rushyverse.api.listener
 
-import com.github.rushyverse.api.API
+import com.github.rushyverse.api.APIPlugin
 import com.github.rushyverse.api.Plugin
 import com.github.rushyverse.api.coroutine.exception.SilentCancellationException
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.*
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
+import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import kotlinx.coroutines.cancel
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import java.util.concurrent.atomic.AtomicReference
-import java.util.logging.Logger
 
 /**
  * Main listener to manager instance of clients for the player entering and exiting the server.
@@ -27,7 +25,7 @@ public class PlayerListener(
 ) : Listener {
 
     private val clients: ClientManager by inject(plugin.id)
-    private val logger: Logger by inject(plugin.id)
+    private val scoreboardManager: ScoreboardManager by inject(APIPlugin.ID)
 
     /**
      * Handle the join event to create and store a new client.
@@ -36,14 +34,8 @@ public class PlayerListener(
      */
     @EventHandler(priority = EventPriority.LOWEST)
     public suspend fun onJoin(event: PlayerJoinEvent) {
-        println("Player join $event for plugin $plugin")
         val player = event.player
-        val clientCreated = createAndSaveClient(player)
-        val joinMessage = AtomicReference<Component?>(event.joinMessage())
-
-        plugin.clientEvents.onJoin(clientCreated, joinMessage)
-
-        event.joinMessage(joinMessage.get())
+        createAndSaveClient(player)
     }
 
     /**
@@ -68,15 +60,9 @@ public class PlayerListener(
     @EventHandler(priority = EventPriority.HIGHEST)
     public suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
+        scoreboardManager.remove(player)
+
         val client = clients.removeClient(player) ?: return
-        val quitMessage = AtomicReference<Component?>(event.quitMessage())
-
-        plugin.clientEvents.onQuit(client, quitMessage)
-
         client.cancel(SilentCancellationException("The player ${player.name} (${player.uniqueId}) left"))
-
-        event.quitMessage(quitMessage.get())
-
-        API.removeFastBoard(client.fastBoard)
     }
 }

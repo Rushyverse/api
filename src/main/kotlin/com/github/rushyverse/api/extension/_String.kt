@@ -204,5 +204,5 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.asMiniComponent(vararg tagResolver: TagResolver): Component =
+public fun String.toComponent(vararg tagResolver: TagResolver): Component =
     MiniMessage.miniMessage().deserialize(this, *tagResolver)

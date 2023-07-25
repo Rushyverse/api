@@ -1,10 +1,12 @@
 package com.github.rushyverse.api.player
 
-import com.github.rushyverse.api.API
-import fr.mrmicky.fastboard.FastBoard
+import com.github.rushyverse.api.APIPlugin
 import com.github.rushyverse.api.delegate.DelegatePlayer
+import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
+import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.SupportedLanguage
+import fr.mrmicky.fastboard.FastBoard
 import kotlinx.coroutines.CoroutineScope
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
@@ -19,16 +21,13 @@ import java.util.*
 public open class Client(
     pluginId: String,
     public val playerUUID: UUID,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
 ) : CoroutineScope by coroutineScope {
 
+    private val scoreboardManager: ScoreboardManager by inject(APIPlugin.ID)
+
     public val player: Player? by DelegatePlayer(pluginId, playerUUID)
-
-    public val fastBoard: FastBoard by lazy { API.getOrInitFastBoard(requirePlayer()) }
-
-    public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
-
-    public val locale: Locale get() = lang.locale
 
     /**
      * Retrieve the instance of player.
@@ -41,5 +40,12 @@ public open class Client(
     public fun send(text: Component): Unit = requirePlayer().sendMessage(text)
 
     public fun send(message: String): Unit = send(text(message))
+
+    /**
+     * Retrieve the scoreboard of the player.
+     * The scoreboard will be created if it doesn't exist.
+     * @return The scoreboard of the player.
+     */
+    public suspend fun scoreboard(): FastBoard = scoreboardManager.getOrCreate(requirePlayer())
 
 }

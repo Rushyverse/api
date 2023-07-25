@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.world.Pos
 import org.bukkit.Location
 import org.bukkit.World
 
@@ -88,4 +87,15 @@ public fun Location.copy(
     pitch: Float = this.pitch,
 ): Location = Location(world, x, y, z, yaw, pitch)
 
-public fun Location.toPos(): Pos = Pos(x, y, z, yaw, pitch)
+public fun Location.divide(value: Number): Location {
+    val toDouble = value.toDouble()
+    return copy(x = x / toDouble, y = y / toDouble, z = z / toDouble)
+}
+
+/**
+ * Returns the center position between two points.
+ * @receiver The first position.
+ * @param other The second position.
+ * @return The center position between the two points.
+ */
+public fun Location.centerRelative(other: Location): Location = add(other).divide(2)

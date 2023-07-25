@@ -49,8 +49,6 @@ public class SharedGameData {
             games[index] = gameData
         }
 
-        println("Shared memory data : $games")
-
         callOnChange()
     }
 }

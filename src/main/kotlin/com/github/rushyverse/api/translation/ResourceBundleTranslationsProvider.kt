@@ -12,7 +12,7 @@ public fun ResourceBundleTranslationsProvider.registerResourceBundleForSupported
     bundleName: String,
     loader: (String, Locale) -> ResourceBundle
 ) {
-    SupportedLanguage.values().forEach {
+    SupportedLanguage.entries.forEach {
         registerResourceBundle(bundleName, it.locale, loader)
     }
 }

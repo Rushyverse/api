@@ -15,10 +15,10 @@ private val log = KotlinLogging.logger { }
 
 /**
  * Allows executing code while the task is not cancelled.
- * The [tasks] contains several body function that one will be executed after each [delay].
+ * The [tasks] contains several body functions that one will be executed after each [delay].
  * @property delay Time to wait between each execution.
  * @property _tasks Task executed in the coroutine context each time.
- * @property tasks Immutable list of task executed in the coroutine context each time.
+ * @property tasks Immutable list of a task executed in the coroutine context each time.
  * @property mutex Mutex to synchronized data of the scheduler.
  * @property nextTaskIndex Next index of the task that will be executed.
  */
@@ -122,7 +122,7 @@ public class SchedulerTask(
     /**
      * Add a new body should be executed in the scheduler.
      * The operation is made with possible asynchronous effect if the scheduler is running.
-     * It's recommend to use this function when you are sure that the scheduler is not running.
+     * It's recommended to use this function when you are sure that the scheduler is not running.
      * @param id Id of the task created.
      * @param body Lambda function.
      * @return Task created.
@@ -150,7 +150,7 @@ public class SchedulerTask(
     /**
      * Add a new body should be executed in the scheduler.
      * The operation is made with possible asynchronous effect if the scheduler is running.
-     * It's recommend to use this function when you are sure that the scheduler is not running.
+     * It's recommended to use this function when you are sure that the scheduler is not running.
      * @param index Index at which the specified element is to be inserted.
      * @param id Id of the task created.
      * @param body Lambda function.
@@ -184,7 +184,7 @@ public class SchedulerTask(
     /**
      * Remove a task from the scheduler.
      * The operation is made with possible asynchronous effect if the scheduler is running.
-     * It's recommend to use this function when you are sure that the scheduler is not running.
+     * It's recommended to use this function when you are sure that the scheduler is not running.
      * @param id Id of the task registered into the scheduler.
      * @return `true` if a task has been removed, `false` otherwise.
      */
@@ -208,7 +208,7 @@ public class SchedulerTask(
      * Remove the task at the index.
      * Throws exception if no task is present at the index.
      * The operation is made with possible asynchronous effect if the scheduler is running.
-     * It's recommend to use this function when you are sure that the scheduler is not running.
+     * It's recommended to use this function when you are sure that the scheduler is not running.
      * If necessary, shift the next task to not skip one task.
      * @param index Index of the task.
      */

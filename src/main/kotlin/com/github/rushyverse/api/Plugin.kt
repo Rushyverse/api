@@ -18,7 +18,6 @@ import java.util.*
 public abstract class Plugin : SuspendingJavaPlugin() {
 
     public abstract val id: String
-    public abstract val clientEvents: PluginClientEvents
 
     public companion object {
         public const val BUNDLE_API: String = "api_translate"
@@ -34,7 +33,7 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         registerListener { VillagerListener(this) }
     }
 
-    protected inline fun <reified T : com.github.rushyverse.api.Plugin> modulePlugin(): Module = loadModule(id) {
+    protected inline fun <reified T : Plugin> modulePlugin(): Module = loadModule(id) {
         single { this@Plugin }
         single { this@Plugin as T }
     }
@@ -67,6 +66,6 @@ public abstract class Plugin : SuspendingJavaPlugin() {
      */
     protected open suspend fun createTranslationsProvider(): ResourceBundleTranslationsProvider =
         ResourceBundleTranslationsProvider().apply {
-            registerResourceBundleForSupportedLocales(com.github.rushyverse.api.Plugin.Companion.BUNDLE_API, ResourceBundle::getBundle)
+            registerResourceBundleForSupportedLocales(Plugin.Companion.BUNDLE_API, ResourceBundle::getBundle)
         }
 }
