@@ -19,7 +19,7 @@ public class ScoreboardManager {
         }
     }
 
-    public suspend fun remove(player: Player): FastBoard? = mutex.withLock {
-        _scoreboards.remove(player.name)
-    }?.also { it.delete() }
+    public suspend fun remove(player: Player) {
+        mutex.withLock { _scoreboards.remove(player.name) }?.delete()
+    }
 }

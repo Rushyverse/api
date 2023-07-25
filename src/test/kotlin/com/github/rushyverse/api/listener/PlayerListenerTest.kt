@@ -5,9 +5,9 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
+import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.utils.getRandomString
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,12 +29,19 @@ class PlayerListenerTest : AbstractKoinTest() {
 
     private lateinit var listener: PlayerListener
 
+    private lateinit var scoreboardManagerMock: ScoreboardManager
+
     @BeforeTest
     override fun onBefore() {
         super.onBefore()
         clientManager = ClientManagerImpl()
         loadTestModule {
             single { clientManager }
+        }
+
+        scoreboardManagerMock = mockk<ScoreboardManager>()
+        loadApiTestModule {
+            single { scoreboardManagerMock }
         }
         listener = PlayerListener(plugin)
     }
@@ -104,12 +111,16 @@ class PlayerListenerTest : AbstractKoinTest() {
         @Test
         fun `client linked to the player is removed and cancelled`() = runTest {
             val player = createPlayerMock()
+            coJustRun { scoreboardManagerMock.remove(any()) }
+
             val client = Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Main + SupervisorJob()))
             clientManager.put(player, client)
+
             listener.onQuit(createEvent(player))
 
             assertEquals(0, clientManager.clients.size)
             assertFalse { client.isActive }
+            coVerify { scoreboardManagerMock.remove(player) }
         }
 
         private fun createEvent(player: Player): PlayerQuitEvent {

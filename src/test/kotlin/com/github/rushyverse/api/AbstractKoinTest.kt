@@ -23,6 +23,7 @@ abstract class AbstractKoinTest {
     open fun onBefore() {
         pluginId = getRandomString()
         CraftContext.startKoin(pluginId) { }
+        CraftContext.startKoin(APIPlugin.ID) { }
 
         loadTestModule {
             plugin = mockk(getRandomString())
@@ -40,11 +41,15 @@ abstract class AbstractKoinTest {
     @AfterTest
     open fun onAfter() {
         CraftContext.stopKoin(pluginId)
+        CraftContext.stopKoin(APIPlugin.ID)
     }
 
     inline fun <reified T : Any> testInject(): T = CraftContext.get(pluginId).inject<T>().value
 
     fun loadTestModule(moduleDeclaration: ModuleDeclaration): Module =
         loadModule(pluginId, false, moduleDeclaration)
+
+    fun loadApiTestModule(moduleDeclaration: ModuleDeclaration): Module =
+        loadModule(APIPlugin.ID, true, moduleDeclaration)
 
 }
