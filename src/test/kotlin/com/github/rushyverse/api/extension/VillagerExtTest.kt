@@ -1,7 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.Plugin
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.utils.getRandomString
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk

@@ -1,8 +1,8 @@
 package com.github.rushyverse.api.player
 
-import io.github.distractic.bukkit.api.AbstractKoinTest
-import io.github.distractic.bukkit.api.player.exception.ClientNotFoundException
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.player.exception.ClientNotFoundException
+import com.github.rushyverse.api.utils.getRandomString
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope

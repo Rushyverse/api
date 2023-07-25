@@ -1,8 +1,8 @@
 package com.github.rushyverse.api.listener
 
-import io.github.distractic.bukkit.api.AbstractKoinTest
-import io.github.distractic.bukkit.api.extension.namespacedKeyKeepJob
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.extension.namespacedKeyKeepJob
+import com.github.rushyverse.api.utils.getRandomString
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

@@ -1,8 +1,8 @@
 package com.github.rushyverse.api.extension
 
-import io.github.distractic.bukkit.api.item.CraftSlot
-import io.github.distractic.bukkit.api.item.exception.CraftResultMissingException
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.item.CraftSlot
+import com.github.rushyverse.api.item.exception.CraftResultMissingException
+import com.github.rushyverse.api.utils.getRandomString
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot

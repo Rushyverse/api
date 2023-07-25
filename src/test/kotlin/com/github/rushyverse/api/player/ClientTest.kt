@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.player
 
-import io.github.distractic.bukkit.api.AbstractKoinTest
+import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.player.exception.PlayerNotFoundException
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +36,7 @@ class ClientTest : AbstractKoinTest() {
     fun `require player instance not found throws an exception`() {
         val client = Client(pluginId, UUID.randomUUID(), CoroutineScope(EmptyCoroutineContext))
         every { server.getPlayer(any<UUID>()) } returns null
-        assertThrows<io.github.distractic.bukkit.api.player.exception.PlayerNotFoundException> {
+        assertThrows<PlayerNotFoundException> {
             client.requirePlayer()
         }
     }

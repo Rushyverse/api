@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.koin
 
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.utils.getRandomString
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

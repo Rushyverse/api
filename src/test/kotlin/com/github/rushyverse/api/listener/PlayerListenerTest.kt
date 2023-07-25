@@ -1,11 +1,11 @@
 package com.github.rushyverse.api.listener
 
-import io.github.distractic.bukkit.api.AbstractKoinTest
-import io.github.distractic.bukkit.api.player.Client
-import io.github.distractic.bukkit.api.player.ClientManager
-import io.github.distractic.bukkit.api.player.ClientManagerImpl
-import io.github.distractic.bukkit.api.player.exception.ClientAlreadyExistsException
-import io.github.distractic.bukkit.api.utils.getRandomString
+import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.player.Client
+import com.github.rushyverse.api.player.ClientManager
+import com.github.rushyverse.api.player.ClientManagerImpl
+import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
+import com.github.rushyverse.api.utils.getRandomString
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope

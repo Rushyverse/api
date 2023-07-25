@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.extension
 
-import io.github.distractic.bukkit.api.extension.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
