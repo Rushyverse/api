@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.mockk
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
@@ -11,7 +11,7 @@ class PersistentDataHolderTest {
 
     @Test
     fun `open data container and manage it`() {
-        val container = mockk<PersistentDataContainer>(getRandomString())
+        val container = mockk<PersistentDataContainer>(randomString())
         val holder = PersistentDataHolder { container }
 
         val isEquals = holder.dataContainer {

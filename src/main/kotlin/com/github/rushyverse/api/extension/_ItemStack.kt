@@ -182,7 +182,7 @@ public fun Array<out ItemStack>.serializeToBytes(): ByteArray {
 }
 
 /**
- * Serialize a collection of item to an encoded String with Base64.
+ * Serialize a collection of items to an encoded String with Base64.
  * @receiver Items.
  * @return The String encoded with items serialized.
  */
@@ -191,7 +191,7 @@ public fun Collection<ItemStack>.serializeToBase64(): String {
 }
 
 /**
- * Serialize a collection of item to a byte array.
+ * Serialize a collection of items to a byte array.
  * @receiver Items.
  * @return Byte array of items serialized.
  */

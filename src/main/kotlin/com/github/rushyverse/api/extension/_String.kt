@@ -13,7 +13,7 @@ import java.math.BigInteger
 import java.util.*
 
 /**
- * Length of the value of UUID.
+ * Length of a UUID.
  */
 public const val UUID_SIZE: Int = 36
 
@@ -69,7 +69,7 @@ public fun String.toUUIDStrictOrNull(): UUID? = try {
 /**
  * Creates a [UUID] from the string standard.
  * The string must have the strict format of UUID (with dashes).
- * If the string cannot be converted to UUID, throws an exception.
+ * If the string cannot be converted to UUID, throw an exception.
  * @receiver String with UUID format.
  * @return The UUID instance equals to the string value.
  * @throws IllegalArgumentException Exception if the value is not a valid uuid.
@@ -93,7 +93,7 @@ public fun String.toUUIDOrNull(): UUID? = try {
 /**
  * Creates a [UUID] from a string.
  * The string can have dashes or not.
- * If the string cannot be converted to UUID, throws an exception.
+ * If the string cannot be converted to UUID, throw an exception.
  * @receiver String with UUID format.
  * @return The UUID instance equals to the string value.
  * @throws IllegalArgumentException Exception if the value is not a valid uuid.

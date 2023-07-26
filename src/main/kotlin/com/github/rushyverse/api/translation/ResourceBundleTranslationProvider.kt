@@ -6,9 +6,9 @@ import java.util.*
 
 /**
  * Loads the [ResourceBundle] called [bundleName] for all supported locales from [SupportedLanguage].
- * @see ResourceBundleTranslationsProvider.registerResourceBundle
+ * @see ResourceBundleTranslationProvider.registerResourceBundle
  */
-public fun ResourceBundleTranslationsProvider.registerResourceBundleForSupportedLocales(
+public fun ResourceBundleTranslationProvider.registerResourceBundleForSupportedLocales(
     bundleName: String,
     loader: (String, Locale) -> ResourceBundle
 ) {
@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger { }
  * Translation provider backed by Java's [ResourceBundle]s. This makes use of `.properties` files that are standard
  * across the Java ecosystem.
  */
-public open class ResourceBundleTranslationsProvider : TranslationsProvider() {
+public open class ResourceBundleTranslationProvider : TranslationProvider() {
 
     private val bundles: MutableMap<Pair<String, Locale>, ResourceBundle> = mutableMapOf()
 
@@ -76,7 +76,7 @@ public open class ResourceBundleTranslationsProvider : TranslationsProvider() {
     }
 
     /**
-     * Create the key to retrieve bundle.
+     * Create the key to retrieve a bundle.
      * @param bundleName Name of the bundle.
      * @param locale Locale.
      * @return The key created.

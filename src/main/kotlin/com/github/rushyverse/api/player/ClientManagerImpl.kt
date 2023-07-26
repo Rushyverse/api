@@ -8,7 +8,7 @@ import org.bukkit.entity.Player
 /**
  * Manage the existing client present in the server.
  * The clients are stored with the name of the player.
- * @property _clients Synchronized mutable map of client as value and name of player as key.
+ * @property _clients Synchronized mutable map of clients as value and name of player as a key.
  */
 public class ClientManagerImpl : ClientManager {
 

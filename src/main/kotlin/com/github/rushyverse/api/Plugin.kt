@@ -1,5 +1,6 @@
 package com.github.rushyverse.api
 
+import com.github.rushyverse.api.APIPlugin.Companion.BUNDLE_API
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import com.github.rushyverse.api.extension.registerListener
 import com.github.rushyverse.api.koin.*
@@ -18,10 +19,6 @@ import java.util.*
 public abstract class Plugin : SuspendingJavaPlugin() {
 
     public abstract val id: String
-
-    public companion object {
-        public const val BUNDLE_API: String = "api_translate"
-    }
 
     override suspend fun onEnableAsync() {
         super.onEnableAsync()
@@ -53,7 +50,7 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     }
 
     /**
-     * Create a new instance of client.
+     * Create a new instance of a client.
      * @param player Player linked to the client.
      * @return C The instance of the client.
      */
@@ -61,11 +58,10 @@ public abstract class Plugin : SuspendingJavaPlugin() {
 
     /**
      * Create a translation provider to provide translations for the [supported languages][SupportedLanguage].
-     * @param bundles Bundles to load.
      * @return New translation provider.
      */
-    protected open suspend fun createTranslationsProvider(): ResourceBundleTranslationsProvider =
-        ResourceBundleTranslationsProvider().apply {
-            registerResourceBundleForSupportedLocales(Plugin.Companion.BUNDLE_API, ResourceBundle::getBundle)
+    protected open suspend fun createTranslationProvider(): ResourceBundleTranslationProvider =
+        ResourceBundleTranslationProvider().apply {
+            registerResourceBundleForSupportedLocales(BUNDLE_API, ResourceBundle::getBundle)
         }
 }

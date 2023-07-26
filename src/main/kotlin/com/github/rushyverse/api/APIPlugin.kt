@@ -12,6 +12,7 @@ public class APIPlugin : JavaPlugin() {
 
     public companion object {
         public const val ID: String = "api"
+        public const val BUNDLE_API: String = "api_translate"
     }
 
     override fun onEnable() {

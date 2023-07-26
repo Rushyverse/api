@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
@@ -22,16 +22,11 @@ class CommandSenderExtTest {
             val slotComponent = slot<TextComponent>()
             justRun { sender.sendMessage(capture(slotComponent)) }
 
-            val content = getRandomString()
+            val content = randomString()
             sender.sendMessageError(content)
             val component = slotComponent.captured
             assertEquals(NamedTextColor.RED, component.color())
             assertEquals(content, component.content())
         }
-    }
-
-    @Nested
-    inner class Permissions {
-
     }
 }

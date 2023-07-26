@@ -10,7 +10,7 @@ import org.bukkit.inventory.MerchantRecipe
  * the amount of the first ingredient is scaled by the recipe's.
  * @param uses Number of times this trade has been used.
  * @param experienceReward Whether to reward experience to the player for the trade.
- * @param villagerExperience Amount of experience the villager earns from this trade.
+ * @param villagerExperience The Amount of experience the villager earns from this trade.
  * @param priceMultiplier price multiplier, can never be below zero.
  * @param demand This value is periodically updated by the
  * villager that owns this merchant recipe based on how often the recipe has
@@ -20,7 +20,7 @@ import org.bukkit.inventory.MerchantRecipe
  * this merchant recipe. It is based on the player's individual reputation with
  * the villager, and the player's currently active status effects (see
  * {@link PotionEffectType#HERO_OF_THE_VILLAGE}). The influence of the player's
- * reputation on the special price is scaled by the recipe's.
+ * reputation on the special price is scaled by the recipe.
  * @param ignoreDiscounts Whether all discounts on this trade should be ignored.
  * @param ingredients List of ingredients necessary to obtain [result] item.
  * @return New instance of [MerchantRecipe][org.bukkit.inventory.MerchantRecipe].

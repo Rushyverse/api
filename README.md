@@ -1,6 +1,6 @@
 # API
 
-This project allows to create a PaperMC based server easily in Kotlin. It provides a lot of features to create a Minecraft
+This project allows creating a PaperMC based server easily in Kotlin. It provides a lot of features to create a Minecraft
 server.
 
 ## Usage

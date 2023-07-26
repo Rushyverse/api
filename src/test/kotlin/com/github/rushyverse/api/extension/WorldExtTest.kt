@@ -1,7 +1,7 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.createRandomLocation
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomLocation
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -20,16 +20,16 @@ class WorldExtTest {
 
     @Test
     fun `await chunk at with block`() = runBlocking {
-        val world = mockk<World>(getRandomString())
+        val world = mockk<World>(randomString())
         val slotBlock = slot<Block>()
         val slotGen = slot<Boolean>()
 
-        val chunk = mockk<Chunk>(getRandomString())
+        val chunk = mockk<Chunk>(randomString())
         every { world.getChunkAtAsync(capture(slotBlock), capture(slotGen)) } returns CompletableFuture.completedFuture(
             chunk
         )
 
-        val block = mockk<Block>(getRandomString())
+        val block = mockk<Block>(randomString())
         assertEquals(chunk, world.awaitChunkAt(block, true))
         assertEquals(block, slotBlock.captured)
         assertTrue { slotGen.captured }
@@ -39,16 +39,16 @@ class WorldExtTest {
 
     @Test
     fun `await chunk at with location`() = runBlocking {
-        val world = mockk<World>(getRandomString())
+        val world = mockk<World>(randomString())
         val slotLoc = slot<Location>()
         val slotGen = slot<Boolean>()
 
-        val chunk = mockk<Chunk>(getRandomString())
+        val chunk = mockk<Chunk>(randomString())
         every { world.getChunkAtAsync(capture(slotLoc), capture(slotGen)) } returns CompletableFuture.completedFuture(
             chunk
         )
 
-        val location = createRandomLocation()
+        val location = randomLocation()
         assertEquals(chunk, world.awaitChunkAt(location, true))
         assertEquals(location, slotLoc.captured)
         assertTrue { slotGen.captured }
@@ -58,13 +58,13 @@ class WorldExtTest {
 
     @Test
     fun `await chunk at with coord`() = runBlocking {
-        val world = mockk<World>(getRandomString())
+        val world = mockk<World>(randomString())
         val slotX = slot<Int>()
         val slotZ = slot<Int>()
         val slotGen = slot<Boolean>()
         val slotUrgent = slot<Boolean>()
 
-        val chunk = mockk<Chunk>(getRandomString())
+        val chunk = mockk<Chunk>(randomString())
         every {
             world.getChunkAtAsync(
                 capture(slotX),

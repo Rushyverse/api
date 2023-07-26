@@ -7,11 +7,13 @@ import kotlin.random.Random
 
 val stringGenerator = generateSequence { UUID.randomUUID().toString() }.distinct().iterator()
 
-fun getRandomString() = stringGenerator.next()
+fun randomString() = stringGenerator.next()
+
+fun randomBoolean() = Random.nextBoolean()
 
 const val LIMIT_RANDOM_COORDINATE = 1000.0
 
-fun createRandomLocation(world: World? = null): Location {
+fun randomLocation(world: World? = null): Location {
     return Location(
         world,
         Random.nextDouble(LIMIT_RANDOM_COORDINATE),

@@ -12,7 +12,7 @@ public fun Cancellable.cancel() {
 /**
  * Extension function allowing to cancel the current process by method calling with a condition.
  */
-public fun <T : Cancellable> T.cancelIf(condition: T.() -> Boolean) {
+public inline fun <T : Cancellable> T.cancelIf(condition: T.() -> Boolean) {
     if (condition()) {
         cancel()
     }

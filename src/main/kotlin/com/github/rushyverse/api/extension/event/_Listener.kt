@@ -24,7 +24,7 @@ public fun Listener.unregister(): Unit = HandlerList.unregisterAll(this)
  * The current coroutine is suspended. When the coroutine is cancellable or resume, unregister the listener.
  * @param plugin Java plugin to register the listener.
  * @param priority Priority to register this event at.
- * @param ignoreCancelled Whether to pass cancelled events or not.
+ * @param ignoreCancelled Whether to pass canceled events or not.
  * @param block Function to treat the received event, returns `true` to valid the event and stop the listening, `false` otherwise.
  */
 public suspend inline fun <reified T : Event> waitEvent(
@@ -51,7 +51,7 @@ public suspend inline fun <reified T : Event> waitEvent(
  * The current coroutine is suspended. When the coroutine is cancellable or resume, unregister the listener.
  * @param plugin Java plugin to register the listener.
  * @param priority Priority to register this event at.
- * @param ignoreCancelled Whether to pass cancelled events or not.
+ * @param ignoreCancelled Whether to pass canceled events or not.
  * @param block Function to treat the received event, returns `true` to valid the event and stop the listening, `false` otherwise.
  */
 public suspend inline fun <reified T : Event> waitEvent(

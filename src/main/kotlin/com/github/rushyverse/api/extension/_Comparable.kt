@@ -2,7 +2,7 @@ package com.github.rushyverse.api.extension
 
 /**
  * Get the lowest and highest value in a specific index.
- * The lowest value is placed at the index 0 and highest at the index 1.
+ * The lowest value is placed at index 0 and highest at index 1.
  *
  * @param a First value.
  * @param b Second value.

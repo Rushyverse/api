@@ -1,4 +1,4 @@
-package com.github.rushyverse.api.extension
+package com.github.rushyverse.api.extension.event
 
 import org.bukkit.entity.Damageable
 import org.bukkit.event.entity.EntityDamageEvent

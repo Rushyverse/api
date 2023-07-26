@@ -39,7 +39,7 @@ public class PlayerListener(
     }
 
     /**
-     * Create a new instance of client and store it into [clients].
+     * Create a new instance of a client and store it into [clients].
      * If a client is already found for the player, throw an exception.
      * @param player Player linked to the client.
      * @return The instance of the client.
@@ -54,7 +54,7 @@ public class PlayerListener(
 
     /**
      * Handle the quit event to remove the client linked to the player leaving.
-     * The life cycle of the client will be cancelled.
+     * The life cycle of the client will be canceled.
      * @param event Event.
      */
     @EventHandler(priority = EventPriority.HIGHEST)

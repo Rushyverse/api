@@ -2,7 +2,7 @@ package com.github.rushyverse.api
 
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import org.bukkit.Server
@@ -13,7 +13,7 @@ import kotlin.test.BeforeTest
 
 abstract class AbstractKoinTest {
 
-    lateinit var plugin: com.github.rushyverse.api.Plugin
+    lateinit var plugin: Plugin
 
     lateinit var server: Server
 
@@ -21,17 +21,17 @@ abstract class AbstractKoinTest {
 
     @BeforeTest
     open fun onBefore() {
-        pluginId = getRandomString()
+        pluginId = randomString()
         CraftContext.startKoin(pluginId) { }
         CraftContext.startKoin(APIPlugin.ID) { }
 
         loadTestModule {
-            plugin = mockk(getRandomString())
-            server = mockk(getRandomString())
+            plugin = mockk(randomString())
+            server = mockk(randomString())
 
             every { plugin.server } returns server
             every { plugin.id } returns pluginId
-            every { plugin.name } returns getRandomString()
+            every { plugin.name } returns randomString()
 
             single { plugin }
             single { server }

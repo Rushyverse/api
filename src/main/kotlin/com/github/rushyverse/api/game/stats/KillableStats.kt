@@ -4,7 +4,7 @@ public open class KillableStats(
     public var kills: Int = 0,
     public var deaths: Int = 0,
 
-) : Stats {
+    ) : Stats {
 
     public override fun calculateScore(): Int {
         val score = kills - deaths

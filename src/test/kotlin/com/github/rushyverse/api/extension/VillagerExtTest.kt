@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -29,7 +29,7 @@ class VillagerExtTest {
 
         @Test
         fun `returns true when data is present`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
             val container = mockk<PersistentDataContainer>()
 
             val slotNamespaced = slot<NamespacedKey>()
@@ -41,7 +41,7 @@ class VillagerExtTest {
 
         @Test
         fun `returns false when data is not present`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
             val container = mockk<PersistentDataContainer>()
 
             val slotNamespaced = slot<NamespacedKey>()
@@ -59,7 +59,7 @@ class VillagerExtTest {
 
         @Test
         fun `when true, set key into the data container`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
             val container = mockk<PersistentDataContainer>()
 
             val slotNamespaced = slot<NamespacedKey>()
@@ -72,7 +72,7 @@ class VillagerExtTest {
 
         @Test
         fun `when false, remove key into the data container`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
             val container = mockk<PersistentDataContainer>()
 
             val slotNamespaced = slot<NamespacedKey>()

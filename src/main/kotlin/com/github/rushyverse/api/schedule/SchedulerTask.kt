@@ -14,7 +14,7 @@ import kotlin.time.Duration
 private val log = KotlinLogging.logger { }
 
 /**
- * Allows executing code while the task is not cancelled.
+ * Allows executing code while the task is not canceled.
  * The [tasks] contains several body functions that one will be executed after each [delay].
  * @property delay Time to wait between each execution.
  * @property _tasks Task executed in the coroutine context each time.

@@ -1,7 +1,8 @@
 package com.github.rushyverse.api.extension
 
 import com.destroystokyo.paper.profile.PlayerProfile
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomBoolean
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
@@ -20,23 +21,23 @@ class PlayerExtTest {
 
         @Test
         fun `edit profile use the current profile and redefine it with the same modified instance`() {
-            val player = mockk<Player>(getRandomString())
-            val profile = mockk<PlayerProfile>(getRandomString())
+            val player = mockk<Player>(randomString())
+            val profile = mockk<PlayerProfile>(randomString())
             every { player.playerProfile } returns profile
 
-            val slotName = slot<String>()
-            every { profile.setName(capture(slotName)) } returns ""
+            val slot = slot<Boolean>()
+            every { profile.complete(capture(slot)) } returns randomBoolean()
 
             val slotProfile = slot<PlayerProfile>()
             justRun { player.playerProfile = capture(slotProfile) }
 
-            val expectedName = getRandomString()
+            val expectedValue = randomBoolean()
             player.editProfile {
-                setName(expectedName)
+                complete(expectedValue)
             }
 
             assertEquals(profile, slotProfile.captured)
-            assertEquals(expectedName, slotName.captured)
+            assertEquals(expectedValue, slot.captured)
         }
     }
 
@@ -48,20 +49,20 @@ class PlayerExtTest {
 
         @BeforeTest
         fun onBefore() {
-            player = mockk(getRandomString())
+            player = mockk(randomString())
             val inventory = mockk<PlayerInventory>()
             every { player.inventory } returns inventory
         }
 
         @Test
         fun `compare with equals and item found`() {
-            val expectedItem = mockk<ItemStack>(getRandomString())
+            val expectedItem = mockk<ItemStack>(randomString())
             every { inventory.itemInMainHand } returns expectedItem
-            every { inventory.itemInOffHand } returns mockk(getRandomString())
+            every { inventory.itemInOffHand } returns mockk(randomString())
 
             assertTrue { player.itemInHand(expectedItem) }
 
-            every { inventory.itemInMainHand } returns mockk(getRandomString())
+            every { inventory.itemInMainHand } returns mockk(randomString())
             every { inventory.itemInOffHand } returns expectedItem
 
             assertTrue { player.itemInHand(expectedItem) }
@@ -69,9 +70,9 @@ class PlayerExtTest {
 
         @Test
         fun `compare with equals and item not found`() {
-            val expectedItem = mockk<ItemStack>(getRandomString())
-            every { inventory.itemInMainHand } returns mockk(getRandomString())
-            every { inventory.itemInOffHand } returns mockk(getRandomString())
+            val expectedItem = mockk<ItemStack>(randomString())
+            every { inventory.itemInMainHand } returns mockk(randomString())
+            every { inventory.itemInOffHand } returns mockk(randomString())
 
             assertFalse { player.itemInHand(expectedItem) }
         }

@@ -2,7 +2,7 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.item.CraftSlot
 import com.github.rushyverse.api.item.exception.CraftResultMissingException
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -32,7 +32,7 @@ class JavaPluginExtTest {
         server = mockk()
 
         every { plugin.server } returns server
-        every { plugin.name } returns getRandomString()
+        every { plugin.name } returns randomString()
         every { server.pluginManager } returns mockk()
     }
 
@@ -109,7 +109,7 @@ class JavaPluginExtTest {
             every { server.addRecipe(capture(slotRecipe)) } returns true
 
             plugin.registerCraft {
-                for (index in CraftSlot.values()) {
+                for (index in CraftSlot.entries) {
                     set(index, item = mockk())
                 }
 
@@ -131,7 +131,7 @@ class JavaPluginExtTest {
 
             plugin.registerCraft {
                 val item = mockk<ItemStack>()
-                for (index in CraftSlot.values()) {
+                for (index in CraftSlot.entries) {
                     set(index, item = item)
                 }
                 result = mockk<ItemStack>().also {

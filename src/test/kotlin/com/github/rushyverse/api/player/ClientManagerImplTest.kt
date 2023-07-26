@@ -2,7 +2,7 @@ package com.github.rushyverse.api.player
 
 import com.github.rushyverse.api.AbstractKoinTest
 import com.github.rushyverse.api.player.exception.ClientNotFoundException
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -161,7 +161,7 @@ class ClientManagerImplTest : AbstractKoinTest() {
     }
 
     private fun createPlayerMock(): Player {
-        val name = getRandomString()
+        val name = randomString()
         val player = mockk<Player>(name)
         every { player.name } returns name
         every { player.uniqueId } returns UUID.randomUUID()

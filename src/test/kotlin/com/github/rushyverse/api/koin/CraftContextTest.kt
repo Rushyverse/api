@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.koin
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -28,13 +28,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                CraftContext.get(getRandomString())
+                CraftContext.get(randomString())
             }
         }
 
         @Test
         fun `when instance is registered for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             val koin = CraftContext.get(id)
             assertNotNull(koin)
@@ -47,12 +47,12 @@ class CraftContextTest {
 
         @Test
         fun `when no instance exists for the id`() {
-            assertNull(CraftContext.getOrNull(getRandomString()))
+            assertNull(CraftContext.getOrNull(randomString()))
         }
 
         @Test
         fun `when instance is registered for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             val koin = CraftContext.get(id)
             assertNotNull(koin)
@@ -65,13 +65,13 @@ class CraftContextTest {
 
         @Test
         fun `when no instance exists for the id`() {
-            CraftContext.stopKoin(getRandomString())
+            CraftContext.stopKoin(randomString())
         }
 
         @Test
         fun `when instance is registered for the id`() {
             assertEquals(0, CraftContext.koins.size)
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             val module = module {
                 single { 1.2 }
@@ -98,14 +98,14 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertEquals(0, CraftContext.koins.size)
-            CraftContext.startKoin(getRandomString()) {}
+            CraftContext.startKoin(randomString()) {}
             assertEquals(1, CraftContext.koins.size)
         }
 
         @Test
         fun `when instance already exists for the id`() {
             assertEquals(0, CraftContext.koins.size)
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id) {}
             assertEquals(1, CraftContext.koins.size)
             assertThrows<KoinAppAlreadyStartedException> {
@@ -117,7 +117,7 @@ class CraftContextTest {
         @Test
         fun `define module in declaration during starting`() {
             assertEquals(0, CraftContext.koins.size)
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id) {
                 this.modules(module {
                     single { "hello" }
@@ -137,14 +137,14 @@ class CraftContextTest {
         fun `when no instance exists for the id`() {
             assertEquals(0, CraftContext.koins.size)
             val koinApplication = KoinApplication.init()
-            CraftContext.startKoin(getRandomString(), koinApplication)
+            CraftContext.startKoin(randomString(), koinApplication)
             assertEquals(1, CraftContext.koins.size)
         }
 
         @Test
         fun `when instance already exists for the id`() {
             assertEquals(0, CraftContext.koins.size)
-            val id = getRandomString()
+            val id = randomString()
             val koinApplication = KoinApplication.init()
             CraftContext.startKoin(id, koinApplication)
             assertEquals(1, CraftContext.koins.size)
@@ -161,7 +161,7 @@ class CraftContextTest {
             koinApplication.modules(module {
                 single { "hello" }
             })
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id, koinApplication)
             val injectedString = CraftContext.get(id).get<String>()
             assertEquals("hello", injectedString)
@@ -176,13 +176,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                CraftContext.loadKoinModules(getRandomString(), module { })
+                CraftContext.loadKoinModules(randomString(), module { })
             }
         }
 
         @Test
         fun `when instance exists for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             CraftContext.loadKoinModules(id, module {
                 single { "hello" }
@@ -198,13 +198,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                CraftContext.loadKoinModules(getRandomString(), emptyList())
+                CraftContext.loadKoinModules(randomString(), emptyList())
             }
         }
 
         @Test
         fun `when instance exists for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             CraftContext.loadKoinModules(id, listOf(
                 module {
@@ -225,13 +225,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                CraftContext.unloadKoinModules(getRandomString(), module { })
+                CraftContext.unloadKoinModules(randomString(), module { })
             }
         }
 
         @Test
         fun `when instance exists for the id but not module linked`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             CraftContext.unloadKoinModules(id, module {
                 single { "hello" }
@@ -240,7 +240,7 @@ class CraftContextTest {
 
         @Test
         fun `when instance exists for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             val module = module {
                 single { "hello" }
@@ -262,13 +262,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                CraftContext.unloadKoinModules(getRandomString(), emptyList())
+                CraftContext.unloadKoinModules(randomString(), emptyList())
             }
         }
 
         @Test
         fun `when instance exists for the id but not module linked`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             CraftContext.unloadKoinModules(id, listOf(module {
                 single { "hello" }
@@ -277,7 +277,7 @@ class CraftContextTest {
 
         @Test
         fun `when instance exists for the id`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             val module1 = module {
                 single { "hello" }
@@ -318,13 +318,13 @@ class CraftContextTest {
         @Test
         fun `when no instance exists for the id`() {
             assertThrows<IllegalStateException> {
-                loadModule(getRandomString()) {}
+                loadModule(randomString()) {}
             }
         }
 
         @Test
         fun `when instance exists for the id with lazy module creation`() {
-            val id = getRandomString()
+            val id = randomString()
             CraftContext.startKoin(id)
             var isInit = false
             loadModule(id) {

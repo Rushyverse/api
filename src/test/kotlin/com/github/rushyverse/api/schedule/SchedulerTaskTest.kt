@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.schedule
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import kotlinx.coroutines.*
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -60,7 +60,7 @@ class SchedulerTaskTest {
                 scheduler.start()
 
                 val body1: suspend SchedulerTask.Task.() -> Unit = { }
-                val id1 = getRandomString()
+                val id1 = randomString()
                 val task1 = scheduler.addAt(0, id1, body1)
                 assertEquals(id1, task1.id)
                 assertEquals(scheduler, task1.parent)
@@ -68,7 +68,7 @@ class SchedulerTaskTest {
                 assertEquals(listOf(task1), scheduler.tasks)
 
                 val body2: suspend SchedulerTask.Task.() -> Unit = { }
-                val id2 = getRandomString()
+                val id2 = randomString()
                 val task2 = scheduler.addAt(1, id2, body2)
                 assertEquals(id2, task2.id)
                 assertEquals(scheduler, task2.parent)
@@ -76,7 +76,7 @@ class SchedulerTaskTest {
                 assertEquals(listOf(task1, task2), scheduler.tasks)
 
                 val body3: suspend SchedulerTask.Task.() -> Unit = { }
-                val id3 = getRandomString()
+                val id3 = randomString()
                 val task3 = scheduler.addAt(1, id3, body3)
                 assertEquals(id3, task3.id)
                 assertEquals(scheduler, task3.parent)
@@ -92,7 +92,7 @@ class SchedulerTaskTest {
                 )
 
                 val body1: suspend SchedulerTask.Task.() -> Unit = { }
-                val id1 = getRandomString()
+                val id1 = randomString()
                 val task1 = scheduler.addAtUnsafe(0, id1, body1)
                 assertEquals(id1, task1.id)
                 assertEquals(scheduler, task1.parent)
@@ -100,7 +100,7 @@ class SchedulerTaskTest {
                 assertEquals(listOf(task1), scheduler.tasks)
 
                 val body2: suspend SchedulerTask.Task.() -> Unit = { }
-                val id2 = getRandomString()
+                val id2 = randomString()
                 val task2 = scheduler.addAtUnsafe(1, id2, body2)
                 assertEquals(id2, task2.id)
                 assertEquals(scheduler, task2.parent)
@@ -108,7 +108,7 @@ class SchedulerTaskTest {
                 assertEquals(listOf(task1, task2), scheduler.tasks)
 
                 val body3: suspend SchedulerTask.Task.() -> Unit = { }
-                val id3 = getRandomString()
+                val id3 = randomString()
                 val task3 = scheduler.addAtUnsafe(0, id3, body3)
                 assertEquals(id3, task3.id)
                 assertEquals(scheduler, task3.parent)
@@ -126,7 +126,7 @@ class SchedulerTaskTest {
             scheduler.start()
 
             val body1: suspend SchedulerTask.Task.() -> Unit = { }
-            val id1 = getRandomString()
+            val id1 = randomString()
             val task1 = scheduler.add(id1, body1)
             assertEquals(id1, task1.id)
             assertEquals(scheduler, task1.parent)
@@ -134,7 +134,7 @@ class SchedulerTaskTest {
             assertEquals(listOf(task1), scheduler.tasks)
 
             val body2: suspend SchedulerTask.Task.() -> Unit = { }
-            val id2 = getRandomString()
+            val id2 = randomString()
             val task2 = scheduler.add(id2, body2)
             assertEquals(id2, task2.id)
             assertEquals(scheduler, task2.parent)
@@ -150,7 +150,7 @@ class SchedulerTaskTest {
             )
 
             val body1: suspend SchedulerTask.Task.() -> Unit = { }
-            val id1 = getRandomString()
+            val id1 = randomString()
             val task1 = scheduler.addUnsafe(id1, body1)
             assertEquals(id1, task1.id)
             assertEquals(scheduler, task1.parent)
@@ -158,7 +158,7 @@ class SchedulerTaskTest {
             assertEquals(listOf(task1), scheduler.tasks)
 
             val body2: suspend SchedulerTask.Task.() -> Unit = { }
-            val id2 = getRandomString()
+            val id2 = randomString()
             val task2 = scheduler.addUnsafe(id2, body2)
             assertEquals(id2, task2.id)
             assertEquals(scheduler, task2.parent)
@@ -332,7 +332,7 @@ class SchedulerTaskTest {
 
             scheduler.start()
             val countDownLatch = CountDownLatch(10)
-            while(counter <= 1) {
+            while (counter <= 1) {
                 assertFalse { countDownLatch.await(10, TimeUnit.MILLISECONDS) }
                 countDownLatch.countDown()
             }
@@ -429,7 +429,7 @@ class SchedulerTaskTest {
                 10.milliseconds,
                 stopWhenNoTask = true
             )
-            val task = scheduler.add {  }
+            val task = scheduler.add { }
             scheduler.start()
             assertTrue { scheduler.running }
             scheduler.remove(task.id)
@@ -443,7 +443,7 @@ class SchedulerTaskTest {
                 10.milliseconds,
                 stopWhenNoTask = false
             )
-            val task = scheduler.add {  }
+            val task = scheduler.add { }
             scheduler.start()
             assertTrue { scheduler.running }
             scheduler.remove(task.id)

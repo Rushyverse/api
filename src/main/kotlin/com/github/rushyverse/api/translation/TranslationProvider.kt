@@ -5,7 +5,7 @@ import java.util.*
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
  */
-public abstract class TranslationsProvider {
+public abstract class TranslationProvider {
 
     /**
      * Get a translation by key from the given locale and bundle name.

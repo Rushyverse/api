@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.mockk
 import org.bukkit.Material
 import org.bukkit.inventory.ItemStack
@@ -13,7 +13,7 @@ class MerchantRecipeExtTest {
 
     @Test
     fun `constructor utils function`() {
-        val result = mockk<ItemStack>(getRandomString())
+        val result = mockk<ItemStack>(randomString())
         val maxUses = 1
         val uses = 2
         val experienceReward = false
@@ -65,7 +65,7 @@ class MerchantRecipeExtTest {
 
     @Test
     fun `default constructor utils function`() {
-        val result = mockk<ItemStack>(getRandomString())
+        val result = mockk<ItemStack>(randomString())
         val maxUses = 10
         val recipe = MerchantRecipe(
             result = result,

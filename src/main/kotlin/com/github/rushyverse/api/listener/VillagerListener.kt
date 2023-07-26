@@ -15,7 +15,7 @@ public class VillagerListener(private val plugin: JavaPlugin) : Listener {
 
     /**
      * When a villager will have his profession changed, check if a specific tag is present into the entity.
-     * If the tag is present, the event will be cancelled, otherwise the career will be changed.
+     * If the tag is present, the event will be canceled, otherwise the career will be changed.
      * @param event Event when a villager will lose his job.
      */
     @EventHandler

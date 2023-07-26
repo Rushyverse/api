@@ -2,7 +2,7 @@ package com.github.rushyverse.api.listener
 
 import com.github.rushyverse.api.AbstractKoinTest
 import com.github.rushyverse.api.extension.namespacedKeyKeepJob
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -31,7 +31,7 @@ class VillagerListenerTest : AbstractKoinTest() {
 
         @Test
         fun `cancel event when tag present in entity`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
             val container = mockk<PersistentDataContainer>()
 
             val slotNamespaced = slot<NamespacedKey>()
@@ -51,7 +51,7 @@ class VillagerListenerTest : AbstractKoinTest() {
 
         @Test
         fun `not cancel event when tag present in entity`() {
-            val villager = mockk<Villager>(getRandomString())
+            val villager = mockk<Villager>(randomString())
 
             val container = mockk<PersistentDataContainer>()
             val slotNamespaced = slot<NamespacedKey>()

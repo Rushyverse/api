@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.extension.event.finalDamagedHealth
 import io.mockk.every
 import io.mockk.mockk
 import org.bukkit.entity.Damageable

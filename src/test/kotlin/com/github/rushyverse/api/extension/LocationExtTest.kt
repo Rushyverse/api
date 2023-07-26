@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.mockk
 import org.bukkit.Location
 import org.bukkit.World
@@ -17,7 +17,7 @@ class LocationExtTest {
 
     @BeforeTest
     fun onBefore() {
-        loc = Location(mockk(getRandomString()), 0.0, 1.0, 2.0, 3.0f, 4.0f)
+        loc = Location(mockk(randomString()), 0.0, 1.0, 2.0, 3.0f, 4.0f)
     }
 
     @Test
@@ -93,7 +93,7 @@ class LocationExtTest {
 
         @Test
         fun `copy with only world property will change only the property`() {
-            val world = mockk<World>(getRandomString())
+            val world = mockk<World>(randomString())
             assertEquals(Location(world, loc.x, loc.y, loc.z, loc.yaw, loc.pitch), loc.copy(world = world))
         }
 
@@ -129,7 +129,7 @@ class LocationExtTest {
 
         @Test
         fun `copy with all args will change all properties`() {
-            val world = mockk<World>(getRandomString())
+            val world = mockk<World>(randomString())
             val x = loc.x + 10
             val y = loc.y + 20
             val z = loc.z + 30

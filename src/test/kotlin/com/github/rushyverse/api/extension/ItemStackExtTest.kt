@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
 import org.bukkit.Material
@@ -319,7 +319,7 @@ class ItemStackExtTest {
     }
 
     private fun mockItem(material: Material): ItemStack {
-        return mockk<ItemStack>(getRandomString()).apply {
+        return mockk<ItemStack>(randomString()).apply {
             every { type } returns material
         }
     }

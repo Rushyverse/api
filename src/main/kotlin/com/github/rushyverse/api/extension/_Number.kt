@@ -46,7 +46,7 @@ public fun Int.toRomanNumerals(): String {
     var remaining = this
     var i = 0
     return buildString {
-        while(remaining > 0) {
+        while (remaining > 0) {
             val romanValue = ROMAN_VALUES[i]
             repeat(remaining / romanValue) {
                 append(ROMAN_NUMERALS[i])

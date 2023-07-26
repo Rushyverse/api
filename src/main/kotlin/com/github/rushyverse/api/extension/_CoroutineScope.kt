@@ -1,9 +1,7 @@
 package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.schedule.SchedulerTask
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
@@ -22,12 +20,12 @@ import kotlin.time.Duration
  * when it completes. Note that the result of `withContext` invocation is
  * dispatched into the original context in a cancellable way with a **prompt cancellation guarantee**,
  * which means that if the original [coroutineContext], in which `withContext` was invoked,
- * is cancelled by the time its dispatcher starts to execute the code,
+ * is canceled by the time its dispatcher starts to execute the code,
  * it discards the result of `withContext` and throws [CancellationException].
  *
- * The cancellation behaviour described above is enabled if and only if the dispatcher is being changed.
+ * The cancellation behavior described above is enabled if and only if the dispatcher is being changed.
  * For example, when using `withContext(NonCancellable) { ... }` there is no change in dispatcher and
- * this call will not be cancelled neither on entry to the block inside `withContext` nor on exit from it.
+ * this call will not be canceled neither on entry to the block inside `withContext` nor on exit from it.
  */
 public suspend inline fun <T> withScopeContext(
     scope: CoroutineScope,
@@ -53,7 +51,7 @@ public fun CoroutineScope.scheduledTask(
 }
 
 /**
- * Create a new scheduler without task.
+ * Create a new scheduler without a task.
  * The [CoroutineScope] for the scheduler is a children of the [CoroutineScope] receiver.
  * @receiver CoroutineScope to launch the task.
  * @param delay Time to wait between each execution.

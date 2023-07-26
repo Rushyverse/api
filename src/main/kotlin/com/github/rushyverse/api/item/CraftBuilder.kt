@@ -80,7 +80,7 @@ public class CraftBuilder {
     public var result: ItemStack? = null
 
     /**
-     * Define an item stack with the material as type at a position on the craft table.
+     * Define an item stack with the material as a type at a position on the craft table.
      * @param positions Positions of the item.
      * @param material Item type.
      * @return The item created from the material.
@@ -126,7 +126,7 @@ public class CraftBuilder {
 
     /**
      * Define the value of the [result] property.
-     * An item is built from the builder and assign it as result of the craft.
+     * An item is built from the builder and assign it as a result of the craft.
      * @param builder Item builder.
      * @return The item built from the builder.
      */

@@ -6,7 +6,7 @@ import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
-import com.github.rushyverse.api.utils.getRandomString
+import com.github.rushyverse.api.utils.randomString
 import io.mockk.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -130,7 +130,7 @@ class PlayerListenerTest : AbstractKoinTest() {
     }
 
     private fun createPlayerMock(): Player {
-        val name = getRandomString()
+        val name = randomString()
         val player = mockk<Player>(name)
         every { player.name } returns name
         every { player.uniqueId } returns UUID.randomUUID()

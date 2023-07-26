@@ -8,7 +8,7 @@ import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
 
 /**
- * Create a new bukkit runnable with the body as the function sent in parameter.
+ * Create new bukkit runnable with the body as the function sent in parameter.
  * @param task Function that will be processed when the bukkit runnable will be run.
  * @return New instance of bukkit runnable.
  */

@@ -34,7 +34,7 @@ public suspend inline fun <reified T : Client> ClientManager.getTypedClientOrNul
 
 /**
  * Manage the existing client present in the server.
- * @property clients Synchronized mutable map of client as value and name of player as key.
+ * @property clients Synchronized mutable map of clients as value and name of player as a key.
  */
 public interface ClientManager {
 
@@ -43,21 +43,21 @@ public interface ClientManager {
     /**
      * Put a new client in the server.
      * @param client New client added.
-     * @return The previous value associated with key, or null there is none.
+     * @return The previous value associated with a key, or null there is none.
      */
     public suspend fun put(player: Player, client: Client): Client?
 
     /**
      * Put a new client in the server if no client is linked to the player.
      * @param client New client added.
-     * @return The previous value associated with key, or null there is none.
+     * @return The previous value associated with a key, or null there is none.
      */
     public suspend fun putIfAbsent(player: Player, client: Client): Client?
 
     /**
      * Remove a client from the server by a Player.
      * @param player Player linked to a Client.
-     * @return The client that was removed, null otherwise.
+     * @return The client that was removed null otherwise.
      */
     public suspend fun removeClient(player: Player): Client?
 
