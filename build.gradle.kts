@@ -15,6 +15,8 @@ repositories {
 }
 
 dependencies {
+    val kotlinSerializableVersion = "1.5.1"
+    val kamlVersion = "0.53.0"
     val coroutineVersion = "1.6.4"
     val loggingVersion = "2.1.23"
     val koinVersion = "3.2.0"
@@ -29,6 +31,8 @@ dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8"))
     implementation(kotlin("reflect"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializableVersion")
+    implementation("com.charleskorn.kaml:kaml:$kamlVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutineVersion")
     implementation("io.github.microutils:kotlin-logging:$loggingVersion")
