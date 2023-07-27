@@ -1,10 +1,10 @@
 package com.github.rushyverse.api.listener
 
-import com.github.rushyverse.api.APIPlugin
 import com.github.rushyverse.api.Plugin
 import com.github.rushyverse.api.coroutine.exception.SilentCancellationException
 import com.github.rushyverse.api.koin.inject
-import com.github.rushyverse.api.player.*
+import com.github.rushyverse.api.player.Client
+import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import kotlinx.coroutines.cancel

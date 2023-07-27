@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.player
 
-import com.github.rushyverse.api.APIPlugin
 import com.github.rushyverse.api.delegate.DelegatePlayer
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
