@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
@@ -21,12 +23,14 @@ dependencies {
     val loggingVersion = "2.1.23"
     val koinVersion = "3.2.0"
     val mccoroutineVersion = "2.4.0"
-    val paperVersion = "1.19-R0.1-SNAPSHOT"
+    val paperVersion = "1.20.1-R0.1-SNAPSHOT"
+    val mockBukkitVersion = "3.18.0"
     val junitVersion = "5.9.0"
     val mockkVersion = "1.12.5"
     val slf4jVersion = "2.0.0-alpha6"
     val fastboardVersion = "2.0.0"
     val commandApiVersion = "9.0.3"
+    val kotestVersion = "5.6.2"
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8"))
@@ -62,7 +66,11 @@ dependencies {
     // Tests
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutineVersion")
+    testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
+    implementation("io.kotest:kotest-assertions-json:$kotestVersion")
+
     testImplementation("io.papermc.paper:paper-api:$paperVersion")
+    implementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion") {
@@ -73,8 +81,13 @@ dependencies {
     testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
 }
 
+val javaVersion get() = JavaVersion.VERSION_17
+val javaVersionString get() = javaVersion.toString()
+val javaVersionInt get() = javaVersionString.toInt()
+
 kotlin {
     explicitApi = org.jetbrains.kotlin.gradle.dsl.ExplicitApiMode.Strict
+    jvmToolchain(javaVersionInt)
 
     sourceSets {
         all {
@@ -91,8 +104,13 @@ kotlin {
 val dokkaOutputDir = "${rootProject.projectDir}/dokka"
 
 tasks {
-    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = javaVersionString
+    }
+
+    withType<JavaCompile> {
+        sourceCompatibility = javaVersionString
+        targetCompatibility = javaVersionString
     }
 
     test {
