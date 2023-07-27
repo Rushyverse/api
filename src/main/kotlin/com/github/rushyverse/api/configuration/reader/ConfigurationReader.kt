@@ -7,10 +7,10 @@ import org.jetbrains.annotations.Blocking
  * Useful to read configuration and transform it to a specific type.
  * @param T Final type to obtain after transformation.
  */
-public fun interface IConfigurationReader<T : Any> {
+public fun interface ConfigurationReader<T : Any> {
 
     /**
-     * Read configuration from the given file.
+     * Read the configuration from the given file.
      * @param file File to read.
      * @return Configuration read from the given file.
      */
