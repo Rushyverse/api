@@ -23,13 +23,12 @@ dependencies {
     val loggingVersion = "2.1.23"
     val koinVersion = "3.2.0"
     val mccoroutineVersion = "2.4.0"
-    val paperVersion = "1.20.1-R0.1-SNAPSHOT"
+    val paperVersion = "1.19-R0.1-SNAPSHOT"
     val mockBukkitVersion = "3.18.0"
     val junitVersion = "5.9.0"
     val mockkVersion = "1.12.5"
     val slf4jVersion = "2.0.0-alpha6"
     val fastboardVersion = "2.0.0"
-    val commandApiVersion = "9.0.3"
     val kotestVersion = "5.6.2"
 
     implementation(kotlin("stdlib"))
@@ -54,12 +53,6 @@ dependencies {
 
     // Scoreboard framework
     implementation("fr.mrmicky:fastboard:$fastboardVersion")
-
-    // CommandAPI framework
-    // The CommandAPI dependency used for Bukkit and it's forks
-    api("dev.jorel:commandapi-bukkit-core:$commandApiVersion")
-    // Due to all functions available in the kotlindsl being inlined, we only need this dependency at compile-time
-    api("dev.jorel:commandapi-bukkit-kotlin:$commandApiVersion")
 
     api("com.github.Rushyverse:core:6ae31a9250")
 
