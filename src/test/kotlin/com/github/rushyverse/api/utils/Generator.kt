@@ -11,6 +11,14 @@ fun randomString() = stringGenerator.next()
 
 fun randomBoolean() = Random.nextBoolean()
 
+fun randomInt() = Random.nextInt()
+
+fun randomLong() = Random.nextLong()
+
+fun randomFloat() = Random.nextFloat()
+
+fun randomDouble() = Random.nextDouble()
+
 const val LIMIT_RANDOM_COORDINATE = 1000.0
 
 fun randomLocation(world: World? = null): Location {
