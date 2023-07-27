@@ -1,5 +1,7 @@
 package com.github.rushyverse.api.koin
 
+import com.github.rushyverse.api.APIPlugin
+import com.github.rushyverse.api.APIPlugin.Companion.ID_API
 import org.koin.core.Koin
 import org.koin.core.KoinApplication
 import org.koin.core.context.KoinContext
@@ -24,7 +26,25 @@ public fun loadModule(
     return module(createdAtStart, moduleDeclaration).also { CraftContext.loadKoinModules(id, it) }
 }
 
-public inline fun <reified T : Any> inject(id: String): Lazy<T> = CraftContext.get(id).inject()
+/**
+ * Injects an instance of the specified type T from the Koin context of the [APIPlugin]. Allows to retrieve
+ * shared instances between plugins.
+ * @returnA lazy delegate of type T representing the injected instance.
+ */
+public inline fun <reified T : Any> inject(): Lazy<T> = CraftContext.get(ID_API).inject()
+
+/**
+ * Injects an instance of the specified type T from the Koin context defined for the [id].
+ * The [id] can be the id of the plugin to retrieve instance linked to the plugin.
+ * If the instance is not found, the [idFallback] will be used to retrieve the instance.
+ *
+ * @param id The id of the memory container to retrieve the instance from.
+ * @param idFallback The id of the memory container to retrieve the instance from if the first one is not found.
+ * @return A lazy delegate of type T representing the injected instance.
+ */
+public inline fun <reified T : Any> inject(id: String, idFallback: String = ID_API): Lazy<T> = lazy {
+    CraftContext.get(id).getOrNull<T>() ?: CraftContext.get(idFallback).get<T>()
+}
 
 /**
  * A copy of [KoinContext] to retrieve koin instance for each application.
@@ -37,12 +57,12 @@ public object CraftContext {
     /**
      * [Koin] instanced linked to an app id.
      */
-    private val _koins: MutableMap<String, Pair<KoinApplication, Koin?>> = mutableMapOf()
+    private val _koins: MutableMap<String, Pair<KoinApplication, Koin>> = mutableMapOf()
 
     /**
      * [Koin] instanced linked to an app id.
      */
-    public val koins: Map<String, Pair<KoinApplication, Koin?>> = _koins
+    public val koins: Map<String, Pair<KoinApplication, Koin>> = _koins
 
     /**
      * Gets the [Koin] instance for an app.
@@ -62,7 +82,7 @@ public object CraftContext {
     /** Closes and removes the current [Koin] instance. */
     public fun stopKoin(id: String): Unit = synchronized(this) {
         val koinInstance = _koins[id] ?: return@synchronized
-        koinInstance.second?.close()
+        koinInstance.second.close()
         _koins -= id
     }
 

@@ -25,7 +25,7 @@ public class PlayerListener(
 ) : Listener {
 
     private val clients: ClientManager by inject(plugin.id)
-    private val scoreboardManager: ScoreboardManager by inject(APIPlugin.ID)
+    private val scoreboardManager: ScoreboardManager by inject()
 
     /**
      * Handle the join event to create and store a new client.

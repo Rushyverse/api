@@ -25,7 +25,7 @@ public open class Client(
     public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
 ) : CoroutineScope by coroutineScope {
 
-    private val scoreboardManager: ScoreboardManager by inject(APIPlugin.ID)
+    private val scoreboardManager: ScoreboardManager by inject()
 
     public val player: Player? by DelegatePlayer(pluginId, playerUUID)
 

@@ -3,6 +3,7 @@ package com.github.rushyverse.api
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -11,18 +12,20 @@ import org.bukkit.plugin.java.JavaPlugin
 public class APIPlugin : JavaPlugin() {
 
     public companion object {
-        public const val ID: String = "api"
+        public const val ID_API: String = "api"
         public const val BUNDLE_API: String = "api_translate"
     }
 
     override fun onEnable() {
-        CraftContext.startKoin(ID)
-        loadModule(ID) {
+        CraftContext.startKoin(ID_API)
+        loadModule(ID_API) {
+            single { Bukkit.getServer() }
             single { ScoreboardManager() }
         }
     }
 
     override fun onDisable() {
-        CraftContext.stopKoin(ID)
+        CraftContext.stopKoin(ID_API)
+        super.onDisable()
     }
 }

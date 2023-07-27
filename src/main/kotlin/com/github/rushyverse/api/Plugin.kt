@@ -13,7 +13,6 @@ import com.github.rushyverse.api.translation.ResourceBundleTranslationProvider
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.koin.core.module.Module
 import org.koin.dsl.bind
@@ -46,7 +45,6 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     }
 
     protected open fun moduleBukkit(): Module = loadModule(id) {
-        single { Bukkit.getServer() }
         single { getLogger() }
     }
 
