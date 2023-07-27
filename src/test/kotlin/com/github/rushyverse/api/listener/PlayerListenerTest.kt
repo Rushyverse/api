@@ -7,7 +7,10 @@ import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.utils.randomString
-import io.mockk.*
+import io.mockk.coJustRun
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

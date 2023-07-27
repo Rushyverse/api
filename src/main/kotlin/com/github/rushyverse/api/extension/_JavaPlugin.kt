@@ -1,7 +1,7 @@
 package com.github.rushyverse.api.extension
 
-import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import com.github.rushyverse.api.item.CraftBuilder
+import com.github.shynixn.mccoroutine.bukkit.registerSuspendingEvents
 import org.bukkit.NamespacedKey
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
