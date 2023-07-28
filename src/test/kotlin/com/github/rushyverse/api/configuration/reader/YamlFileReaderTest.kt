@@ -101,13 +101,12 @@ class YamlFileReaderTest {
         every { plugin.dataFolder } returns tempDir
 
         val expectedValue = TestValue(value)
-        println("Load config : ${load(configFile)}")
         load(configFile) shouldBe expectedValue
 
         val file = File(tempDir, configFile)
         println("File [${file.absolutePath}] exists : ${file.exists()}")
         file.exists() shouldBe true
-        file.readText() shouldBe "test: $value\r\n"
+        file.readText() shouldBe "test: $value${System.lineSeparator()}"
     }
 
     fun shouldNotCreateFileIfExistsAndReadIt(
