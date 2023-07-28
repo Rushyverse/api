@@ -60,7 +60,6 @@ public class PlayerListener(
     @EventHandler(priority = EventPriority.HIGHEST)
     public suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
-        println(scoreboardManager)
         scoreboardManager.remove(player)
 
         val client = clients.removeClient(player) ?: return
