@@ -5,10 +5,7 @@ import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.entity.PlayerMock
 import com.github.rushyverse.api.AbstractKoinTest
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
-import org.bukkit.entity.Player
 import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext

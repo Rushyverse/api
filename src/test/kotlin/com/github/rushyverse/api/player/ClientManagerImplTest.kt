@@ -1,8 +1,6 @@
 package com.github.rushyverse.api.player
 
-import com.github.rushyverse.api.APIPlugin
 import com.github.rushyverse.api.AbstractKoinTest
-import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.player.exception.ClientNotFoundException
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
@@ -18,19 +16,14 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-class ClientManagerImplTest {
+class ClientManagerImplTest: AbstractKoinTest() {
 
     private lateinit var clientManager: ClientManager
 
     @BeforeTest
-    fun onBefore() {
-        CraftContext.startKoin(APIPlugin.ID_API) { }
+    override fun onBefore() {
+        super.onBefore()
         clientManager = ClientManagerImpl()
-    }
-
-    @AfterTest
-    fun onAfter() {
-        CraftContext.stopKoin(APIPlugin.ID_API)
     }
 
     @Test
