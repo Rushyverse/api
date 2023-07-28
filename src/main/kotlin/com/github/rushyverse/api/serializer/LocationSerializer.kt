@@ -16,37 +16,43 @@ import org.bukkit.Server
  */
 public class LocationSerializer : KSerializer<Location> {
 
+    public companion object {
+
+        /**
+         * Serializer for the coordinates x, y or z.
+         */
+        private val coordinateSerializer get() = Double.serializer()
+
+        /**
+         * Serializer for the rotations yaw or pitch.
+         */
+        private val rotationSerializer get() = Float.serializer().nullable
+
+        /**
+         * Serializer for the world.
+         */
+        private val worldSerializer get() = String.serializer().nullable
+
+        public val descriptor: SerialDescriptor = buildClassSerialDescriptor("location") {
+            val coordinateSerializer = coordinateSerializer
+            val rotationSerializer = rotationSerializer
+
+            element("x", coordinateSerializer.descriptor)
+            element("y", coordinateSerializer.descriptor)
+            element("z", coordinateSerializer.descriptor)
+            element("yaw", rotationSerializer.descriptor)
+            element("pitch", rotationSerializer.descriptor)
+            element("world", worldSerializer.descriptor)
+        }
+
+    }
+
     /**
      * Server instance.
      */
     private val server: Server by inject<Server>()
 
-    /**
-     * Serializer for the coordinates x, y or z.
-     */
-    private val coordinateSerializer get() = Double.serializer()
-
-    /**
-     * Serializer for the rotations yaw or pitch.
-     */
-    private val rotationSerializer get() = Float.serializer().nullable
-
-    /**
-     * Serializer for the world.
-     */
-    private val worldSerializer get() = String.serializer().nullable
-
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("location") {
-        val coordinateSerializer = coordinateSerializer
-        val rotationSerializer = rotationSerializer
-
-        element("x", coordinateSerializer.descriptor)
-        element("y", coordinateSerializer.descriptor)
-        element("z", coordinateSerializer.descriptor)
-        element("yaw", rotationSerializer.descriptor)
-        element("pitch", rotationSerializer.descriptor)
-        element("world", worldSerializer.descriptor)
-    }
+    override val descriptor: SerialDescriptor = LocationSerializer.descriptor
 
     override fun serialize(encoder: Encoder, value: Location) {
         val coordinateSerializer = coordinateSerializer
