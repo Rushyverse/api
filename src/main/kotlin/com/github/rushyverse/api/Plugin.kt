@@ -9,6 +9,7 @@ import com.github.rushyverse.api.listener.VillagerListener
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
+import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.ResourceBundleTranslationProvider
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
@@ -30,6 +31,7 @@ public abstract class Plugin : SuspendingJavaPlugin() {
 
         CraftContext.startKoin(id)
         moduleBukkit()
+        moduleClients()
 
         registerListener { PlayerListener(this) }
         registerListener { VillagerListener(this) }
