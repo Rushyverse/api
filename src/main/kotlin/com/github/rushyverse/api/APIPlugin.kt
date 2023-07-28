@@ -1,5 +1,6 @@
 package com.github.rushyverse.api
 
+import com.github.rushyverse.api.game.SharedGameData
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
@@ -17,10 +18,12 @@ public class APIPlugin : JavaPlugin() {
     }
 
     override fun onEnable() {
+        super.onEnable()
         CraftContext.startKoin(ID_API)
         loadModule(ID_API) {
             single { Bukkit.getServer() }
             single { ScoreboardManager() }
+            single { SharedGameData() }
         }
     }
 
