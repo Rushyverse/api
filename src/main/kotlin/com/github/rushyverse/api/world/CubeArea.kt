@@ -11,6 +11,9 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.*
 import org.bukkit.Location
 
+/**
+ * Serializer class for [CubeArea] objects.
+ */
 public object CubeAreaSerializer: KSerializer<CubeArea> {
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cubeArea") {
@@ -20,7 +23,7 @@ public object CubeAreaSerializer: KSerializer<CubeArea> {
     }
 
     override fun deserialize(decoder: Decoder): CubeArea {
-        val locationSerializer = LocationSerializer()
+        val locationSerializer = LocationSerializer
 
         return decoder.decodeStructure(descriptor) {
             var loc1: Location? = null
@@ -48,7 +51,7 @@ public object CubeAreaSerializer: KSerializer<CubeArea> {
     }
 
     override fun serialize(encoder: Encoder, value: CubeArea) {
-        val locationSerializer = LocationSerializer()
+        val locationSerializer = LocationSerializer
 
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(descriptor, 0, locationSerializer, value.min)
@@ -93,13 +96,13 @@ public class CubeArea(loc1: Location, loc2: Location) {
         val (z1, z2) = minMaxOf(loc1.z, loc2.z)
         this.min = Location(world1, x1, y1, z1)
         this.max = Location(world2, x2, y2, z2)
-
     }
 
     /**
-     * Check if a location is in area.
-     * This method don't care about the equality between the worlds names.
-     * Reason: log: "CubeArea: Worlds are not equal: plugins/rtf/temp/rtf1 -> null"
+     * Determines if a given location is within the specified area.
+     *
+     * @param location The location to check.
+     * @return True if the location is within the area, false otherwise.
      */
     public fun isInArea(location: Location): Boolean {
         return min.world === location.world &&
