@@ -1,35 +1,35 @@
 package com.github.rushyverse.api.serializer
 
-import com.github.rushyverse.api.AbstractKoinTest
+import be.seeseemelk.mockbukkit.MockBukkit
+import be.seeseemelk.mockbukkit.WorldMock
 import com.github.rushyverse.api.utils.randomDouble
 import com.github.rushyverse.api.utils.randomFloat
-import com.github.rushyverse.api.utils.randomString
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.bukkit.Location
-import org.bukkit.World
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-class LocationSerializerTest : AbstractKoinTest() {
+class LocationSerializerTest {
 
-    private lateinit var world: World
+    private lateinit var world: WorldMock
 
     @BeforeTest
-    override fun onBefore() {
-        super.onBefore()
-        val worldName = randomString()
-        world = mockk() {
-            every { name } returns worldName
+    fun onBefore() {
+        world = WorldMock()
+        MockBukkit.mock().apply {
+            addWorld(world)
         }
+    }
 
-        every { server.getWorld(worldName) } returns world
+    @AfterTest
+    fun onAfter() {
+        MockBukkit.unmock()
     }
 
     @Nested
@@ -108,7 +108,7 @@ class LocationSerializerTest : AbstractKoinTest() {
         @Test
         fun `without world`() {
             val loc = Location(null, randomDouble(), randomDouble(), randomDouble(), randomFloat(), randomFloat())
-            val json = Json.encodeToString(LocationSerializer(), loc)
+            val json = Json.encodeToString(LocationSerializer, loc)
             json shouldEqualJson """
                 {
                     "x": ${loc.x},
@@ -123,7 +123,7 @@ class LocationSerializerTest : AbstractKoinTest() {
 
         private fun assertSerialize(x: Double, y: Double, z: Double, yaw: Float = 0f, pitch: Float = 0f) {
             val loc = Location(world, x, y, z, yaw, pitch)
-            val json = Json.encodeToString(LocationSerializer(), loc)
+            val json = Json.encodeToString(LocationSerializer, loc)
             json shouldEqualJson """
                 {
                     "x": $x,
@@ -226,7 +226,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                     }
                 """.trimIndent()
                 val exception =
-                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer(), json) }
+                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer, json) }
                 exception.message shouldBe "The field x is missing"
             }
 
@@ -242,7 +242,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                     }
                 """.trimIndent()
                 val exception =
-                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer(), json) }
+                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer, json) }
                 exception.message shouldBe "The field y is missing"
             }
 
@@ -258,7 +258,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                     }
                 """.trimIndent()
                 val exception =
-                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer(), json) }
+                    assertThrows<SerializationException> { Json.decodeFromString(LocationSerializer, json) }
                 exception.message shouldBe "The field z is missing"
             }
 
@@ -273,7 +273,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                       "world": "${world.name}"
                     }
                 """.trimIndent()
-                val location = Json.decodeFromString(LocationSerializer(), json)
+                val location = Json.decodeFromString(LocationSerializer, json)
                 location shouldBe Location(world, 1.0, 2.0, 3.0, 0.0f, 4.0f)
             }
 
@@ -288,7 +288,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                       "world": "${world.name}"
                     }
                 """.trimIndent()
-                val location = Json.decodeFromString(LocationSerializer(), json)
+                val location = Json.decodeFromString(LocationSerializer, json)
                 location shouldBe Location(world, 1.0, 2.0, 3.0, 4.0f, 0.0f)
             }
 
@@ -303,7 +303,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                       "pitch": 5.0
                     }
                 """.trimIndent()
-                val location = Json.decodeFromString(LocationSerializer(), json)
+                val location = Json.decodeFromString(LocationSerializer, json)
                 location shouldBe Location(null, 1.0, 2.0, 3.0, 4.0f, 5.0f)
             }
         }
@@ -318,7 +318,7 @@ class LocationSerializerTest : AbstractKoinTest() {
                   "pitch": $pitch
                 }
             """.trimIndent()
-            val location = Json.decodeFromString(LocationSerializer(), json)
+            val location = Json.decodeFromString(LocationSerializer, json)
             location shouldBe Location(null, x, y, z, yaw, pitch)
         }
     }
