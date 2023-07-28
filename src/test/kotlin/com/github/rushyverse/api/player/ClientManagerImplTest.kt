@@ -169,5 +169,5 @@ class ClientManagerImplTest : AbstractKoinTest() {
     }
 
     private fun createClient(player: Player) =
-        Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Default + SupervisorJob()))
+        Client(player.uniqueId, CoroutineScope(Dispatchers.Default + SupervisorJob()))
 }

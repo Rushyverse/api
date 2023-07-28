@@ -17,7 +17,7 @@ class ClientTest : AbstractKoinTest() {
 
     @Test
     fun `retrieve player instance not found returns null`() {
-        val client = Client(pluginId, UUID.randomUUID(), CoroutineScope(EmptyCoroutineContext))
+        val client = Client(UUID.randomUUID(), CoroutineScope(EmptyCoroutineContext))
         every { server.getPlayer(any<UUID>()) } returns null
         assertNull(client.player)
     }
@@ -25,7 +25,7 @@ class ClientTest : AbstractKoinTest() {
     @Test
     fun `retrieve player instance found returns the instance`() {
         val uuid = UUID.randomUUID()
-        val client = Client(pluginId, uuid, CoroutineScope(EmptyCoroutineContext))
+        val client = Client(uuid, CoroutineScope(EmptyCoroutineContext))
 
         val player = mockk<Player>()
         every { server.getPlayer(uuid) } returns player
@@ -34,7 +34,7 @@ class ClientTest : AbstractKoinTest() {
 
     @Test
     fun `require player instance not found throws an exception`() {
-        val client = Client(pluginId, UUID.randomUUID(), CoroutineScope(EmptyCoroutineContext))
+        val client = Client(UUID.randomUUID(), CoroutineScope(EmptyCoroutineContext))
         every { server.getPlayer(any<UUID>()) } returns null
         assertThrows<PlayerNotFoundException> {
             client.requirePlayer()
@@ -44,7 +44,7 @@ class ClientTest : AbstractKoinTest() {
     @Test
     fun `require player instance found returns the instance`() {
         val uuid = UUID.randomUUID()
-        val client = Client(pluginId, uuid, CoroutineScope(EmptyCoroutineContext))
+        val client = Client(uuid, CoroutineScope(EmptyCoroutineContext))
 
         val player = mockk<Player>()
         every { server.getPlayer(uuid) } returns player

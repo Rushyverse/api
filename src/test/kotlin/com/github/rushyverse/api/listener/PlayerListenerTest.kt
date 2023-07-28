@@ -116,7 +116,7 @@ class PlayerListenerTest : AbstractKoinTest() {
             val player = createPlayerMock()
             coJustRun { scoreboardManagerMock.remove(any()) }
 
-            val client = Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Main + SupervisorJob()))
+            val client = Client(player.uniqueId, CoroutineScope(Dispatchers.Main + SupervisorJob()))
             clientManager.put(player, client)
 
             listener.onQuit(createEvent(player))
@@ -141,5 +141,5 @@ class PlayerListenerTest : AbstractKoinTest() {
     }
 
     private fun createClient(player: Player) =
-        Client(pluginId, player.uniqueId, CoroutineScope(Dispatchers.Default + SupervisorJob()))
+        Client(player.uniqueId, CoroutineScope(Dispatchers.Default + SupervisorJob()))
 }

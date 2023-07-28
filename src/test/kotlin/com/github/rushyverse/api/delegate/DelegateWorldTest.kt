@@ -1,23 +1,31 @@
 package com.github.rushyverse.api.delegate
 
-import com.github.rushyverse.api.AbstractKoinTest
-import io.mockk.every
-import io.mockk.mockk
+import be.seeseemelk.mockbukkit.MockBukkit
+import be.seeseemelk.mockbukkit.WorldMock
 import org.bukkit.World
 import java.util.*
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
+import kotlin.test.*
 
-class DelegateWorldTest : AbstractKoinTest() {
+class DelegateWorldTest {
+
+    private lateinit var world: WorldMock
+
+    @BeforeTest
+    fun onBefore() {
+        world = WorldMock()
+        MockBukkit.mock().apply {
+            addWorld(world)
+        }
+    }
+
+    @AfterTest
+    fun onAfter() {
+        MockBukkit.unmock()
+    }
 
     @Test
     fun `get world if server has it`() {
-        val uuid = UUID.randomUUID()
-        val delegate = DelegateWorld(pluginId, uuid)
-
-        val world = mockk<World>()
-        every { server.getWorld(uuid) } returns world
+        val delegate = DelegateWorld(world.uid)
 
         val obj = object {
             val property: World? by delegate
@@ -29,8 +37,7 @@ class DelegateWorldTest : AbstractKoinTest() {
     @Test
     fun `get world if server doesn't have it`() {
         val uuid = UUID.randomUUID()
-        val delegate = DelegateWorld(pluginId, uuid)
-        every { server.getWorld(uuid) } returns null
+        val delegate = DelegateWorld(uuid)
 
         val obj = object {
             val property: World? by delegate
