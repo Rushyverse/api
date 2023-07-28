@@ -104,7 +104,6 @@ class YamlFileReaderTest {
         load(configFile) shouldBe expectedValue
 
         val file = File(tempDir, configFile)
-        println("File [${file.absolutePath}] exists : ${file.exists()}")
         file.exists() shouldBe true
         file.readText() shouldBe "test: $value${System.lineSeparator()}"
     }
