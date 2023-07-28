@@ -14,7 +14,7 @@ import org.bukkit.Location
 /**
  * Serializer class for [CubeArea] objects.
  */
-public object CubeAreaSerializer: KSerializer<CubeArea> {
+public object CubeAreaSerializer : KSerializer<CubeArea> {
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cubeArea") {
         val locationDescriptor = LocationSerializer.descriptor

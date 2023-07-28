@@ -91,7 +91,7 @@ public object LocationSerializer : KSerializer<Location> {
             }
 
             Location(
-                world?.let { Bukkit.getServer().getWorld(it) },
+                world?.let { Bukkit.getWorld(it) },
                 x ?: throw SerializationException("The field x is missing"),
                 y ?: throw SerializationException("The field y is missing"),
                 z ?: throw SerializationException("The field z is missing"),

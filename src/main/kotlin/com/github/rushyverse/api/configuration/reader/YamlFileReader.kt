@@ -50,7 +50,7 @@ public class YamlFileReader(
      * @param resourceFile The resource file to copy if the configuration file does not exist.
      */
     private fun createConfigurationFileIfNecessary(config: File, resourceFile: String) {
-        if(config.exists()) return
+        if (config.exists()) return
 
         config.toPath().createParentDirectories()
         require(config.createNewFile()) {
