@@ -16,10 +16,10 @@ import org.bukkit.Location
  */
 public object CubeAreaSerializer : KSerializer<CubeArea> {
 
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cubeArea") {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cube") {
         val locationDescriptor = LocationSerializer.descriptor
-        element("loc1", locationDescriptor)
-        element("loc2", locationDescriptor)
+        element("location1", locationDescriptor)
+        element("location2", locationDescriptor)
     }
 
     override fun deserialize(decoder: Decoder): CubeArea {
@@ -44,8 +44,8 @@ public object CubeAreaSerializer : KSerializer<CubeArea> {
             }
 
             CubeArea(
-                loc1 ?: throw SerializationException("The field loc1 is missing"),
-                loc2 ?: throw SerializationException("The field loc2 is missing"),
+                loc1 ?: throw SerializationException("The field location1 is missing"),
+                loc2 ?: throw SerializationException("The field location2 is missing"),
             )
         }
     }
