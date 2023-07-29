@@ -65,12 +65,11 @@ public object CubeAreaSerializer : KSerializer<CubeArea> {
  * A cuboid area defined by two positions.
  * @property min Minimum position.
  * @property max Maximum position.
- * @property center Center position of the cube.
  */
 @Serializable(with = CubeAreaSerializer::class)
-public class CubeArea(loc1: Location, loc2: Location) {
+public class CubeArea(loc1: Location, loc2: Location): Area {
 
-    public var center: Location
+    public override var location: Location
         get() = max.centerRelative(min)
         set(value) {
             // The new position becomes the center of the cube.
@@ -98,13 +97,7 @@ public class CubeArea(loc1: Location, loc2: Location) {
         this.max = Location(world2, x2, y2, z2)
     }
 
-    /**
-     * Determines if a given location is within the specified area.
-     *
-     * @param location The location to check.
-     * @return True if the location is within the area, false otherwise.
-     */
-    public fun isInArea(location: Location): Boolean {
+    public override fun isInArea(location: Location): Boolean {
         return min.world === location.world &&
                 location.x in min.x..max.x &&
                 location.y in min.y..max.y &&
