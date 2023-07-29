@@ -15,7 +15,7 @@ fun randomInt() = Random.nextInt()
 
 fun randomLong() = Random.nextLong()
 
-fun randomFloat() = Random.nextFloat()
+fun randomFloat() = randomDouble().toFloat()
 
 fun randomDouble() = Random.nextDouble()
 

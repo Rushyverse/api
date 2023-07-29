@@ -20,50 +20,6 @@ class LocationExtTest {
         loc = Location(mockk(randomString()), 0.0, 1.0, 2.0, 3.0f, 4.0f)
     }
 
-    @Test
-    fun `center the location`() {
-        val expectedX = loc.blockX + 0.5
-        val expectedZ = loc.blockZ + 0.5
-        val locCenter = loc.center()
-        assertEquals(expectedX, locCenter.x)
-        assertEquals(expectedZ, locCenter.z)
-    }
-
-    @Nested
-    @DisplayName("Components")
-    inner class Components {
-
-        @Test
-        fun `component1 give the world property`() {
-            assertEquals(loc.world, loc.component1())
-        }
-
-        @Test
-        fun `component2 give the x property`() {
-            assertEquals(loc.x, loc.component2())
-        }
-
-        @Test
-        fun `component3 give the y property`() {
-            assertEquals(loc.y, loc.component3())
-        }
-
-        @Test
-        fun `component4 give the z property`() {
-            assertEquals(loc.z, loc.component4())
-        }
-
-        @Test
-        fun `component5 give the yaw property`() {
-            assertEquals(loc.yaw, loc.component5())
-        }
-
-        @Test
-        fun `component6 give the pitch property`() {
-            assertEquals(loc.pitch, loc.component6())
-        }
-    }
-
     @Nested
     @DisplayName("Copy properties")
     inner class Copy {

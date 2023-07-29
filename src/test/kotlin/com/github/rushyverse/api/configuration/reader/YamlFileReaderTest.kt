@@ -56,7 +56,7 @@ class YamlFileReaderTest {
 
         @Test
         fun `should not create file if exists and read it`() {
-            shouldNotCreateFileIfExistsAndReadIt { reader.readConfigurationFile(TestValue::class, it) }
+            shouldNotCreateFileIfExistsAndDecode { reader.readConfigurationFile(TestValue::class, it) }
         }
     }
 
@@ -89,7 +89,7 @@ class YamlFileReaderTest {
 
         @Test
         fun `should not create file if exists and read it`() {
-            shouldNotCreateFileIfExistsAndReadIt { reader.readConfigurationFile(TestValue.serializer(), it) }
+            shouldNotCreateFileIfExistsAndDecode { reader.readConfigurationFile(TestValue.serializer(), it) }
         }
     }
 
@@ -108,7 +108,7 @@ class YamlFileReaderTest {
         file.readText() shouldBe "test: $value${System.lineSeparator()}"
     }
 
-    fun shouldNotCreateFileIfExistsAndReadIt(
+    fun shouldNotCreateFileIfExistsAndDecode(
         load: (String) -> TestValue
     ) {
         every { plugin.dataFolder } returns tempDir
