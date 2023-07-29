@@ -67,7 +67,7 @@ public object CubeAreaSerializer : KSerializer<CubeArea> {
  * @property max Maximum position.
  */
 @Serializable(with = CubeAreaSerializer::class)
-public class CubeArea(loc1: Location, loc2: Location): Area {
+public class CubeArea(loc1: Location, loc2: Location) : Area {
 
     public override var location: Location
         get() = max.centerRelative(min)
@@ -98,6 +98,8 @@ public class CubeArea(loc1: Location, loc2: Location): Area {
     }
 
     public override fun isInArea(location: Location): Boolean {
+        val min = min
+        val max = max
         return min.world === location.world &&
                 location.x in min.x..max.x &&
                 location.y in min.y..max.y &&
