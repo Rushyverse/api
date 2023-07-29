@@ -1,10 +1,10 @@
 package com.github.rushyverse.api.extension
 
+import com.github.shynixn.mccoroutine.bukkit.SuspendingPlugin
 import com.github.shynixn.mccoroutine.bukkit.asyncDispatcher
 import com.github.shynixn.mccoroutine.bukkit.minecraftDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
-import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
 
 /**
@@ -27,7 +27,7 @@ public inline fun BukkitRunnable(crossinline task: BukkitRunnable.() -> Unit): B
  * @return T Instance returned after the execution of the task.
  */
 public suspend inline fun <T> onPrimaryThread(
-    plugin: Plugin,
+    plugin: SuspendingPlugin,
     noinline block: suspend CoroutineScope.() -> T
 ): T = withContext(plugin.minecraftDispatcher, block)
 
@@ -38,6 +38,6 @@ public suspend inline fun <T> onPrimaryThread(
  * @return T Instance returned after the execution of the task.
  */
 public suspend inline fun <T> onAsyncThread(
-    plugin: Plugin,
+    plugin: SuspendingPlugin,
     noinline block: suspend CoroutineScope.() -> T
 ): T = withContext(plugin.asyncDispatcher, block)
