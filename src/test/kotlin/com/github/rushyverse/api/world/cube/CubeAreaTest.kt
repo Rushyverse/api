@@ -46,6 +46,16 @@ class CubeAreaTest {
         }
 
         @Test
+        fun `should set min and max with null world`() {
+            val loc1 = Location(null, 0.0, 0.0, 0.0)
+            val loc2 = Location(null, 1.0, 1.0, 1.0)
+            CubeArea(loc1, loc2).apply {
+                assertEqualsLocation(loc1, min)
+                assertEqualsLocation(loc2, max)
+            }
+        }
+
+        @Test
         fun `should set min and max ignoring direction`() {
             val loc1 = Location(worldMock, 0.0, 0.0, 0.0, randomFloat(), randomFloat())
             val loc2 = Location(worldMock, 1.0, 1.0, 1.0, randomFloat(), randomFloat())
@@ -109,6 +119,15 @@ class CubeAreaTest {
 
     @Nested
     inner class InAreaWithWorld {
+
+        @Test
+        fun `should return true if world is null for both`() {
+            val min = Location(null, 0.0, 0.0, 0.0)
+            val max = Location(null, 1.0, 1.0, 1.0)
+            val area = CubeArea(min, max)
+
+            min isIn area shouldBe true
+        }
 
         @Test
         fun `should return false if world is different`() {
