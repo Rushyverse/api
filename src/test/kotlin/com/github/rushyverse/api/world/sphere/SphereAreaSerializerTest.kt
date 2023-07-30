@@ -39,8 +39,8 @@ class SphereAreaSerializerTest {
         fun `should with only coordinate for location`() {
             val loc = Location(null, randomDouble(), randomDouble(), randomDouble())
             val radius = randomDouble(from = 0.0)
-            val sphereArea = SphereArea(loc, radius)
-            val json = Json.encodeToString(SphereArea.serializer(), sphereArea)
+            val area = SphereArea(loc, radius)
+            val json = Json.encodeToString(SphereArea.serializer(), area)
             json shouldEqualJson """
                 {
                     "location": {
@@ -60,8 +60,8 @@ class SphereAreaSerializerTest {
         fun `should with direction coordinate for location`() {
             val loc = Location(null, randomDouble(), randomDouble(), randomDouble(), randomFloat(), randomFloat())
             val radius = randomDouble(from = 0.0)
-            val sphereArea = SphereArea(loc, radius)
-            val json = Json.encodeToString(SphereArea.serializer(), sphereArea)
+            val area = SphereArea(loc, radius)
+            val json = Json.encodeToString(SphereArea.serializer(), area)
             json shouldEqualJson """
                 {
                     "location": {
@@ -81,8 +81,8 @@ class SphereAreaSerializerTest {
         fun `should with all fields`() {
             val loc = Location(world, randomDouble(), randomDouble(), randomDouble(), randomFloat(), randomFloat())
             val radius = randomDouble(from = 0.0)
-            val sphereArea = SphereArea(loc, radius)
-            val json = Json.encodeToString(SphereArea.serializer(), sphereArea)
+            val area = SphereArea(loc, radius)
+            val json = Json.encodeToString(SphereArea.serializer(), area)
             json shouldEqualJson """
                 {
                     "location": {
