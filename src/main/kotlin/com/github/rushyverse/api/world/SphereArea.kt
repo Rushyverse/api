@@ -102,4 +102,28 @@ public class SphereArea(
         return location.world === areaLocation.world // Same world
                 && location.distanceSquared(areaLocation) <= radius.pow(2) // Distance is less than or equal to radius
     }
+
+    override fun toString(): String {
+        return "SphereArea(location=$location, radius=$radius)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as SphereArea
+
+        if (location != other.location) return false
+        if (radius != other.radius) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = location.hashCode()
+        result = 31 * result + radius.hashCode()
+        return result
+    }
+
+
 }

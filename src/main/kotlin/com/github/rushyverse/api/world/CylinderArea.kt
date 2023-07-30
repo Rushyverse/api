@@ -118,4 +118,30 @@ public class CylinderArea(
                 && sqrt((location.x - areaLocation.x).pow(2.0) + (location.z - areaLocation.z).pow(2.0)) <= radius // Within radius
                 && location.y in height // Within height
     }
+
+    override fun toString(): String {
+        return "CylinderArea(location=$location, height=$height, radius=$radius)"
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CylinderArea
+
+        if (location != other.location) return false
+        if (height != other.height) return false
+        if (radius != other.radius) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = location.hashCode()
+        result = 31 * result + height.hashCode()
+        result = 31 * result + radius.hashCode()
+        return result
+    }
+
+
 }

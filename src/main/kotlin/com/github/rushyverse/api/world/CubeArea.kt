@@ -110,4 +110,21 @@ public class CubeArea(loc1: Location, loc2: Location) : Area {
         return "CubeArea(min=$min, max=$max)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CubeArea
+
+        if (min != other.min) return false
+        if (max != other.max) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = min.hashCode()
+        result = 31 * result + max.hashCode()
+        return result
+    }
 }
