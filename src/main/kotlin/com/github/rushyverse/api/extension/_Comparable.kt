@@ -8,7 +8,7 @@ package com.github.rushyverse.api.extension
  * @param b Second value.
  * @return Both values with a defined order.
  */
-public fun <T : Comparable<T>> minMax(a: T, b: T): Pair<T, T> = if (a <= b) {
+public fun <T : Comparable<T>> minMaxOf(a: T, b: T): Pair<T, T> = if (a <= b) {
     a to b
 } else {
     b to a
