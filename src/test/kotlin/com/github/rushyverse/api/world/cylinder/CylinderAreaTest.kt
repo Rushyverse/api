@@ -1,22 +1,20 @@
-package com.github.rushyverse.api.world
+package com.github.rushyverse.api.world.cylinder
 
 import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.WorldMock
 import com.github.rushyverse.api.extension.copy
-import com.github.rushyverse.api.utils.randomString
+import com.github.rushyverse.api.world.CylinderArea
+import com.github.rushyverse.api.world.isIn
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import io.mockk.every
 import io.mockk.mockk
 import org.bukkit.Location
-import org.bukkit.entity.Player
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertContentEquals
 
 class CylinderAreaTest {
 
