@@ -16,7 +16,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.test.*
 
-class ClientManagerImplTest: AbstractKoinTest() {
+class ClientManagerImplTest : AbstractKoinTest() {
 
     private lateinit var clientManager: ClientManager
 
