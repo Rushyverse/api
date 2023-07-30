@@ -4,6 +4,7 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.WorldMock
 import com.github.rushyverse.api.extension.copy
+import com.github.rushyverse.api.utils.randomString
 import com.github.rushyverse.api.world.SphereArea
 import com.github.rushyverse.api.world.isIn
 import io.kotest.assertions.throwables.shouldThrow
@@ -26,7 +27,7 @@ class SphereAreaTest {
     @BeforeTest
     fun onBefore() {
         serverMock = MockBukkit.mock()
-        worldMock = serverMock.addSimpleWorld("world")
+        worldMock = serverMock.addSimpleWorld(randomString())
     }
 
     @AfterTest
@@ -65,7 +66,27 @@ class SphereAreaTest {
     }
 
     @Nested
-    inner class UpdateWithRadiusChange {
+    inner class InAreaWithWorld {
+
+        @Test
+        fun `should return false if world is different`() {
+            val min = Location(worldMock, 0.0, 0.0, 0.0)
+            val area = SphereArea(min, 1.0)
+
+            min.copy(world = serverMock.addSimpleWorld(randomString())) isIn area shouldBe false
+        }
+
+        @Test
+        fun `should return true if world is same and in area`() {
+            val min = Location(worldMock, 0.0, 0.0, 0.0)
+            val area = SphereArea(min, 1.0)
+
+            min isIn area shouldBe true
+        }
+    }
+
+    @Nested
+    inner class InAreaWithRadius {
 
         @Test
         fun `should use zero for radius`() {
@@ -108,7 +129,8 @@ class SphereAreaTest {
             min.copy(x = 5.0, y = 5.0, z = 5.0) isIn area shouldBe false
             min.copy(x = -5.0, y = -5.0, z = -5.0) isIn area shouldBe false
 
-            val maxDiagonal = floor(sqrt(5.0 * 5.0 / 3.0) * 100) / 100 // The limit is 25 for radius 5.0 with x,y,z = ~2.886
+            val maxDiagonal =
+                floor(sqrt(5.0 * 5.0 / 3.0) * 100) / 100 // The limit is 25 for radius 5.0 with x,y,z = ~2.886
             min.copy(x = maxDiagonal, y = maxDiagonal, z = maxDiagonal) isIn area shouldBe true
             min.copy(x = -maxDiagonal, y = -maxDiagonal, z = -maxDiagonal) isIn area shouldBe true
             min.copy(x = maxDiagonal + 0.1, y = maxDiagonal + 0.1, z = maxDiagonal + 0.1) isIn area shouldBe false

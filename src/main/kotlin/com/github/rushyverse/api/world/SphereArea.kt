@@ -97,7 +97,6 @@ public class SphereArea(
     }
 
     override fun isInArea(location: Location): Boolean {
-        println("Checking if $location is in ${this.location} : ${location.distanceSquared(this.location)}")
         val areaLocation = this.location
         return location.world === areaLocation.world // Same world
                 && location.distanceSquared(areaLocation) <= radius.pow(2) // Distance is less than or equal to radius

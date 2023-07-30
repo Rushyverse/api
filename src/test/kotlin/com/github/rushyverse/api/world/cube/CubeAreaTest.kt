@@ -9,17 +9,12 @@ import com.github.rushyverse.api.utils.randomFloat
 import com.github.rushyverse.api.utils.randomLocation
 import com.github.rushyverse.api.utils.randomString
 import com.github.rushyverse.api.world.CubeArea
-import com.github.rushyverse.api.world.CylinderArea
 import com.github.rushyverse.api.world.isIn
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import org.bukkit.Location
-import org.checkerframework.checker.units.qual.min
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
-import kotlin.math.floor
-import kotlin.math.sqrt
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test

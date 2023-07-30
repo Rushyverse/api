@@ -4,6 +4,7 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.WorldMock
 import com.github.rushyverse.api.extension.copy
+import com.github.rushyverse.api.utils.randomString
 import com.github.rushyverse.api.world.CylinderArea
 import com.github.rushyverse.api.world.isIn
 import io.kotest.assertions.throwables.shouldThrow
@@ -63,10 +64,30 @@ class CylinderAreaTest {
     }
 
     @Nested
-    inner class UpdateWithYChange {
+    inner class InAreaWithWorld {
 
         @Test
-        fun `should use negative y limit`() {
+        fun `should return false if world is different`() {
+            val min = Location(worldMock, 0.0, 0.0, 0.0)
+            val area = CylinderArea(min, 1.0, 0.0..0.0)
+
+            min.copy(world = serverMock.addSimpleWorld(randomString())) isIn area shouldBe false
+        }
+
+        @Test
+        fun `should return true if world is same and in area`() {
+            val min = Location(worldMock, 0.0, 0.0, 0.0)
+            val area = CylinderArea(min, 1.0, 0.0..0.0)
+
+            min isIn area shouldBe true
+        }
+    }
+
+    @Nested
+    inner class InAreaWithHeight {
+
+        @Test
+        fun `should use negative height limit`() {
             val min = Location(worldMock, 0.0, 0.0, 0.0)
             val area = CylinderArea(min, 1.0, -10.0..-5.0)
 
@@ -77,7 +98,7 @@ class CylinderAreaTest {
         }
 
         @Test
-        fun `should use positive y limit`() {
+        fun `should use positive height limit`() {
             val min = Location(worldMock, 0.0, 0.0, 0.0)
             val area = CylinderArea(min, 0.0, 5.0..10.0)
 
@@ -88,7 +109,7 @@ class CylinderAreaTest {
         }
 
         @Test
-        fun `should use negative and positive y limit`() {
+        fun `should use negative and positive height limit`() {
             val min = Location(worldMock, 0.0, 0.0, 0.0)
             val area = CylinderArea(min, 0.0, -5.0..10.0)
 
@@ -100,7 +121,7 @@ class CylinderAreaTest {
         }
 
         @Test
-        fun `should use zero y limit`() {
+        fun `should use zero height limit`() {
             val min = Location(worldMock, 0.0, 0.0, 0.0)
             val area = CylinderArea(min, 0.0, 0.0..0.0)
 
@@ -112,7 +133,7 @@ class CylinderAreaTest {
     }
 
     @Nested
-    inner class UpdateWithRadiusChange {
+    inner class InAreaWithRadius {
 
         @Test
         fun `should use zero for radius`() {
@@ -150,6 +171,9 @@ class CylinderAreaTest {
             min.copy(x = -0.1, z = 1.0) isIn area shouldBe false
             min.copy(x = 0.1, z = -1.0) isIn area shouldBe false
             min.copy(x = -0.1, z = -1.0) isIn area shouldBe false
+
+            min.copy(y = 0.1) isIn area shouldBe false
+            min.copy(y = -0.1) isIn area shouldBe false
         }
     }
 }

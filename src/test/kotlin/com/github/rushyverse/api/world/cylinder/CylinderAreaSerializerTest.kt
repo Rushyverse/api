@@ -5,7 +5,6 @@ import be.seeseemelk.mockbukkit.WorldMock
 import com.github.rushyverse.api.utils.randomDouble
 import com.github.rushyverse.api.utils.randomFloat
 import com.github.rushyverse.api.world.CylinderArea
-import com.github.rushyverse.api.world.SphereArea
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
