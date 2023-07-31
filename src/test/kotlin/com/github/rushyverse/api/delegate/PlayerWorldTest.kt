@@ -1,23 +1,33 @@
 package com.github.rushyverse.api.delegate
 
-import com.github.rushyverse.api.AbstractKoinTest
-import io.mockk.every
-import io.mockk.mockk
+import be.seeseemelk.mockbukkit.MockBukkit
 import org.bukkit.entity.Player
 import org.junit.jupiter.api.Test
 import java.util.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class PlayerWorldTest : AbstractKoinTest() {
+class PlayerWorldTest {
+
+    private lateinit var player: Player
+
+    @BeforeTest
+    fun onBefore() {
+        MockBukkit.mock().apply {
+            player = addPlayer()
+        }
+    }
+
+    @AfterTest
+    fun onAfter() {
+        MockBukkit.unmock()
+    }
 
     @Test
     fun `get player if server has it`() {
-        val uuid = UUID.randomUUID()
-        val delegate = DelegatePlayer(pluginId, uuid)
-
-        val player = mockk<Player>()
-        every { server.getPlayer(uuid) } returns player
+        val delegate = DelegatePlayer(player.uniqueId)
 
         val obj = object {
             val property by delegate
@@ -29,8 +39,7 @@ class PlayerWorldTest : AbstractKoinTest() {
     @Test
     fun `get player if server doesn't have it`() {
         val uuid = UUID.randomUUID()
-        val delegate = DelegatePlayer(pluginId, uuid)
-        every { server.getPlayer(uuid) } returns null
+        val delegate = DelegatePlayer(uuid)
 
         val obj = object {
             val property by delegate

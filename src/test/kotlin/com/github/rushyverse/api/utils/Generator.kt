@@ -11,13 +11,14 @@ fun randomString() = stringGenerator.next()
 
 fun randomBoolean() = Random.nextBoolean()
 
-fun randomInt() = Random.nextInt()
+fun randomInt(from: Int = Int.MIN_VALUE, until: Int = Int.MAX_VALUE) = Random.nextInt(from, until)
 
-fun randomLong() = Random.nextLong()
+fun randomLong(from: Long = Long.MIN_VALUE, until: Long = Long.MAX_VALUE) = Random.nextLong(from, until)
 
-fun randomFloat() = Random.nextFloat()
+fun randomFloat(from: Float = Float.MIN_VALUE, until: Float = Float.MAX_VALUE) =
+    randomDouble(from.toDouble(), until.toDouble()).toFloat()
 
-fun randomDouble() = Random.nextDouble()
+fun randomDouble(from: Double = Double.MIN_VALUE, until: Double = Double.MAX_VALUE) = Random.nextDouble(from, until)
 
 const val LIMIT_RANDOM_COORDINATE = 1000.0
 

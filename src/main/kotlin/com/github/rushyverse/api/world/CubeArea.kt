@@ -11,16 +11,19 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.*
 import org.bukkit.Location
 
-public object CubeAreaSerializer: KSerializer<CubeArea> {
+/**
+ * Serializer class for [CubeArea] objects.
+ */
+public object CubeAreaSerializer : KSerializer<CubeArea> {
 
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cubeArea") {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("cube") {
         val locationDescriptor = LocationSerializer.descriptor
-        element("loc1", locationDescriptor)
-        element("loc2", locationDescriptor)
+        element("location1", locationDescriptor)
+        element("location2", locationDescriptor)
     }
 
     override fun deserialize(decoder: Decoder): CubeArea {
-        val locationSerializer = LocationSerializer()
+        val locationSerializer = LocationSerializer
 
         return decoder.decodeStructure(descriptor) {
             var loc1: Location? = null
@@ -41,14 +44,14 @@ public object CubeAreaSerializer: KSerializer<CubeArea> {
             }
 
             CubeArea(
-                loc1 ?: throw SerializationException("The field loc1 is missing"),
-                loc2 ?: throw SerializationException("The field loc2 is missing"),
+                loc1 ?: throw SerializationException("The field location1 is missing"),
+                loc2 ?: throw SerializationException("The field location2 is missing"),
             )
         }
     }
 
     override fun serialize(encoder: Encoder, value: CubeArea) {
-        val locationSerializer = LocationSerializer()
+        val locationSerializer = LocationSerializer
 
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(descriptor, 0, locationSerializer, value.min)
@@ -62,12 +65,11 @@ public object CubeAreaSerializer: KSerializer<CubeArea> {
  * A cuboid area defined by two positions.
  * @property min Minimum position.
  * @property max Maximum position.
- * @property center Center position of the cube.
  */
 @Serializable(with = CubeAreaSerializer::class)
-public class CubeArea(loc1: Location, loc2: Location) {
+public class CubeArea(loc1: Location, loc2: Location) : Area {
 
-    public var center: Location
+    public override var location: Location
         get() = max.centerRelative(min)
         set(value) {
             // The new position becomes the center of the cube.
@@ -93,15 +95,11 @@ public class CubeArea(loc1: Location, loc2: Location) {
         val (z1, z2) = minMaxOf(loc1.z, loc2.z)
         this.min = Location(world1, x1, y1, z1)
         this.max = Location(world2, x2, y2, z2)
-
     }
 
-    /**
-     * Check if a location is in area.
-     * This method don't care about the equality between the worlds names.
-     * Reason: log: "CubeArea: Worlds are not equal: plugins/rtf/temp/rtf1 -> null"
-     */
-    public fun isInArea(location: Location): Boolean {
+    public override fun isInArea(location: Location): Boolean {
+        val min = min
+        val max = max
         return min.world === location.world &&
                 location.x in min.x..max.x &&
                 location.y in min.y..max.y &&
@@ -112,4 +110,21 @@ public class CubeArea(loc1: Location, loc2: Location) {
         return "CubeArea(min=$min, max=$max)"
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CubeArea
+
+        if (min != other.min) return false
+        if (max != other.max) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = min.hashCode()
+        result = 31 * result + max.hashCode()
+        return result
+    }
 }

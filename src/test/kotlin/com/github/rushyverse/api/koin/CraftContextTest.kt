@@ -14,8 +14,8 @@ import kotlin.test.*
 
 class CraftContextTest {
 
-    @BeforeTest
-    fun onBefore() {
+    @AfterTest
+    fun onAfter() {
         CraftContext.koins.toMap().forEach { (id, _) ->
             CraftContext.stopKoin(id)
         }

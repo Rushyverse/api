@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.serializer
 
-import com.github.rushyverse.api.koin.inject
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.nullable
@@ -8,51 +7,40 @@ import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.*
+import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Server
 
 /**
  * Serializer for [Location].
  */
-public class LocationSerializer : KSerializer<Location> {
-
-    public companion object {
-
-        /**
-         * Serializer for the coordinates x, y or z.
-         */
-        private val coordinateSerializer get() = Double.serializer()
-
-        /**
-         * Serializer for the rotations yaw or pitch.
-         */
-        private val rotationSerializer get() = Float.serializer().nullable
-
-        /**
-         * Serializer for the world.
-         */
-        private val worldSerializer get() = String.serializer().nullable
-
-        public val descriptor: SerialDescriptor = buildClassSerialDescriptor("location") {
-            val coordinateSerializer = coordinateSerializer
-            val rotationSerializer = rotationSerializer
-
-            element("x", coordinateSerializer.descriptor)
-            element("y", coordinateSerializer.descriptor)
-            element("z", coordinateSerializer.descriptor)
-            element("yaw", rotationSerializer.descriptor)
-            element("pitch", rotationSerializer.descriptor)
-            element("world", worldSerializer.descriptor)
-        }
-
-    }
+public object LocationSerializer : KSerializer<Location> {
 
     /**
-     * Server instance.
+     * Serializer for the coordinates x, y or z.
      */
-    private val server: Server by inject<Server>()
+    private val coordinateSerializer get() = Double.serializer()
 
-    override val descriptor: SerialDescriptor = LocationSerializer.descriptor
+    /**
+     * Serializer for the rotations yaw or pitch.
+     */
+    private val rotationSerializer get() = Float.serializer().nullable
+
+    /**
+     * Serializer for the world.
+     */
+    private val worldSerializer get() = String.serializer().nullable
+
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("location") {
+        val coordinateSerializer = coordinateSerializer
+        val rotationSerializer = rotationSerializer
+
+        element("x", coordinateSerializer.descriptor)
+        element("y", coordinateSerializer.descriptor)
+        element("z", coordinateSerializer.descriptor)
+        element("yaw", rotationSerializer.descriptor)
+        element("pitch", rotationSerializer.descriptor)
+        element("world", worldSerializer.descriptor)
+    }
 
     override fun serialize(encoder: Encoder, value: Location) {
         val coordinateSerializer = coordinateSerializer
@@ -103,7 +91,7 @@ public class LocationSerializer : KSerializer<Location> {
             }
 
             Location(
-                world?.let { server.getWorld(it) },
+                world?.let { Bukkit.getWorld(it) },
                 x ?: throw SerializationException("The field x is missing"),
                 y ?: throw SerializationException("The field y is missing"),
                 z ?: throw SerializationException("The field z is missing"),

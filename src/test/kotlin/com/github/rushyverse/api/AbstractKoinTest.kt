@@ -5,7 +5,6 @@ import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
-import org.bukkit.Server
 import org.koin.core.module.Module
 import org.koin.dsl.ModuleDeclaration
 import kotlin.test.AfterTest
@@ -15,9 +14,7 @@ abstract class AbstractKoinTest {
 
     lateinit var plugin: Plugin
 
-    lateinit var server: Server
-
-    lateinit var pluginId: String
+    private lateinit var pluginId: String
 
     @BeforeTest
     open fun onBefore() {
@@ -26,16 +23,11 @@ abstract class AbstractKoinTest {
         CraftContext.startKoin(APIPlugin.ID_API) { }
 
         loadTestModule {
-            plugin = mockk(randomString()) {
+            plugin = mockk {
                 every { id } returns pluginId
                 every { name } returns randomString()
             }
             single { plugin }
-        }
-
-        server = mockk(randomString())
-        loadApiTestModule {
-            single { server }
         }
     }
 
@@ -45,12 +37,10 @@ abstract class AbstractKoinTest {
         CraftContext.stopKoin(APIPlugin.ID_API)
     }
 
-    inline fun <reified T : Any> testInject(): T = CraftContext.get(pluginId).inject<T>().value
-
     fun loadTestModule(moduleDeclaration: ModuleDeclaration): Module =
-        loadModule(pluginId, false, moduleDeclaration)
+        loadModule(pluginId, moduleDeclaration = moduleDeclaration)
 
     fun loadApiTestModule(moduleDeclaration: ModuleDeclaration): Module =
-        loadModule(APIPlugin.ID_API, true, moduleDeclaration)
+        loadModule(APIPlugin.ID_API, moduleDeclaration = moduleDeclaration)
 
 }

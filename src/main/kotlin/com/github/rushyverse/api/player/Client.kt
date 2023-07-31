@@ -18,7 +18,6 @@ import java.util.*
  * @property player Player linked to the client.
  */
 public open class Client(
-    pluginId: String,
     public val playerUUID: UUID,
     coroutineScope: CoroutineScope,
     public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
@@ -26,7 +25,7 @@ public open class Client(
 
     private val scoreboardManager: ScoreboardManager by inject()
 
-    public val player: Player? by DelegatePlayer(pluginId, playerUUID)
+    public val player: Player? by DelegatePlayer(playerUUID)
 
     /**
      * Retrieve the instance of player.
