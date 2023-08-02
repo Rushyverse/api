@@ -1,6 +1,6 @@
 package com.github.rushyverse.api.player.scoreboard
 
-import fr.mrmicky.fastboard.FastBoard
+import fr.mrmicky.fastboard.adventure.FastBoard
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.bukkit.entity.Player

@@ -5,7 +5,7 @@ import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.SupportedLanguage
-import fr.mrmicky.fastboard.FastBoard
+import fr.mrmicky.fastboard.adventure.FastBoard
 import kotlinx.coroutines.CoroutineScope
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
