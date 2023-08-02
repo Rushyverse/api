@@ -30,6 +30,7 @@ dependencies {
     val slf4jVersion = "2.0.0-alpha6"
     val fastboardVersion = "2.0.0"
     val kotestVersion = "5.6.2"
+    val icu4jVersion = "73.2"
 
     implementation(kotlin("stdlib"))
     implementation(kotlin("stdlib-jdk8"))
@@ -39,6 +40,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutineVersion")
     implementation("io.github.microutils:kotlin-logging:$loggingVersion")
+
+    // Plural translation
+    implementation("com.ibm.icu:icu4j:$icu4jVersion")
 
     // Injection framework
     implementation("io.insert-koin:koin-core:$koinVersion")
