@@ -10,5 +10,6 @@ public enum class SupportedLanguage(public val displayName: String, public val l
     ENGLISH("English", Locale("en", "gb")),
     FRENCH("Français", Locale("fr", "fr")),
     SPANISH("Español", Locale("es", "es")),
-    GERMAN("Deutsch", Locale("de", "de"))
+    GERMAN("Deutsch", Locale("de", "de")),
+    CHINESE("Chinese", Locale("zh", "zh"))
 }
