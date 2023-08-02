@@ -1,7 +1,7 @@
 package com.github.rushyverse.api.translation
 
+import com.ibm.icu.text.MessageFormat
 import mu.KotlinLogging
-import java.text.MessageFormat
 import java.util.*
 
 /**
