@@ -8,6 +8,9 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
+/**
+ * MiniMessage instance to serialize components with strict mode.
+ */
 private val MINI_MESSAGE_STRICT: MiniMessage = MiniMessage.builder()
     .strict(true)
     .tags(StandardTags.defaults())
@@ -227,4 +230,11 @@ public fun Component.withoutDecorations(): Component =
 public fun Component.undefineDecorations(): Component =
     undefineBold().undefineItalic().undefineUnderlined().undefineStrikethrough().undefineObfuscated()
 
-public fun Component.asMiniString(mini: MiniMessage = MINI_MESSAGE_STRICT): String = mini.serialize(this)
+/**
+ * Converts the component to its string representation using MiniMessage.
+ *
+ * @receiver The component to convert.
+ * @param mini The MiniMessage instance to use for serialization.
+ * @return The string representation of the component.
+ */
+public fun Component.asString(mini: MiniMessage = MINI_MESSAGE_STRICT): String = mini.serialize(this)
