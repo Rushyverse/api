@@ -16,9 +16,11 @@ import kotlinx.serialization.encoding.*
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
+import org.bukkit.block.banner.Pattern
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Damageable
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.BannerMeta
 import org.bukkit.inventory.meta.SkullMeta
 import java.util.*
 
@@ -31,13 +33,15 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
 
     private val amountSerializer: KSerializer<Int> get() = Int.serializer()
 
-    private val enchantmentsSerializer: KSerializer<Map<Enchantment, Int>?> = MapSerializer(EnchantmentSerializer, Int.serializer()).nullable
+    private val enchantmentsSerializer: KSerializer<Map<Enchantment, Int>?> =
+        MapSerializer(EnchantmentSerializer, Int.serializer()).nullable
 
     private val unbreakableSerializer: KSerializer<Boolean?> = Boolean.serializer().nullable
 
     private val customMetaModelSerializer: KSerializer<Int?> = Int.serializer().nullable
 
-    private val destroyableKeysSerializer: KSerializer<List<Namespaced>?> = ListSerializer(NamespacedSerializer).nullable
+    private val destroyableKeysSerializer: KSerializer<List<Namespaced>?> =
+        ListSerializer(NamespacedSerializer).nullable
 
     private val placeableKeysSerializer: KSerializer<List<Namespaced>?> get() = destroyableKeysSerializer
 
@@ -49,6 +53,8 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
 
     private val textureSerializer: KSerializer<String?> = String.serializer().nullable
 
+    private val patternsSerializer: KSerializer<List<Pattern>?> = ListSerializer(PatternSerializer).nullable
+
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("itemstack") {
         element("material", materialSerializer.descriptor)
         element("amount", amountSerializer.descriptor)
@@ -59,10 +65,9 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
         element("placeableKeys", placeableKeysSerializer.descriptor)
         element("displayName", displayNameSerializer.descriptor)
         element("lore", loreSerializer.descriptor)
-        // For item
         element("durability", durabilitySerializer.descriptor)
-        // For Skull item
         element("texture", textureSerializer.descriptor)
+        element("patterns", patternsSerializer.descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: ItemStack) {
@@ -88,19 +93,23 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             )
             encodeSerializableElement(descriptor, 7, displayNameSerializer, itemMeta?.displayName())
             encodeSerializableElement(descriptor, 8, loreSerializer, itemMeta?.lore())
-            // For item
             encodeSerializableElement(
                 descriptor,
                 9,
                 durabilitySerializer,
                 itemMeta?.let { it as? Damageable }?.health
             )
-            // For Skull item
             encodeSerializableElement(
                 descriptor,
                 10,
                 textureSerializer,
                 itemMeta?.let { it as? SkullMeta }?.playerProfile?.getTexturesProperty()?.value
+            )
+            encodeSerializableElement(
+                descriptor,
+                11,
+                patternsSerializer,
+                itemMeta?.let { it as? BannerMeta }?.patterns
             )
         }
     }
@@ -120,6 +129,8 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             var durability: Double? = null
             // For Skull item
             var texture: String? = null
+            // For banner item
+            var patterns: List<Pattern>? = null
 
             if (decodeSequentially()) {
                 material = decodeSerializableElement(descriptor, 0, materialSerializer)
@@ -133,6 +144,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                 lore = decodeSerializableElement(descriptor, 8, loreSerializer)
                 durability = decodeSerializableElement(descriptor, 9, durabilitySerializer)
                 texture = decodeSerializableElement(descriptor, 10, textureSerializer)
+                patterns = decodeSerializableElement(descriptor, 11, patternsSerializer)
             } else {
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
@@ -143,6 +155,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                             index,
                             enchantmentsSerializer
                         )
+
                         3 -> unbreakable = decodeSerializableElement(descriptor, index, unbreakableSerializer)
                         4 -> customMetaModel = decodeSerializableElement(descriptor, index, customMetaModelSerializer)
                         5 -> destroyableKeys = decodeSerializableElement(descriptor, index, destroyableKeysSerializer)
@@ -151,6 +164,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                         8 -> lore = decodeSerializableElement(descriptor, index, loreSerializer)
                         9 -> durability = decodeSerializableElement(descriptor, index, durabilitySerializer)
                         10 -> texture = decodeSerializableElement(descriptor, index, textureSerializer)
+                        11 -> patterns = decodeSerializableElement(descriptor, index, patternsSerializer)
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
                     }
@@ -172,15 +186,21 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                     displayName?.also(it::displayName)
                     lore?.toList()?.also(it::lore)
 
-                    if (it is Damageable) {
-                        durability?.also(it::damage)
-                    }
+                    when (it) {
+                        is Damageable -> {
+                            durability?.also(it::damage)
+                        }
 
-                    if (it is SkullMeta) {
-                        texture?.let { texture ->
-                            val profile = Bukkit.createProfile(UUID.randomUUID())
-                            profile.setTextures(texture)
-                            it.playerProfile = profile
+                        is SkullMeta -> {
+                            texture?.let { texture ->
+                                val profile = Bukkit.createProfile(UUID.randomUUID())
+                                profile.setTextures(texture)
+                                it.playerProfile = profile
+                            }
+                        }
+
+                        is BannerMeta -> {
+                            patterns?.also(it::setPatterns)
                         }
                     }
                 }
