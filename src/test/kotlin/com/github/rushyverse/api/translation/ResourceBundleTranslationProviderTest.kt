@@ -106,16 +106,6 @@ class ResourceBundleTranslationProviderTest {
         }
 
         @Test
-        fun `should return the value for the given key with the given list arguments`() {
-            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
-            provider.translate(
-                "test_args", SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, listOf(
-                    "with arguments"
-                )
-            ) shouldBe "english_value with arguments"
-        }
-
-        @Test
         fun `should return the key if the bundle is not registered`() {
             val locale = SupportedLanguage.ENGLISH.locale
             val ex = assertThrows<ResourceBundleNotRegisteredException> {
@@ -137,13 +127,6 @@ class ResourceBundleTranslationProviderTest {
             provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
             val key = randomString()
             provider.translate(key, SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, arrayOf("test")) shouldBe key
-        }
-
-        @Test
-        fun `should return the key if the value is not defined for language with the given list arguments`() {
-            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
-            val key = randomString()
-            provider.translate(key, SupportedLanguage.ENGLISH.locale, BUNDLE_NAME, listOf("test")) shouldBe key
         }
 
         @Test

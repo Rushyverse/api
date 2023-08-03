@@ -35,7 +35,7 @@ public open class ResourceBundleTranslationProvider : TranslationProvider() {
         key: String,
         locale: Locale,
         bundleName: String,
-        replacements: Array<Any>
+        arguments: Array<Any>
     ): String {
         val string = try {
             get(key, locale, bundleName)
@@ -44,7 +44,7 @@ public open class ResourceBundleTranslationProvider : TranslationProvider() {
             return key
         }
 
-        return MessageFormat(string, locale).format(replacements)
+        return MessageFormat(string, locale).format(arguments)
     }
 
     /**

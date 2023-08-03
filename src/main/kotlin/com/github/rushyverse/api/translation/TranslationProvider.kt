@@ -19,25 +19,6 @@ public abstract class TranslationProvider {
         key: String,
         locale: Locale,
         bundleName: String,
-        replacements: Array<Any>
+        arguments: Array<Any> = emptyArray()
     ): String
-
-    /**
-     * Get a formatted translation using the provided arguments.
-     */
-    public fun translate(
-        key: String,
-        locale: Locale,
-        bundleName: String
-    ): String = translate(key, locale, bundleName, emptyArray())
-
-    /**
-     * Get a formatted translation using the provided arguments.
-     */
-    public fun translate(
-        key: String,
-        locale: Locale,
-        bundleName: String,
-        replacements: Collection<Any>
-    ): String = translate(key, locale, bundleName, replacements.toTypedArray())
 }
