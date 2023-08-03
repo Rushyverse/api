@@ -1,5 +1,7 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.utils.randomString
+import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -121,6 +123,36 @@ class StringExtTest {
                 assertNull(value.toUUIDStrictOrNull())
             }
 
+        }
+
+    }
+
+    @Nested
+    inner class WithColor {
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "",
+                " ",
+                "red"
+            ]
+        )
+        fun `should wrap non empty string`(value: String) {
+            val string = randomString()
+            string withColor value shouldBe "<$value>$string</$value>"
+        }
+
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "",
+                " ",
+                "red"
+            ]
+        )
+        fun `should wrap empty string`(value: String) {
+            "" withColor value shouldBe "<$value></$value>"
         }
 
     }

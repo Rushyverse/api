@@ -25,6 +25,16 @@ public const val UUID_SIZE: Int = 36
  */
 public fun String.colored(): String = ChatColor.translateAlternateColorCodes('&', this)
 
+/**
+ * Wraps a given string with a color tag.
+ * Example: "Hello".wrapColorWith("red") will return `<red>Hello</red>`.
+ *
+ * @receiver The string to be wrapped.
+ * @param color The color to use for wrapping.
+ * @return The original string wrapped with the color tag.
+ */
+public infix fun String.withColor(color: String): String = "<$color>$this</$color>"
+
 /***
  * Encodes the specified byte array into a String using the [Base64] encoding scheme.
  * @receiver String to encode.
