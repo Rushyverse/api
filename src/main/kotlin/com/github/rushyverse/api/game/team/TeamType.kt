@@ -5,25 +5,28 @@ import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.TranslationProvider
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import java.util.*
 
-public enum class TeamType {
-
-    WHITE,
-    RED,
-    BLUE,
-    GREEN,
-    YELLOW,
-    PURPLE,
-    AQUA,
-    ORANGE,
-    BLACK
+public enum class TeamType(
+    public val color: TextColor
+) {
+    WHITE(NamedTextColor.WHITE),
+    RED(NamedTextColor.RED),
+    BLUE(NamedTextColor.BLUE),
+    GREEN(NamedTextColor.GREEN),
+    YELLOW(NamedTextColor.YELLOW),
+    PURPLE(NamedTextColor.LIGHT_PURPLE),
+    AQUA(NamedTextColor.AQUA),
+    ORANGE(NamedTextColor.GOLD),
+    BLACK(NamedTextColor.BLACK)
     ;
 
     public fun name(
         translationProvider: TranslationProvider,
         locale: Locale = SupportedLanguage.ENGLISH.locale
-    ): String = translationProvider.translate("team.${name}", locale, BUNDLE_API)
+    ): String = translationProvider.translate("team.${name.lowercase()}", locale, BUNDLE_API)
 
     public fun textName(
         translationProvider: TranslationProvider,
