@@ -2,7 +2,6 @@ package com.github.rushyverse.api.serializer
 
 import com.destroystokyo.paper.Namespaced
 import com.github.rushyverse.api.extension.ItemStack
-import com.github.rushyverse.api.extension.asMiniString
 import com.github.rushyverse.api.extension.getTexturesProperty
 import com.github.rushyverse.api.extension.setTextures
 import kotlinx.serialization.KSerializer
@@ -28,47 +27,42 @@ import java.util.*
  */
 public object ItemStackSerializer : KSerializer<ItemStack> {
 
-    private val intSerializer: KSerializer<Int> get() = Int.serializer()
+    private val materialSerializer: KSerializer<Material> get() = MaterialSerializer
 
-    private val doubleSerializer: KSerializer<Double> get() = Double.serializer()
+    private val amountSerializer: KSerializer<Int> get() = Int.serializer()
 
-    private val booleanSerializer: KSerializer<Boolean> get() = Boolean.serializer()
+    private val enchantmentsSerializer: KSerializer<Map<Enchantment, Int>?> = MapSerializer(EnchantmentSerializer, Int.serializer()).nullable
 
-    private val stringSerializer: KSerializer<String> get() = String.serializer()
+    private val unbreakableSerializer: KSerializer<Boolean?> = Boolean.serializer().nullable
 
-    private val materialSerializer: MaterialSerializer get() = MaterialSerializer
+    private val customMetaModelSerializer: KSerializer<Int?> = Int.serializer().nullable
 
-    private val namespacedKeySerializer: NamespacedSerializer get() = NamespacedSerializer
+    private val destroyableKeysSerializer: KSerializer<List<Namespaced>?> = ListSerializer(NamespacedSerializer).nullable
 
-    private val componentSerializer: ComponentSerializer get() = ComponentSerializer
+    private val placeableKeysSerializer: KSerializer<List<Namespaced>?> get() = destroyableKeysSerializer
 
-    private val mapEnchantmentSerializer: KSerializer<Map<Enchantment, Int>>
-        get() = MapSerializer(
-            EnchantmentSerializer,
-            intSerializer
-        )
+    private val displayNameSerializer: KSerializer<Component?> = ComponentSerializer.nullable
 
-    private val listNamespacedKeySerializer: KSerializer<List<Namespaced>>
-        get() = ListSerializer(
-            namespacedKeySerializer
-        )
+    private val loreSerializer: KSerializer<List<Component>?> = ListSerializer(ComponentSerializer).nullable
 
-    private val listComponentSerializer: KSerializer<List<Component>> get() = ListSerializer(componentSerializer)
+    private val durabilitySerializer: KSerializer<Double?> = Double.serializer().nullable
+
+    private val textureSerializer: KSerializer<String?> = String.serializer().nullable
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("itemstack") {
         element("material", materialSerializer.descriptor)
-        element("amount", intSerializer.descriptor)
-        element("enchantments", mapEnchantmentSerializer.descriptor)
-        element("unbreakable", booleanSerializer.descriptor)
-        element("customMetaModel", intSerializer.descriptor)
-        element("destroyableKeys", listNamespacedKeySerializer.descriptor)
-        element("placeableKeys", listNamespacedKeySerializer.descriptor)
-        element("displayName", componentSerializer.descriptor)
-        element("lore", listComponentSerializer.descriptor)
+        element("amount", amountSerializer.descriptor)
+        element("enchantments", enchantmentsSerializer.descriptor)
+        element("unbreakable", unbreakableSerializer.descriptor)
+        element("customMetaModel", customMetaModelSerializer.descriptor)
+        element("destroyableKeys", destroyableKeysSerializer.descriptor)
+        element("placeableKeys", placeableKeysSerializer.descriptor)
+        element("displayName", displayNameSerializer.descriptor)
+        element("lore", loreSerializer.descriptor)
         // For item
-        element("durability", doubleSerializer.descriptor)
+        element("durability", durabilitySerializer.descriptor)
         // For Skull item
-        element("texture", stringSerializer.descriptor)
+        element("texture", textureSerializer.descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: ItemStack) {
@@ -76,36 +70,36 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
 
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(descriptor, 0, materialSerializer, value.type)
-            encodeSerializableElement(descriptor, 1, intSerializer, value.amount)
-            encodeSerializableElement(descriptor, 2, mapEnchantmentSerializer, value.enchantments)
-            encodeSerializableElement(descriptor, 3, booleanSerializer.nullable, itemMeta?.isUnbreakable)
-            encodeSerializableElement(descriptor, 4, intSerializer.nullable, itemMeta?.customModelData)
+            encodeSerializableElement(descriptor, 1, amountSerializer, value.amount)
+            encodeSerializableElement(descriptor, 2, enchantmentsSerializer, value.enchantments)
+            encodeSerializableElement(descriptor, 3, unbreakableSerializer, itemMeta?.isUnbreakable)
+            encodeSerializableElement(descriptor, 4, customMetaModelSerializer, itemMeta?.customModelData)
             encodeSerializableElement(
                 descriptor,
                 5,
-                listNamespacedKeySerializer,
+                destroyableKeysSerializer,
                 itemMeta?.destroyableKeys?.toList() ?: emptyList()
             )
             encodeSerializableElement(
                 descriptor,
                 6,
-                listNamespacedKeySerializer.nullable,
+                placeableKeysSerializer,
                 itemMeta?.placeableKeys?.toList()
             )
-            encodeSerializableElement(descriptor, 7, stringSerializer.nullable, itemMeta?.displayName()?.asMiniString())
-            encodeSerializableElement(descriptor, 8, listComponentSerializer.nullable, itemMeta?.lore())
+            encodeSerializableElement(descriptor, 7, displayNameSerializer, itemMeta?.displayName())
+            encodeSerializableElement(descriptor, 8, loreSerializer, itemMeta?.lore())
             // For item
             encodeSerializableElement(
                 descriptor,
                 9,
-                doubleSerializer.nullable,
+                durabilitySerializer,
                 itemMeta?.let { it as? Damageable }?.health
             )
             // For Skull item
             encodeSerializableElement(
                 descriptor,
                 10,
-                stringSerializer.nullable,
+                textureSerializer,
                 itemMeta?.let { it as? SkullMeta }?.playerProfile?.getTexturesProperty()?.value
             )
         }
@@ -121,32 +115,45 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             var destroyableKeys: Collection<Namespaced>? = null
             var placeableKeys: Collection<Namespaced>? = null
             var displayName: Component? = null
-            var lore: MutableList<Component>? = null
+            var lore: Collection<Component>? = null
             // For item
             var durability: Double? = null
             // For Skull item
             var texture: String? = null
 
-            while (true) {
-                when (val index = decodeElementIndex(descriptor)) {
-                    0 -> material = decodeSerializableElement(descriptor, index, materialSerializer)
-                    1 -> amount = decodeSerializableElement(descriptor, index, intSerializer)
-                    2 -> enchantments = decodeSerializableElement(
-                        descriptor,
-                        index,
-                        mapEnchantmentSerializer
-                    )
-
-                    3 -> unbreakable = decodeSerializableElement(descriptor, index, booleanSerializer)
-                    4 -> customMetaModel = decodeSerializableElement(descriptor, index, intSerializer.nullable)
-                    5 -> destroyableKeys = decodeSerializableElement(descriptor, index, listNamespacedKeySerializer)
-                    6 -> placeableKeys = decodeSerializableElement(descriptor, index, listNamespacedKeySerializer)
-                    7 -> displayName = decodeSerializableElement(descriptor, index, componentSerializer)
-                    8 -> lore = decodeSerializableElement(descriptor, index, listComponentSerializer).toMutableList()
-                    9 -> durability = decodeSerializableElement(descriptor, index, doubleSerializer)
-                    10 -> texture = decodeSerializableElement(descriptor, index, stringSerializer)
-                    CompositeDecoder.DECODE_DONE -> break
-                    else -> error("Unexpected index: $index")
+            if (decodeSequentially()) {
+                material = decodeSerializableElement(descriptor, 0, materialSerializer)
+                amount = decodeSerializableElement(descriptor, 1, amountSerializer)
+                enchantments = decodeSerializableElement(descriptor, 2, enchantmentsSerializer)
+                unbreakable = decodeSerializableElement(descriptor, 3, unbreakableSerializer)
+                customMetaModel = decodeSerializableElement(descriptor, 4, customMetaModelSerializer)
+                destroyableKeys = decodeSerializableElement(descriptor, 5, destroyableKeysSerializer)
+                placeableKeys = decodeSerializableElement(descriptor, 6, placeableKeysSerializer)
+                displayName = decodeSerializableElement(descriptor, 7, displayNameSerializer)
+                lore = decodeSerializableElement(descriptor, 8, loreSerializer)
+                durability = decodeSerializableElement(descriptor, 9, durabilitySerializer)
+                texture = decodeSerializableElement(descriptor, 10, textureSerializer)
+            } else {
+                while (true) {
+                    when (val index = decodeElementIndex(descriptor)) {
+                        0 -> material = decodeSerializableElement(descriptor, index, materialSerializer)
+                        1 -> amount = decodeSerializableElement(descriptor, index, amountSerializer)
+                        2 -> enchantments = decodeSerializableElement(
+                            descriptor,
+                            index,
+                            enchantmentsSerializer
+                        )
+                        3 -> unbreakable = decodeSerializableElement(descriptor, index, unbreakableSerializer)
+                        4 -> customMetaModel = decodeSerializableElement(descriptor, index, customMetaModelSerializer)
+                        5 -> destroyableKeys = decodeSerializableElement(descriptor, index, destroyableKeysSerializer)
+                        6 -> placeableKeys = decodeSerializableElement(descriptor, index, placeableKeysSerializer)
+                        7 -> displayName = decodeSerializableElement(descriptor, index, displayNameSerializer)
+                        8 -> lore = decodeSerializableElement(descriptor, index, loreSerializer)
+                        9 -> durability = decodeSerializableElement(descriptor, index, durabilitySerializer)
+                        10 -> texture = decodeSerializableElement(descriptor, index, textureSerializer)
+                        CompositeDecoder.DECODE_DONE -> break
+                        else -> error("Unexpected index: $index")
+                    }
                 }
             }
 
@@ -163,7 +170,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                     destroyableKeys?.also(it::setDestroyableKeys)
                     placeableKeys?.also(it::setPlaceableKeys)
                     displayName?.also(it::displayName)
-                    lore?.also(it::lore)
+                    lore?.toList()?.also(it::lore)
 
                     if (it is Damageable) {
                         durability?.also(it::damage)
