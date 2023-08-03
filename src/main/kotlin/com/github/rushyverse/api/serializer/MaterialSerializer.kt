@@ -13,7 +13,7 @@ import org.bukkit.Material
  */
 public object MaterialSerializer : KSerializer<Material> {
 
-    private val stringSerializer get() = String.serializer()
+    private val stringSerializer: KSerializer<String> get() = String.serializer()
 
     override val descriptor: SerialDescriptor get() = stringSerializer.descriptor
 

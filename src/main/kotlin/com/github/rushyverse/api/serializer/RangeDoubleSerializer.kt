@@ -15,7 +15,7 @@ public object RangeDoubleSerializer : KSerializer<ClosedRange<Double>> {
     /**
      * Serializer for [Double].
      */
-    private val doubleSerializer get() = Double.serializer()
+    private val doubleSerializer: KSerializer<Double> get() = Double.serializer()
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("range") {
         val doubleSerializer = doubleSerializer

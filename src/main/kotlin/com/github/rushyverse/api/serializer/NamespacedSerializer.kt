@@ -13,7 +13,7 @@ import org.bukkit.NamespacedKey
  */
 public object NamespacedSerializer : KSerializer<Namespaced> {
 
-    private val stringSerializer get() = String.serializer()
+    private val stringSerializer: KSerializer<String> get() = String.serializer()
 
     override val descriptor: SerialDescriptor get() = stringSerializer.descriptor
 

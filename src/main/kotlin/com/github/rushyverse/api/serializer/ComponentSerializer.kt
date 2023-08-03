@@ -14,7 +14,7 @@ import net.kyori.adventure.text.Component
  */
 public object ComponentSerializer : KSerializer<Component> {
 
-    private val stringSerializer get() = String.serializer()
+    private val stringSerializer: KSerializer<String> get() = String.serializer()
 
     override val descriptor: SerialDescriptor get() = stringSerializer.descriptor
 
