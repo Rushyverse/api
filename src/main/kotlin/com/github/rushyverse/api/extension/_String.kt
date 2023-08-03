@@ -12,6 +12,8 @@ import org.bukkit.ChatColor
 import java.math.BigInteger
 import java.util.*
 
+private val MINI_MESSAGE: MiniMessage = MiniMessage.miniMessage()
+
 /**
  * Length of a UUID.
  */
@@ -214,5 +216,5 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.toComponent(vararg tagResolver: TagResolver): Component =
-    MiniMessage.miniMessage().deserialize(this, *tagResolver)
+public fun String.toComponent(vararg tagResolver: TagResolver, miniMessage: MiniMessage = MINI_MESSAGE): Component =
+    miniMessage.deserialize(this, *tagResolver)

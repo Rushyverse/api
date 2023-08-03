@@ -2,9 +2,16 @@ package com.github.rushyverse.api.extension
 
 import net.kyori.adventure.text.*
 import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
+
+private val MINI_MESSAGE_STRICT: MiniMessage = MiniMessage.builder()
+    .strict(true)
+    .tags(StandardTags.defaults())
+    .build()
 
 /**
  * Creates a text component using a builder.
@@ -220,21 +227,4 @@ public fun Component.withoutDecorations(): Component =
 public fun Component.undefineDecorations(): Component =
     undefineBold().undefineItalic().undefineUnderlined().undefineStrikethrough().undefineObfuscated()
 
-/**
- * Create a new component using the string content.
- * @receiver String to transform.
- * @param extractUrls If true, will extract urls from the string and apply a clickable effect on them.
- * @param extractColors If true, will extract colors from the string and apply them to the component.
- * @param colorChar The character used to define a color.
- * @return A new text component.
- */
-public fun String.toComponent(
-    extractUrls: Boolean = false,
-    extractColors: Boolean = true,
-    colorChar: Char = LegacyComponentSerializer.AMPERSAND_CHAR,
-): TextComponent = LegacyComponentSerializer.builder().apply {
-    if (extractUrls) extractUrls()
-    if (extractColors) character(colorChar)
-}
-    .build()
-    .deserialize(this)
+public fun Component.asMiniString(mini: MiniMessage = MINI_MESSAGE_STRICT): String = mini.serialize(this)
