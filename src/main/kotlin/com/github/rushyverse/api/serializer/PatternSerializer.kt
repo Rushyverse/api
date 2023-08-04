@@ -18,11 +18,10 @@ public object PatternSerializer : KSerializer<Pattern> {
 
     private val dyeColorSerializer: DyeColorSerializer get() = DyeColorSerializer
 
-    override val descriptor: SerialDescriptor
-        get() = buildClassSerialDescriptor("pattern") {
-            element("type", typeSerializer.descriptor)
-            element("color", dyeColorSerializer.descriptor)
-        }
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("pattern") {
+        element("type", typeSerializer.descriptor)
+        element("color", dyeColorSerializer.descriptor)
+    }
 
     override fun serialize(encoder: Encoder, value: Pattern) {
         encoder.encodeStructure(descriptor) {

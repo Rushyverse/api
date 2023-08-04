@@ -2,7 +2,8 @@ package com.github.rushyverse.api.serializer
 
 import com.destroystokyo.paper.Namespaced
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -13,21 +14,28 @@ import org.bukkit.NamespacedKey
  */
 public object NamespacedSerializer : KSerializer<Namespaced> {
 
-    private val stringSerializer: KSerializer<String> get() = String.serializer()
+    private val regexUppercase = Regex("([A-Z])")
 
-    override val descriptor: SerialDescriptor get() = stringSerializer.descriptor
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
+        "namespaced",
+        PrimitiveKind.STRING
+    )
 
     override fun serialize(encoder: Encoder, value: Namespaced) {
-        stringSerializer.serialize(encoder, value.key)
+        encoder.encodeString(value.key)
     }
 
     override fun deserialize(decoder: Decoder): Namespaced {
-        return stringSerializer.deserialize(decoder).let {
-            val value = it.split(NamespacedKey.DEFAULT_SEPARATOR)
-            if (value.size == 2) {
-                NamespacedKey(value[0], value[1])
+        return decoder.decodeString().let { decodedString ->
+            val namespacedString = decodedString.split(NamespacedKey.DEFAULT_SEPARATOR).map {
+                // Replace "A-Z" to "_a-z"
+                it.replace(regexUppercase) { matchResult -> "_${matchResult.value.lowercase()}" }
+            }
+
+            if (namespacedString.size == 2) {
+                NamespacedKey(namespacedString[0], namespacedString[1])
             } else {
-                NamespacedKey.minecraft(it)
+                NamespacedKey.minecraft(decodedString)
             }
         }
     }

@@ -2,6 +2,8 @@ package com.github.rushyverse.api.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -13,7 +15,10 @@ import org.bukkit.enchantments.Enchantment
  */
 public object EnchantmentSerializer : KSerializer<Enchantment> {
 
-    override val descriptor: SerialDescriptor get() = NamespacedSerializer.descriptor
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
+        "enchantment",
+        PrimitiveKind.STRING
+    )
 
     override fun serialize(encoder: Encoder, value: Enchantment) {
         NamespacedSerializer.serialize(encoder, value.key)
