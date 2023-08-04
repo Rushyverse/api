@@ -27,6 +27,7 @@ public object NamespacedSerializer : KSerializer<Namespaced> {
 
     override fun deserialize(decoder: Decoder): Namespaced {
         return decoder.decodeString().let { decodedString ->
+            println("Decoded string: $decodedString")
             val namespacedString = decodedString.split(NamespacedKey.DEFAULT_SEPARATOR).map {
                 // Replace "A-Z" to "_a-z"
                 it.replace(regexUppercase) { matchResult -> "_${matchResult.value.lowercase()}" }
@@ -35,7 +36,7 @@ public object NamespacedSerializer : KSerializer<Namespaced> {
             if (namespacedString.size == 2) {
                 NamespacedKey(namespacedString[0], namespacedString[1])
             } else {
-                NamespacedKey.minecraft(decodedString)
+                NamespacedKey.minecraft(namespacedString[0])
             }
         }
     }
