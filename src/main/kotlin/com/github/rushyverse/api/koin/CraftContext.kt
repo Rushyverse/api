@@ -7,9 +7,12 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.KoinContext
 import org.koin.core.error.KoinAppAlreadyStartedException
 import org.koin.core.module.Module
+import org.koin.core.qualifier.Qualifier
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.ModuleDeclaration
 import org.koin.dsl.module
+import org.koin.mp.KoinPlatformTools
+import kotlin.collections.set
 
 /**
  * Wrapper for [org.koin.dsl.module] that immediately loads the module for the current [Koin] instance.
@@ -31,7 +34,10 @@ public fun loadModule(
  * shared instances between plugins.
  * @returnA lazy delegate of type T representing the injected instance.
  */
-public inline fun <reified T : Any> inject(): Lazy<T> = CraftContext.get(ID_API).inject()
+public inline fun <reified T : Any> inject(
+    qualifier: Qualifier? = null,
+    mode: LazyThreadSafetyMode = KoinPlatformTools.defaultLazyMode(),
+): Lazy<T> = lazy(mode) { CraftContext.get(ID_API).get(qualifier) }
 
 /**
  * Injects an instance of the specified type T from the Koin context defined for the [id].
@@ -42,8 +48,13 @@ public inline fun <reified T : Any> inject(): Lazy<T> = CraftContext.get(ID_API)
  * @param idFallback The id of the memory container to retrieve the instance from if the first one is not found.
  * @return A lazy delegate of type T representing the injected instance.
  */
-public inline fun <reified T : Any> inject(id: String, idFallback: String = ID_API): Lazy<T> = lazy {
-    CraftContext.get(id).getOrNull<T>() ?: CraftContext.get(idFallback).get<T>()
+public inline fun <reified T : Any> inject(
+    id: String,
+    idFallback: String = ID_API,
+    qualifier: Qualifier? = null,
+    mode: LazyThreadSafetyMode = KoinPlatformTools.defaultLazyMode(),
+): Lazy<T> = lazy(mode) {
+    CraftContext.get(id).getOrNull<T>(qualifier) ?: CraftContext.get(idFallback).get<T>(qualifier)
 }
 
 /**
