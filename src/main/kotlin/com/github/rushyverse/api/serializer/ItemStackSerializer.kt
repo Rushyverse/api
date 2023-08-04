@@ -19,6 +19,7 @@ import org.bukkit.Material
 import org.bukkit.block.banner.Pattern
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.Damageable
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.BannerMeta
 import org.bukkit.inventory.meta.SkullMeta
@@ -55,6 +56,8 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
 
     private val patternsSerializer: KSerializer<List<Pattern>?> = ListSerializer(PatternSerializer).nullable
 
+    private val itemFlagsSerializer: KSerializer<List<ItemFlag>?> = ListSerializer(ItemFlagSerializer).nullable
+
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("itemstack") {
         element("material", materialSerializer.descriptor)
         element("amount", amountSerializer.descriptor)
@@ -68,6 +71,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
         element("durability", durabilitySerializer.descriptor)
         element("texture", textureSerializer.descriptor)
         element("patterns", patternsSerializer.descriptor)
+        element("itemFlags", itemFlagsSerializer.descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: ItemStack) {
@@ -111,6 +115,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                 patternsSerializer,
                 itemMeta?.let { it as? BannerMeta }?.patterns
             )
+            encodeSerializableElement(descriptor, 12, itemFlagsSerializer, itemMeta?.itemFlags?.toList())
         }
     }
 
@@ -125,6 +130,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             var placeableKeys: Collection<Namespaced>? = null
             var displayName: Component? = null
             var lore: Collection<Component>? = null
+            var itemFlags: Collection<ItemFlag>? = null
             // For item
             var durability: Double? = null
             // For Skull item
@@ -145,6 +151,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                 durability = decodeSerializableElement(descriptor, 9, durabilitySerializer)
                 texture = decodeSerializableElement(descriptor, 10, textureSerializer)
                 patterns = decodeSerializableElement(descriptor, 11, patternsSerializer)
+                itemFlags = decodeSerializableElement(descriptor, 12, itemFlagsSerializer)
             } else {
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
@@ -165,6 +172,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                         9 -> durability = decodeSerializableElement(descriptor, index, durabilitySerializer)
                         10 -> texture = decodeSerializableElement(descriptor, index, textureSerializer)
                         11 -> patterns = decodeSerializableElement(descriptor, index, patternsSerializer)
+                        12 -> itemFlags = decodeSerializableElement(descriptor, index, itemFlagsSerializer)
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
                     }
@@ -185,6 +193,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                     placeableKeys?.also(it::setPlaceableKeys)
                     displayName?.also(it::displayName)
                     lore?.toList()?.also(it::lore)
+                    itemFlags?.also { itemFlags -> it.addItemFlags(*itemFlags.toTypedArray()) }
 
                     when (it) {
                         is Damageable -> {
