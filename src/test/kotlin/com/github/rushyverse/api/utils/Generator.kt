@@ -23,6 +23,10 @@ fun randomFloat(from: Float = Float.MIN_VALUE, until: Float = Float.MAX_VALUE) =
 
 fun randomDouble(from: Double = Double.MIN_VALUE, until: Double = Double.MAX_VALUE) = Random.nextDouble(from, until)
 
+inline fun <reified T: Enum<T>> randomEnum(): T {
+    return enumValues<T>().random()
+}
+
 const val LIMIT_RANDOM_COORDINATE = 1000.0
 
 fun randomLocation(world: World? = null): Location {
