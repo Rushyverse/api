@@ -1,13 +1,10 @@
 package com.github.rushyverse.api.serializer
 
 import com.github.rushyverse.api.utils.randomDouble
-import com.github.rushyverse.api.utils.randomEnum
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.bukkit.DyeColor
-import org.bukkit.block.banner.PatternType
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
