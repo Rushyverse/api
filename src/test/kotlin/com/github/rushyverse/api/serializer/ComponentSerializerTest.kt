@@ -20,21 +20,6 @@ import kotlin.test.Test
 
 class ComponentSerializerTest {
 
-    private lateinit var world: WorldMock
-
-    @BeforeTest
-    fun onBefore() {
-        world = WorldMock()
-        MockBukkit.mock().apply {
-            addWorld(world)
-        }
-    }
-
-    @AfterTest
-    fun onAfter() {
-        MockBukkit.unmock()
-    }
-
     @Nested
     inner class Serialize {
 
