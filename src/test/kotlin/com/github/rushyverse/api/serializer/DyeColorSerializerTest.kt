@@ -3,6 +3,7 @@ package com.github.rushyverse.api.serializer
 import com.github.rushyverse.api.utils.randomString
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.matchers.shouldBe
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.bukkit.DyeColor
 import org.junit.jupiter.api.Nested
@@ -53,7 +54,7 @@ class DyeColorSerializerTest {
         @Test
         fun `should throw exception if value is not found`() {
             val colorName = randomString()
-            val exception = assertThrows<IllegalArgumentException> {
+            val exception = assertThrows<SerializationException> {
                 Json.decodeFromString(DyeColorSerializer, "\"$colorName\"")
             }
             exception.message shouldBe "Invalid enum value: $colorName. Valid values are: WHITE, ORANGE, MAGENTA, LIGHT_BLUE, YELLOW, LIME, PINK, GRAY, LIGHT_GRAY, CYAN, PURPLE, BLUE, BROWN, GREEN, RED, BLACK"
