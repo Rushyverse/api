@@ -30,8 +30,7 @@ public open class EnumSerializer<T : Enum<T>>(
     }
 
     override fun deserialize(decoder: Decoder): T {
-        val name = decoder.decodeString().uppercase().replace(" ", "_")
-        return findEnumValue(name)
+        return findEnumValue(decoder.decodeString())
     }
 
     /**
