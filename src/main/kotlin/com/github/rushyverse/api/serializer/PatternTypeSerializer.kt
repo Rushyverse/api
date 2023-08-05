@@ -27,6 +27,6 @@ public object PatternTypeSerializer : KSerializer<PatternType> {
 
     override fun deserialize(decoder: Decoder): PatternType {
         val key = decoder.decodeString()
-        return PatternType.getByIdentifier(key) ?: enumSerializer.findEnumValue(key)
+        return PatternType.getByIdentifier(key.lowercase()) ?: enumSerializer.findEnumValue(key)
     }
 }
