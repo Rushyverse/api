@@ -23,22 +23,22 @@ import kotlin.test.Test
 class EnchantmentSerializerTest {
 
     class EnchantmentMock(private val _name: String, namespace: NamespacedKey) : Enchantment(namespace) {
-        override fun translationKey(): String = TODO("Not yet implemented")
+        override fun translationKey(): String = error("Not implemented")
         override fun getName(): String = _name
-        override fun getMaxLevel(): Int = TODO("Not yet implemented")
-        override fun getStartLevel(): Int = TODO("Not yet implemented")
-        override fun getItemTarget(): EnchantmentTarget = TODO("Not yet implemented")
-        override fun isTreasure(): Boolean = TODO("Not yet implemented")
-        override fun isCursed(): Boolean = TODO("Not yet implemented")
-        override fun conflictsWith(other: Enchantment): Boolean = TODO("Not yet implemented")
-        override fun canEnchantItem(item: ItemStack): Boolean = TODO("Not yet implemented")
-        override fun displayName(level: Int): Component = TODO("Not yet implemented")
-        override fun isTradeable(): Boolean = TODO("Not yet implemented")
-        override fun isDiscoverable(): Boolean = TODO("Not yet implemented")
-        override fun getRarity(): EnchantmentRarity = TODO("Not yet implemented")
+        override fun getMaxLevel(): Int = error("Not implemented")
+        override fun getStartLevel(): Int = error("Not implemented")
+        override fun getItemTarget(): EnchantmentTarget = error("Not implemented")
+        override fun isTreasure(): Boolean = error("Not implemented")
+        override fun isCursed(): Boolean = error("Not implemented")
+        override fun conflictsWith(other: Enchantment): Boolean = error("Not implemented")
+        override fun canEnchantItem(item: ItemStack): Boolean = error("Not implemented")
+        override fun displayName(level: Int): Component = error("Not implemented")
+        override fun isTradeable(): Boolean = error("Not implemented")
+        override fun isDiscoverable(): Boolean = error("Not implemented")
+        override fun getRarity(): EnchantmentRarity = error("Not implemented")
         override fun getDamageIncrease(level: Int, entityCategory: EntityCategory): Float =
-            TODO("Not yet implemented")
-        override fun getActiveSlots(): MutableSet<EquipmentSlot> = TODO("Not yet implemented")
+            error("Not implemented")
+        override fun getActiveSlots(): MutableSet<EquipmentSlot> = error("Not implemented")
     }
 
     @BeforeTest
