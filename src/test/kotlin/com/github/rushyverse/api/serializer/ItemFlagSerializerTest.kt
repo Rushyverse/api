@@ -20,9 +20,9 @@ class ItemFlagSerializerTest {
         @ParameterizedTest
         @EnumSource(ItemFlag::class)
         fun `should use enum name`(item: ItemFlag) {
-            val name = item.name
+            val enumName = item.name
             Json.encodeToString(ItemFlagSerializer, item) shouldEqualJson """
-                "$name"
+                "$enumName"
             """.trimIndent()
         }
     }
@@ -33,31 +33,35 @@ class ItemFlagSerializerTest {
         @ParameterizedTest
         @EnumSource(ItemFlag::class)
         fun `should find value with uppercase`(value: ItemFlag) {
-            val name = value.name.uppercase()
-            Json.decodeFromString(ItemFlagSerializer, "\"$name\"") shouldBe value
+            val enumName = value.name.uppercase()
+            Json.decodeFromString(ItemFlagSerializer, "\"$enumName\"") shouldBe value
         }
 
         @ParameterizedTest
         @EnumSource(ItemFlag::class)
         fun `should find value with lowercase`(value: ItemFlag) {
-            val name = value.name.lowercase()
-            Json.decodeFromString(ItemFlagSerializer, "\"$name\"") shouldBe value
+            val enumName = value.name.lowercase()
+            Json.decodeFromString(ItemFlagSerializer, "\"$enumName\"") shouldBe value
         }
 
         @ParameterizedTest
         @EnumSource(ItemFlag::class)
         fun `should find value with space`(value: ItemFlag) {
-            val name = value.name.replace("_", " ")
-            Json.decodeFromString(ItemFlagSerializer, "\"$name\"") shouldBe value
+            val enumName = value.name.replace("_", " ")
+            Json.decodeFromString(ItemFlagSerializer, "\"$enumName\"") shouldBe value
         }
 
         @Test
         fun `should throw exception if value is not found`() {
-            val name = randomString()
+            val enumName = randomString()
             val exception = assertThrows<SerializationException> {
-                Json.decodeFromString(ItemFlagSerializer, "\"$name\"")
+                Json.decodeFromString(ItemFlagSerializer, "\"$enumName\"")
             }
-            exception.message shouldBe "Invalid enum value: $name. Valid values are: HIDE_ENCHANTS, HIDE_ATTRIBUTES, HIDE_UNBREAKABLE, HIDE_DESTROYS, HIDE_PLACED_ON, HIDE_POTION_EFFECTS, HIDE_DYE, HIDE_ARMOR_TRIM"
+            exception.message shouldBe "Invalid enum value: $enumName. Valid values are: ${
+                ItemFlag.entries.joinToString(
+                    ", "
+                )
+            }"
         }
     }
 }

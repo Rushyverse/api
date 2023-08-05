@@ -20,9 +20,9 @@ class DyeColorSerializerTest {
         @ParameterizedTest
         @EnumSource(DyeColor::class)
         fun `should use enum name`(color: DyeColor) {
-            val colorName = color.name
+            val enumName = color.name
             Json.encodeToString(DyeColorSerializer, color) shouldEqualJson """
-                "$colorName"
+                "$enumName"
             """.trimIndent()
         }
     }
@@ -33,31 +33,35 @@ class DyeColorSerializerTest {
         @ParameterizedTest
         @EnumSource(DyeColor::class)
         fun `should find value with uppercase`(color: DyeColor) {
-            val colorName = color.name.uppercase()
-            Json.decodeFromString(DyeColorSerializer, "\"$colorName\"") shouldBe color
+            val enumName = color.name.uppercase()
+            Json.decodeFromString(DyeColorSerializer, "\"$enumName\"") shouldBe color
         }
 
         @ParameterizedTest
         @EnumSource(DyeColor::class)
         fun `should find value with lowercase`(color: DyeColor) {
-            val colorName = color.name.lowercase()
-            Json.decodeFromString(DyeColorSerializer, "\"$colorName\"") shouldBe color
+            val enumName = color.name.lowercase()
+            Json.decodeFromString(DyeColorSerializer, "\"$enumName\"") shouldBe color
         }
 
         @ParameterizedTest
         @EnumSource(DyeColor::class)
         fun `should find value with space`(color: DyeColor) {
-            val colorName = color.name.replace("_", " ")
-            Json.decodeFromString(DyeColorSerializer, "\"$colorName\"") shouldBe color
+            val enumName = color.name.replace("_", " ")
+            Json.decodeFromString(DyeColorSerializer, "\"$enumName\"") shouldBe color
         }
 
         @Test
         fun `should throw exception if value is not found`() {
-            val colorName = randomString()
+            val enumName = randomString()
             val exception = assertThrows<SerializationException> {
-                Json.decodeFromString(DyeColorSerializer, "\"$colorName\"")
+                Json.decodeFromString(DyeColorSerializer, "\"$enumName\"")
             }
-            exception.message shouldBe "Invalid enum value: $colorName. Valid values are: WHITE, ORANGE, MAGENTA, LIGHT_BLUE, YELLOW, LIME, PINK, GRAY, LIGHT_GRAY, CYAN, PURPLE, BLUE, BROWN, GREEN, RED, BLACK"
+            exception.message shouldBe "Invalid enum value: $enumName. Valid values are: ${
+                DyeColor.entries.joinToString(
+                    ", "
+                )
+            }"
         }
     }
 }
