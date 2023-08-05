@@ -22,7 +22,7 @@ public object NamespacedSerializer : KSerializer<Namespaced> {
     )
 
     override fun serialize(encoder: Encoder, value: Namespaced) {
-        encoder.encodeString(value.key)
+        encoder.encodeString(value.namespace + NamespacedKey.DEFAULT_SEPARATOR + value.key)
     }
 
     override fun deserialize(decoder: Decoder): Namespaced {
