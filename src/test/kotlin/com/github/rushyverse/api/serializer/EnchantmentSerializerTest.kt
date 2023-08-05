@@ -22,6 +22,25 @@ import kotlin.test.Test
 
 class EnchantmentSerializerTest {
 
+    class EnchantmentMock(private val _name: String, namespace: NamespacedKey) : Enchantment(namespace) {
+        override fun translationKey(): String = TODO("Not yet implemented")
+        override fun getName(): String = _name
+        override fun getMaxLevel(): Int = TODO("Not yet implemented")
+        override fun getStartLevel(): Int = TODO("Not yet implemented")
+        override fun getItemTarget(): EnchantmentTarget = TODO("Not yet implemented")
+        override fun isTreasure(): Boolean = TODO("Not yet implemented")
+        override fun isCursed(): Boolean = TODO("Not yet implemented")
+        override fun conflictsWith(other: Enchantment): Boolean = TODO("Not yet implemented")
+        override fun canEnchantItem(item: ItemStack): Boolean = TODO("Not yet implemented")
+        override fun displayName(level: Int): Component = TODO("Not yet implemented")
+        override fun isTradeable(): Boolean = TODO("Not yet implemented")
+        override fun isDiscoverable(): Boolean = TODO("Not yet implemented")
+        override fun getRarity(): EnchantmentRarity = TODO("Not yet implemented")
+        override fun getDamageIncrease(level: Int, entityCategory: EntityCategory): Float =
+            TODO("Not yet implemented")
+        override fun getActiveSlots(): MutableSet<EquipmentSlot> = TODO("Not yet implemented")
+    }
+
     @BeforeTest
     fun onBefore() {
         MockBukkit.mock()
@@ -47,6 +66,17 @@ class EnchantmentSerializerTest {
             }
 
             Enchantment.values().forEach(::assertEnchant)
+        }
+
+        @Test
+        fun `should serialize custom enchantment`() {
+            val namespacedKey = NamespacedKey("namespace_test", "test")
+            val enchantment = EnchantmentMock("test", namespacedKey)
+            Enchantment.registerEnchantment(enchantment)
+
+            Json.encodeToString(EnchantmentSerializer, enchantment) shouldEqualJson """
+                "namespace_test:test"
+            """.trimIndent()
         }
     }
 
@@ -93,24 +123,7 @@ class EnchantmentSerializerTest {
         @Test
         fun `should find custom enchantment`() {
             val namespacedKey = NamespacedKey("namespace_test", "test")
-            val enchantment = object : Enchantment(namespacedKey) {
-                override fun translationKey(): String = TODO("Not yet implemented")
-                override fun getName(): String = "test"
-                override fun getMaxLevel(): Int = TODO("Not yet implemented")
-                override fun getStartLevel(): Int = TODO("Not yet implemented")
-                override fun getItemTarget(): EnchantmentTarget = TODO("Not yet implemented")
-                override fun isTreasure(): Boolean = TODO("Not yet implemented")
-                override fun isCursed(): Boolean = TODO("Not yet implemented")
-                override fun conflictsWith(other: Enchantment): Boolean = TODO("Not yet implemented")
-                override fun canEnchantItem(item: ItemStack): Boolean = TODO("Not yet implemented")
-                override fun displayName(level: Int): Component = TODO("Not yet implemented")
-                override fun isTradeable(): Boolean = TODO("Not yet implemented")
-                override fun isDiscoverable(): Boolean = TODO("Not yet implemented")
-                override fun getRarity(): EnchantmentRarity = TODO("Not yet implemented")
-                override fun getDamageIncrease(level: Int, entityCategory: EntityCategory): Float =
-                    TODO("Not yet implemented")
-                override fun getActiveSlots(): MutableSet<EquipmentSlot> = TODO("Not yet implemented")
-            }
+            val enchantment = EnchantmentMock("test", namespacedKey)
             Enchantment.registerEnchantment(enchantment)
 
             val json = """
