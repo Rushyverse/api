@@ -28,8 +28,11 @@ public object NamespacedSerializer : KSerializer<Namespaced> {
     override fun deserialize(decoder: Decoder): Namespaced {
         return decoder.decodeString().let { decodedString ->
             val namespacedString = decodedString.split(NamespacedKey.DEFAULT_SEPARATOR).map {
-                // Replace "A-Z" to "_a-z"
-                it.replace(regexUppercase) { matchResult -> "_${matchResult.value.lowercase()}" }
+                // Replace " " to "_". Example: blue wool -> blue_wool
+                it.replace(' ', '_')
+                    // Replace "A-Z" to "_a-z". Example: blueWool -> blue_wool
+                    .replace(regexUppercase) { matchResult -> "_${matchResult.value.lowercase()}" }
+
             }
 
             if (namespacedString.size == 2) {

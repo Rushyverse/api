@@ -63,7 +63,7 @@ class NamespacedSerializerTest {
         }
 
         @Test
-        fun `should create with uppercase instead of underscore`() {
+        fun `should replace uppercase by underscore and lowercase`() {
             fun decode(namespace: String?, key: String, expected: NamespacedKey) {
                 val json = """
                     "${if (namespace != null) "$namespace:" else ""}$key"
@@ -73,8 +73,21 @@ class NamespacedSerializerTest {
             }
             decode("test", "myKey", NamespacedKey("test", "my_key"))
             decode("myNamespace", "myKey", NamespacedKey("my_namespace", "my_key"))
-            decode("myNamespace", "myKey", NamespacedKey("my_namespace", "my_key"))
             decode(null, "myKey", NamespacedKey.minecraft("my_key"))
+        }
+
+        @Test
+        fun `should replace space by underscore`() {
+            fun decode(namespace: String?, key: String, expected: NamespacedKey) {
+                val json = """
+                    "${if (namespace != null) "$namespace:" else ""}$key"
+                """.trimIndent()
+
+                Json.decodeFromString(NamespacedSerializer, json) shouldBe expected
+            }
+            decode("test", "my key", NamespacedKey("test", "my_key"))
+            decode("my namespace", "my key", NamespacedKey("my_namespace", "my_key"))
+            decode(null, "my key", NamespacedKey.minecraft("my_key"))
         }
     }
 
