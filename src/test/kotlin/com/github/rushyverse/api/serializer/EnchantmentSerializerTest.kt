@@ -38,6 +38,7 @@ class EnchantmentSerializerTest {
         override fun getRarity(): EnchantmentRarity = error("Not implemented")
         override fun getDamageIncrease(level: Int, entityCategory: EntityCategory): Float =
             error("Not implemented")
+
         override fun getActiveSlots(): MutableSet<EquipmentSlot> = error("Not implemented")
     }
 
