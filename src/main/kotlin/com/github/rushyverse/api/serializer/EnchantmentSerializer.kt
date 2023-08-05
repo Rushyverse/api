@@ -27,6 +27,10 @@ public object EnchantmentSerializer : KSerializer<Enchantment> {
     override fun deserialize(decoder: Decoder): Enchantment {
         val key = NamespacedSerializer.deserialize(decoder) as NamespacedKey
         return Enchantment.getByKey(key)
-            ?: throw SerializationException("Unable to find enchantment with namespaced key: $key")
+            ?: throw SerializationException(
+                "Unable to find enchantment with namespaced key: $key. Valid enchantments are: ${
+                    Enchantment.values().joinToString { it.key.asString() }
+                }"
+            )
     }
 }
