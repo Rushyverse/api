@@ -26,9 +26,9 @@ class EnumSerializerTest {
 
         @ParameterizedTest
         @EnumSource(TestEnum::class)
-        fun `should use enum name`(color: TestEnum) {
-            val enumName = color.name
-            Json.encodeToString(TestEnumSerializer, color) shouldEqualJson """
+        fun `should use enum name`(value: TestEnum) {
+            val enumName = value.name
+            Json.encodeToString(TestEnumSerializer, value) shouldEqualJson """
                 "$enumName"
             """.trimIndent()
         }
@@ -39,23 +39,23 @@ class EnumSerializerTest {
 
         @ParameterizedTest
         @EnumSource(TestEnum::class)
-        fun `should find value with uppercase`(color: TestEnum) {
-            val enumName = color.name.uppercase()
-            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe color
+        fun `should find value with uppercase`(value: TestEnum) {
+            val enumName = value.name.uppercase()
+            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe value
         }
 
         @ParameterizedTest
         @EnumSource(TestEnum::class)
-        fun `should find value with lowercase`(color: TestEnum) {
-            val enumName = color.name.lowercase()
-            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe color
+        fun `should find value with lowercase`(value: TestEnum) {
+            val enumName = value.name.lowercase()
+            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe value
         }
 
         @ParameterizedTest
         @EnumSource(TestEnum::class)
-        fun `should find value with space`(color: TestEnum) {
-            val enumName = color.name.replace("_", " ")
-            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe color
+        fun `should find value with space`(value: TestEnum) {
+            val enumName = value.name.replace("_", " ")
+            Json.decodeFromString(TestEnumSerializer, "\"$enumName\"") shouldBe value
         }
 
         @Test
