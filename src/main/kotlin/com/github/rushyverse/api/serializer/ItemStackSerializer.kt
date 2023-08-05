@@ -39,7 +39,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
 
     private val unbreakableSerializer: KSerializer<Boolean?> = Boolean.serializer().nullable
 
-    private val customMetaModelSerializer: KSerializer<Int?> = Int.serializer().nullable
+    private val customModelSerializer: KSerializer<Int?> = Int.serializer().nullable
 
     private val destroyableKeysSerializer: KSerializer<List<Namespaced>?> =
         ListSerializer(NamespacedSerializer).nullable
@@ -63,7 +63,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
         element("amount", amountSerializer.descriptor)
         element("enchantments", enchantmentsSerializer.descriptor)
         element("unbreakable", unbreakableSerializer.descriptor)
-        element("customMetaModel", customMetaModelSerializer.descriptor)
+        element("customModel", customModelSerializer.descriptor)
         element("destroyableKeys", destroyableKeysSerializer.descriptor)
         element("placeableKeys", placeableKeysSerializer.descriptor)
         element("displayName", displayNameSerializer.descriptor)
@@ -81,41 +81,50 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             encodeSerializableElement(descriptor, 0, materialSerializer, value.type)
             encodeSerializableElement(descriptor, 1, amountSerializer, value.amount)
             encodeSerializableElement(descriptor, 2, enchantmentsSerializer, value.enchantments)
-            encodeSerializableElement(descriptor, 3, unbreakableSerializer, itemMeta?.isUnbreakable)
-            encodeSerializableElement(descriptor, 4, customMetaModelSerializer, itemMeta?.customModelData)
+
+            if(itemMeta == null) return@encodeStructure
+
+            encodeSerializableElement(descriptor, 3, unbreakableSerializer, itemMeta.isUnbreakable)
+            encodeSerializableElement(descriptor, 4, customModelSerializer, itemMeta.let {
+                if(it.hasCustomModelData()) it.customModelData else null
+            })
             encodeSerializableElement(
                 descriptor,
                 5,
                 destroyableKeysSerializer,
-                itemMeta?.destroyableKeys?.toList() ?: emptyList()
+                itemMeta.let { if(it.hasDestroyableKeys()) it.destroyableKeys.toList() else null }
             )
             encodeSerializableElement(
                 descriptor,
                 6,
                 placeableKeysSerializer,
-                itemMeta?.placeableKeys?.toList()
+                itemMeta.let { if(it.hasPlaceableKeys()) it.placeableKeys.toList() else null }
             )
-            encodeSerializableElement(descriptor, 7, displayNameSerializer, itemMeta?.displayName())
-            encodeSerializableElement(descriptor, 8, loreSerializer, itemMeta?.lore())
+            encodeSerializableElement(descriptor, 7, displayNameSerializer, itemMeta.let {
+                if(it.hasDisplayName()) it.displayName() else null
+            })
+            encodeSerializableElement(descriptor, 8, loreSerializer, itemMeta.let {
+                if(it.hasLore()) it.lore() else null
+            })
             encodeSerializableElement(
                 descriptor,
                 9,
                 durabilitySerializer,
-                itemMeta?.let { it as? Damageable }?.health
+                itemMeta.let { it as? Damageable }?.health
             )
             encodeSerializableElement(
                 descriptor,
                 10,
                 textureSerializer,
-                itemMeta?.let { it as? SkullMeta }?.playerProfile?.getTexturesProperty()?.value
+                itemMeta.let { it as? SkullMeta }?.playerProfile?.getTexturesProperty()?.value
             )
             encodeSerializableElement(
                 descriptor,
                 11,
                 patternsSerializer,
-                itemMeta?.let { it as? BannerMeta }?.patterns
+                itemMeta.let { it as? BannerMeta }?.patterns
             )
-            encodeSerializableElement(descriptor, 12, flagsSerializer, itemMeta?.itemFlags?.toList())
+            encodeSerializableElement(descriptor, 12, flagsSerializer, itemMeta.itemFlags.toList())
         }
     }
 
@@ -125,7 +134,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             var amount = 1
             var enchantments: Map<Enchantment, Int>? = null
             var unbreakable: Boolean? = null
-            var customMetaModel: Int? = null
+            var customModel: Int? = null
             var destroyableKeys: Collection<Namespaced>? = null
             var placeableKeys: Collection<Namespaced>? = null
             var displayName: Component? = null
@@ -143,7 +152,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                 amount = decodeSerializableElement(descriptor, 1, amountSerializer)
                 enchantments = decodeSerializableElement(descriptor, 2, enchantmentsSerializer)
                 unbreakable = decodeSerializableElement(descriptor, 3, unbreakableSerializer)
-                customMetaModel = decodeSerializableElement(descriptor, 4, customMetaModelSerializer)
+                customModel = decodeSerializableElement(descriptor, 4, customModelSerializer)
                 destroyableKeys = decodeSerializableElement(descriptor, 5, destroyableKeysSerializer)
                 placeableKeys = decodeSerializableElement(descriptor, 6, placeableKeysSerializer)
                 displayName = decodeSerializableElement(descriptor, 7, displayNameSerializer)
@@ -164,7 +173,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                         )
 
                         3 -> unbreakable = decodeSerializableElement(descriptor, index, unbreakableSerializer)
-                        4 -> customMetaModel = decodeSerializableElement(descriptor, index, customMetaModelSerializer)
+                        4 -> customModel = decodeSerializableElement(descriptor, index, customModelSerializer)
                         5 -> destroyableKeys = decodeSerializableElement(descriptor, index, destroyableKeysSerializer)
                         6 -> placeableKeys = decodeSerializableElement(descriptor, index, placeableKeysSerializer)
                         7 -> displayName = decodeSerializableElement(descriptor, index, displayNameSerializer)
@@ -188,7 +197,7 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                         it.addEnchant(enchant, level, true)
                     }
                     unbreakable?.also(it::setUnbreakable)
-                    customMetaModel?.also(it::setCustomModelData)
+                    customModel?.also(it::setCustomModelData)
                     destroyableKeys?.also(it::setDestroyableKeys)
                     placeableKeys?.also(it::setPlaceableKeys)
                     displayName?.also(it::displayName)
