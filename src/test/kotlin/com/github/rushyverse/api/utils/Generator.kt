@@ -5,9 +5,12 @@ import org.bukkit.World
 import java.util.*
 import kotlin.random.Random
 
-val stringGenerator = generateSequence { UUID.randomUUID().toString() }.distinct().iterator()
-
-fun randomString() = stringGenerator.next()
+fun randomString(
+    allowedChar: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9'),
+    size: Int = 50
+): String {
+    return List(size) { allowedChar.random() }.joinToString("")
+}
 
 fun randomBoolean() = Random.nextBoolean()
 

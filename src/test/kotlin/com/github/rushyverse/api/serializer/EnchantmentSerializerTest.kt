@@ -70,12 +70,14 @@ class EnchantmentSerializerTest {
 
         @Test
         fun `should serialize custom enchantment`() {
-            val namespacedKey = NamespacedKey("namespace_test", "test")
-            val enchantment = EnchantmentMock("test", namespacedKey)
+            val namespace = randomAcceptableNamespace()
+            val key = randomAcceptableNamespace()
+            val namespacedKey = NamespacedKey(namespace, key)
+            val enchantment = EnchantmentMock(key, namespacedKey)
             Enchantment.registerEnchantment(enchantment)
 
             Json.encodeToString(EnchantmentSerializer, enchantment) shouldEqualJson """
-                "namespace_test:test"
+                "$namespace:$key"
             """.trimIndent()
         }
     }
@@ -122,20 +124,22 @@ class EnchantmentSerializerTest {
 
         @Test
         fun `should find custom enchantment`() {
-            val namespacedKey = NamespacedKey("namespace_test", "test")
-            val enchantment = EnchantmentMock("test", namespacedKey)
+            val namespace = randomAcceptableNamespace()
+            val key = randomAcceptableNamespace()
+            val namespacedKey = NamespacedKey(namespace, key)
+            val enchantment = EnchantmentMock(key, namespacedKey)
             Enchantment.registerEnchantment(enchantment)
 
             val json = """
-                "namespace_test:test"
+                "$namespace:$key"
             """.trimIndent()
             Json.decodeFromString(EnchantmentSerializer, json) shouldBe enchantment
         }
 
         @Test
         fun `should throw if not found`() {
-            val namespace = randomString()
-            val key = randomString()
+            val namespace = randomAcceptableNamespace()
+            val key = randomAcceptableNamespace()
             val json = """
                 "$namespace:$key"
             """.trimIndent()
@@ -147,4 +151,6 @@ class EnchantmentSerializerTest {
             exception.message shouldBe "Unable to find enchantment with namespaced key: $namespace:$key. Valid enchantments are: minecraft:impaling, minecraft:thorns, minecraft:piercing, minecraft:fire_protection, minecraft:smite, minecraft:unbreaking, minecraft:swift_sneak, minecraft:feather_falling, minecraft:mending, minecraft:protection, minecraft:respiration, minecraft:projectile_protection, minecraft:knockback, minecraft:fire_aspect, minecraft:luck_of_the_sea, minecraft:lure, minecraft:punch, minecraft:channeling, minecraft:frost_walker, minecraft:sharpness, minecraft:power, minecraft:riptide, minecraft:bane_of_arthropods, minecraft:efficiency, minecraft:fortune, minecraft:looting, minecraft:loyalty, minecraft:silk_touch, minecraft:quick_charge, minecraft:binding_curse, minecraft:aqua_affinity, minecraft:multishot, minecraft:depth_strider, minecraft:vanishing_curse, minecraft:infinity, minecraft:flame, minecraft:blast_protection, minecraft:sweeping"
         }
     }
+
+    fun randomAcceptableNamespace() = randomString(('a'..'z') + ('0'..'9') + '_')
 }
