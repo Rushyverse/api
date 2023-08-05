@@ -46,6 +46,6 @@ public open class EnumSerializer<T : Enum<T>>(
     public fun findEnumValue(decoded: String): T {
         val name = decoded.uppercase().replace(" ", "_")
         return values.firstOrNull { it.name == name }
-            ?: throw SerializationException("Invalid enum value: $name. Valid values are: ${values.joinToString { it.name }}")
+            ?: throw SerializationException("Invalid enum value: $decoded. Valid values are: ${values.joinToString { it.name }}")
     }
 }
