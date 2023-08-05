@@ -19,30 +19,30 @@ public object PatternSerializer : KSerializer<Pattern> {
     private val dyeColorSerializer: DyeColorSerializer get() = DyeColorSerializer
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("pattern") {
-        element("type", typeSerializer.descriptor)
         element("color", dyeColorSerializer.descriptor)
+        element("type", typeSerializer.descriptor)
     }
 
     override fun serialize(encoder: Encoder, value: Pattern) {
         encoder.encodeStructure(descriptor) {
-            encodeSerializableElement(descriptor, 0, typeSerializer, value.pattern)
-            encodeSerializableElement(descriptor, 1, dyeColorSerializer, value.color)
+            encodeSerializableElement(descriptor, 0, dyeColorSerializer, value.color)
+            encodeSerializableElement(descriptor, 1, typeSerializer, value.pattern)
         }
     }
 
     override fun deserialize(decoder: Decoder): Pattern {
         return decoder.decodeStructure(descriptor) {
-            var type: PatternType? = null
             var color: DyeColor? = null
+            var type: PatternType? = null
 
             if (decodeSequentially()) {
-                type = decodeSerializableElement(descriptor, 0, typeSerializer)
-                color = decodeSerializableElement(descriptor, 1, dyeColorSerializer)
+                color = decodeSerializableElement(descriptor, 0, dyeColorSerializer)
+                type = decodeSerializableElement(descriptor, 1, typeSerializer)
             } else {
                 while (true) {
                     when (val index = decodeElementIndex(descriptor)) {
-                        0 -> type = decodeSerializableElement(descriptor, index, typeSerializer)
-                        1 -> color = decodeSerializableElement(descriptor, index, dyeColorSerializer)
+                        0 -> color = decodeSerializableElement(descriptor, index, dyeColorSerializer)
+                        1 -> type = decodeSerializableElement(descriptor, index, typeSerializer)
                         CompositeDecoder.DECODE_DONE -> break
                         else -> error("Unexpected index: $index")
                     }
