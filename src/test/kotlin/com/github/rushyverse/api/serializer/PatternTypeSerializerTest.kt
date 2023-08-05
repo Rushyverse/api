@@ -20,7 +20,7 @@ class PatternTypeSerializerTest {
         @ParameterizedTest
         @EnumSource(PatternType::class)
         fun `should use identifier`(value: PatternType) {
-            val identifier = value.identifier
+            val identifier = value.identifier.lowercase()
             Json.encodeToString(PatternTypeSerializer, value) shouldEqualJson """
                 "$identifier"
             """.trimIndent()
