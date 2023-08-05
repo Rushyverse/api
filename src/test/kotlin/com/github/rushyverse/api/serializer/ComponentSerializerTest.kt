@@ -45,8 +45,8 @@ class ComponentSerializerTest {
                 val colorName = color.toString()
                 val component = Component.text(string, color)
                 Json.encodeToString(ComponentSerializer, component) shouldEqualJson """
-                "<$colorName>$string</$colorName>"
-            """.trimIndent()
+                    "<$colorName>$string</$colorName>"
+                """.trimIndent()
             }
 
             assertColor(NamedTextColor.AQUA)
@@ -197,7 +197,7 @@ class ComponentSerializerTest {
             Json.decodeFromString(
                 ComponentSerializer,
                 """
-                      "<$decorationName>$string"
+                  "<$decorationName>$string"
                 """.trimIndent()
             ) shouldBe expectedComponent
 
@@ -205,7 +205,7 @@ class ComponentSerializerTest {
             Json.decodeFromString(
                 ComponentSerializer,
                 """
-                      "<$decorationName>$string</$decorationName>"
+                  "<$decorationName>$string</$decorationName>"
                 """.trimIndent()
             ) shouldBe expectedComponent
         }
@@ -218,14 +218,14 @@ class ComponentSerializerTest {
             Json.decodeFromString(
                 ComponentSerializer,
                 """
-                      "<aqua><bold>$string"
+                  "<aqua><bold>$string"
                 """.trimIndent()
             ) shouldBe expectedComponent
 
             Json.decodeFromString(
                 ComponentSerializer,
                 """
-                      "<aqua><bold>$string</bold></aqua>"
+                  "<aqua><bold>$string</bold></aqua>"
                 """.trimIndent()
             ) shouldBe expectedComponent
         }
