@@ -119,12 +119,12 @@ class ItemStackExtTest {
             val item1 = mockItem(Material.BEDROCK)
             val item2 = mockItem(Material.ACACIA_LEAVES)
             assertEquals(
-                listOf(item1, item2), listOf(
+                listOf(item1, item2), sequenceOf(
                     item1,
                     mockItem(Material.AIR),
                     item2,
                     mockItem(Material.AIR)
-                ).filterNotAir()
+                ).filterNotAir().toList()
             )
         }
     }
