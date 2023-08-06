@@ -2,6 +2,7 @@ package com.github.rushyverse.api.world
 
 import com.github.rushyverse.api.serializer.LocationSerializer
 import com.github.rushyverse.api.serializer.RangeDoubleSerializer
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -39,6 +40,7 @@ public object CylinderAreaSerializer : KSerializer<CylinderArea> {
         element("height", rangeDoubleSerializer.descriptor)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): CylinderArea {
         return decoder.decodeStructure(descriptor) {
             var location: Location? = null

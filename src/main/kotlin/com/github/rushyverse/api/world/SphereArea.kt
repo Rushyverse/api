@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.world
 
 import com.github.rushyverse.api.serializer.LocationSerializer
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -31,6 +32,7 @@ public object SphereAreaSerializer : KSerializer<SphereArea> {
         element("radius", doubleSerializer.descriptor)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): SphereArea {
         return decoder.decodeStructure(descriptor) {
             var location: Location? = null
