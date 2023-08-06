@@ -1,4 +1,4 @@
-package com.github.rushyverse.api.extension
+package com.github.rushyverse.api.extension.event
 
 import com.github.rushyverse.api.extension.event.cancel
 import io.kotest.matchers.shouldBe
