@@ -109,7 +109,6 @@ class SphereAreaTest {
         fun `should use positive for radius`() {
             val min = Location(worldMock, 0.0, 0.0, 0.0)
             val area = SphereArea(min, 5.0)
-            println(sqrt(5.0 * 5.0 / 3.0))
 
             min.copy(x = 0.0, y = 0.0, z = 0.0) isIn area shouldBe true
             min.copy(x = 5.0, y = 0.0, z = 0.0) isIn area shouldBe true

@@ -1,6 +1,10 @@
 package com.github.rushyverse.api
 
+import com.charleskorn.kaml.Yaml
+import com.charleskorn.kaml.YamlConfiguration
 import com.github.rushyverse.api.APIPlugin.Companion.BUNDLE_API
+import com.github.rushyverse.api.configuration.reader.IFileReader
+import com.github.rushyverse.api.configuration.reader.YamlFileReader
 import com.github.rushyverse.api.extension.registerListener
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
@@ -9,11 +13,14 @@ import com.github.rushyverse.api.listener.VillagerListener
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
-import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
+import com.github.rushyverse.api.serializer.*
 import com.github.rushyverse.api.translation.ResourceBundleTranslationProvider
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.SerializersModuleBuilder
+import kotlinx.serialization.modules.contextual
 import org.bukkit.entity.Player
 import org.koin.core.module.Module
 import org.koin.dsl.bind
@@ -53,6 +60,33 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     override suspend fun onDisableAsync() {
         CraftContext.stopKoin(id)
         super.onDisableAsync()
+    }
+
+    /**
+     * Create a new instance of yaml reader.
+     * @return The instance of the yaml reader.
+     */
+    protected open fun createYamlReader(
+        configuration: YamlConfiguration = YamlConfiguration(),
+        serializerModuleBuilder: SerializersModuleBuilder.() -> Unit = {},
+    ): IFileReader {
+        val yaml = Yaml(
+            serializersModule = SerializersModule {
+                contextual(ComponentSerializer)
+                contextual(DyeColorSerializer)
+                contextual(EnchantmentSerializer)
+                contextual(ItemStackSerializer)
+                contextual(LocationSerializer)
+                contextual(MaterialSerializer)
+                contextual(NamespacedSerializer)
+                contextual(PatternSerializer)
+                contextual(PatternTypeSerializer)
+                contextual(RangeDoubleSerializer)
+                serializerModuleBuilder()
+            },
+            configuration = configuration,
+        )
+        return YamlFileReader(this, yaml)
     }
 
     /**

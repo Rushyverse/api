@@ -18,17 +18,17 @@ public object LocationSerializer : KSerializer<Location> {
     /**
      * Serializer for the coordinates x, y or z.
      */
-    private val coordinateSerializer get() = Double.serializer()
+    private val coordinateSerializer: KSerializer<Double> get() = Double.serializer()
 
     /**
      * Serializer for the rotations yaw or pitch.
      */
-    private val rotationSerializer get() = Float.serializer().nullable
+    private val rotationSerializer: KSerializer<Float?> = Float.serializer().nullable
 
     /**
      * Serializer for the world.
      */
-    private val worldSerializer get() = String.serializer().nullable
+    private val worldSerializer: KSerializer<String?> = String.serializer().nullable
 
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("location") {
         val coordinateSerializer = coordinateSerializer

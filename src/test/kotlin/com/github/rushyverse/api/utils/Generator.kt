@@ -5,9 +5,12 @@ import org.bukkit.World
 import java.util.*
 import kotlin.random.Random
 
-val stringGenerator = generateSequence { UUID.randomUUID().toString() }.distinct().iterator()
-
-fun randomString() = stringGenerator.next()
+fun randomString(
+    allowedChar: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9'),
+    size: Int = 50
+): String {
+    return List(size) { allowedChar.random() }.joinToString("")
+}
 
 fun randomBoolean() = Random.nextBoolean()
 
@@ -19,6 +22,10 @@ fun randomFloat(from: Float = Float.MIN_VALUE, until: Float = Float.MAX_VALUE) =
     randomDouble(from.toDouble(), until.toDouble()).toFloat()
 
 fun randomDouble(from: Double = Double.MIN_VALUE, until: Double = Double.MAX_VALUE) = Random.nextDouble(from, until)
+
+inline fun <reified T: Enum<T>> randomEnum(): T {
+    return enumValues<T>().random()
+}
 
 const val LIMIT_RANDOM_COORDINATE = 1000.0
 

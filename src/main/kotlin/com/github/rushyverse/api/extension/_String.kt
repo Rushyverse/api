@@ -8,9 +8,18 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
 import org.bukkit.ChatColor
 import java.math.BigInteger
 import java.util.*
+
+/**
+ * MiniMessage instance to deserialize components without strict mode.
+ */
+private val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
+    .strict(false)
+    .tags(StandardTags.defaults())
+    .build()
 
 /**
  * Length of a UUID.
@@ -214,5 +223,5 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.toComponent(vararg tagResolver: TagResolver): Component =
-    MiniMessage.miniMessage().deserialize(this, *tagResolver)
+public fun String.asComponent(vararg tagResolver: TagResolver, miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT): Component =
+    miniMessage.deserialize(this, *tagResolver)
