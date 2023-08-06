@@ -3,7 +3,6 @@ package com.github.rushyverse.api.world
 import com.github.rushyverse.api.extension.centerRelative
 import com.github.rushyverse.api.extension.minMaxOf
 import com.github.rushyverse.api.serializer.LocationSerializer
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
@@ -23,7 +22,6 @@ public object CubeAreaSerializer : KSerializer<CubeArea> {
         element("location2", locationDescriptor)
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): CubeArea {
         val locationSerializer = LocationSerializer
 

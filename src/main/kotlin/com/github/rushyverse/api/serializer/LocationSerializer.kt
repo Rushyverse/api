@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.serializer
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.nullable
@@ -57,7 +56,6 @@ public object LocationSerializer : KSerializer<Location> {
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): Location {
         val coordinateSerializer = coordinateSerializer
         val rotationSerializer = rotationSerializer

@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.serializer
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.serializer
@@ -34,7 +33,6 @@ public object RangeDoubleSerializer : KSerializer<ClosedRange<Double>> {
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): ClosedRange<Double> {
         val doubleSerializer = doubleSerializer
 

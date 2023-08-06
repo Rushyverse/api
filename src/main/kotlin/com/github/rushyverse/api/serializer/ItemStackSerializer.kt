@@ -4,7 +4,6 @@ import com.destroystokyo.paper.Namespaced
 import com.github.rushyverse.api.extension.ItemStack
 import com.github.rushyverse.api.extension.getTexturesProperty
 import com.github.rushyverse.api.extension.setTextures
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
@@ -129,7 +128,6 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): ItemStack {
         return decoder.decodeStructure(descriptor) {
             var material: Material? = null

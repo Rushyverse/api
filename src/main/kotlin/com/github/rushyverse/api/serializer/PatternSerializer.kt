@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.serializer
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -31,7 +30,6 @@ public object PatternSerializer : KSerializer<Pattern> {
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     override fun deserialize(decoder: Decoder): Pattern {
         return decoder.decodeStructure(descriptor) {
             var color: DyeColor? = null

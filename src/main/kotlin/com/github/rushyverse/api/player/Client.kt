@@ -9,7 +9,6 @@ import com.github.rushyverse.api.translation.SupportedLanguage
 import fr.mrmicky.fastboard.adventure.FastBoard
 import kotlinx.coroutines.CoroutineScope
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.text
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import org.bukkit.entity.Player
 import java.util.*
