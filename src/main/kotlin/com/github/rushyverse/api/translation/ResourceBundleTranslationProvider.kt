@@ -40,7 +40,7 @@ public open class ResourceBundleTranslationProvider : TranslationProvider() {
         val string = try {
             get(key, locale, bundleName)
         } catch (e: MissingResourceException) {
-            logger.error("Unable to find translation for key '$key' in bundles: '$bundleName'")
+            logger.error("Unable to find translation for key '$key' in bundles: '$bundleName'", e)
             return key
         }
 

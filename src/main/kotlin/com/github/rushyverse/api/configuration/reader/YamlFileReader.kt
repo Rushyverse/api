@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.configuration.reader
 
-import com.charleskorn.kaml.Yaml
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.serializer
@@ -15,7 +14,6 @@ import kotlin.reflect.full.createType
  * Read configuration from YAML file.
  * If the file does not exist, it will be created from the resource with the same name.
  * @property plugin Plugin to get the data folder from.
- * @property format [Yaml] configuration to use.
  */
 public class YamlFileReader(
     public val plugin: JavaPlugin,
