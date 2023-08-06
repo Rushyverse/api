@@ -11,7 +11,8 @@ import org.bukkit.World
  *
  * @property world1 The first world involved in the check, which may be the source or origin.
  * @property world2 The second world involved in the check, which may be the destination or target.
- * @param message Optional error message detailing the context or reason for the exception. If not provided, a default message may be utilized.
+ * @param message Optional error message detailing the context or reason for the exception.
+ * If not provided, a default message may be utilized.
  */
 public class WorldDifferentException(
     public val world1: World? = null,

@@ -168,7 +168,8 @@ public inline fun Collection<String>.toLore(
 
 /**
  * Transform a string into a list of string by cutting it.
- * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space,
+ * it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
  * @param lineLength Max size of each string.
@@ -180,7 +181,8 @@ public fun String.toFormattedLore(lineLength: Int = DEFAULT_LORE_LINE_LENGTH): L
 
 /**
  * Transform a string into a sequence of string by cutting.
- * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space,
+ * it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
  * @param lineLength Max size of each string.
