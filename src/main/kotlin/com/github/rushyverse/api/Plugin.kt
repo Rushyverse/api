@@ -107,7 +107,15 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         val yaml = Yaml(
             serializersModule = SerializersModule {
                 contextual(ComponentSerializer)
-                // ... (other serializers)
+                contextual(DyeColorSerializer)
+                contextual(EnchantmentSerializer)
+                contextual(ItemStackSerializer)
+                contextual(LocationSerializer)
+                contextual(MaterialSerializer)
+                contextual(NamespacedSerializer)
+                contextual(PatternSerializer)
+                contextual(PatternTypeSerializer)
+                contextual(RangeDoubleSerializer)
                 serializerModuleBuilder()
             },
             configuration = configuration,
