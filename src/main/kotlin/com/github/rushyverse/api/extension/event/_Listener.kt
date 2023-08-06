@@ -14,7 +14,9 @@ import kotlin.time.Duration
 /**
  * Unregister the listener.
  */
-public fun Listener.unregister(): Unit = HandlerList.unregisterAll(this)
+public fun Listener.unregister() {
+    HandlerList.unregisterAll(this)
+}
 
 /**
  * Wait events corresponding to an event type.

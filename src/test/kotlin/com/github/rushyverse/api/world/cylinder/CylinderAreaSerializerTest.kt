@@ -22,9 +22,7 @@ class CylinderAreaSerializerTest {
     @BeforeTest
     fun onBefore() {
         world = WorldMock()
-        MockBukkit.mock().apply {
-            addWorld(world)
-        }
+        MockBukkit.mock().addWorld(world)
     }
 
     @AfterTest

@@ -91,10 +91,12 @@ public object CraftContext {
     public fun getOrNull(id: String): Koin? = _koins[id]?.second
 
     /** Closes and removes the current [Koin] instance. */
-    public fun stopKoin(id: String): Unit = synchronized(this) {
-        val koinInstance = _koins[id] ?: return@synchronized
-        koinInstance.second.close()
-        _koins -= id
+    public fun stopKoin(id: String) {
+        synchronized(this) {
+            val koinInstance = _koins[id] ?: return@synchronized
+            koinInstance.second.close()
+            _koins -= id
+        }
     }
 
     /**
@@ -143,8 +145,10 @@ public object CraftContext {
      *
      * @param module The module to load.
      */
-    public fun loadKoinModules(id: String, module: Module): Unit = synchronized(this) {
-        loadKoinModules(id, listOf(module))
+    public fun loadKoinModules(id: String, module: Module) {
+        synchronized(this) {
+            loadKoinModules(id, listOf(module))
+        }
     }
 
     /**
@@ -152,8 +156,10 @@ public object CraftContext {
      *
      * @param modules The modules to load.
      */
-    public fun loadKoinModules(id: String, modules: List<Module>): Unit = synchronized(this) {
-        get(id).loadModules(modules)
+    public fun loadKoinModules(id: String, modules: List<Module>) {
+        synchronized(this) {
+            get(id).loadModules(modules)
+        }
     }
 
     /**
@@ -161,8 +167,10 @@ public object CraftContext {
      *
      * @param module The module to unload.
      */
-    public fun unloadKoinModules(id: String, module: Module): Unit = synchronized(this) {
-        unloadKoinModules(id, listOf(module))
+    public fun unloadKoinModules(id: String, module: Module) {
+        synchronized(this) {
+            unloadKoinModules(id, listOf(module))
+        }
     }
 
     /**
@@ -170,7 +178,9 @@ public object CraftContext {
      *
      * @param modules The modules to unload.
      */
-    public fun unloadKoinModules(id: String, modules: List<Module>): Unit = synchronized(this) {
-        get(id).unloadModules(modules)
+    public fun unloadKoinModules(id: String, modules: List<Module>) {
+        synchronized(this) {
+            get(id).unloadModules(modules)
+        }
     }
 }

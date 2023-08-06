@@ -66,7 +66,7 @@ public class YamlFileReader(
     @Blocking
     private fun createFileFromResource(target: File, resourceFile: String) {
         val resource = plugin::class.java.getResourceAsStream("/$resourceFile")
-            ?: throw IllegalStateException("Cannot find resource $resourceFile in the plugin.")
+            ?: error("Cannot find resource $resourceFile in the plugin.")
 
         resource.bufferedReader().use { reader ->
             target.bufferedWriter().use { writer ->

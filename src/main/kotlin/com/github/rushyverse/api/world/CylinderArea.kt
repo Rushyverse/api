@@ -114,10 +114,39 @@ public class CylinderArea(
 
     override fun isInArea(location: Location): Boolean {
         val areaLocation = this.location
-        return location.world === areaLocation.world // Same world
-                && sqrt((location.x - areaLocation.x).pow(2.0) + (location.z - areaLocation.z).pow(2.0)) <= radius // Within radius
-                && location.y in height // Within height
+        return isSameWorld(location, areaLocation)
+                && isInRadius(location, areaLocation)
+                && isInHeight(location)
     }
+
+    /**
+     * Determines if two locations are in the same world.
+     *
+     * @param location The first location.
+     * @param areaLocation The second location.
+     * @return `true` if both locations are in the same world, `false` otherwise.
+     */
+    private fun isSameWorld(location: Location, areaLocation: Location): Boolean =
+        location.world === areaLocation.world
+
+    /**
+     * Checks if the given location is within the specified height range.
+     *
+     * @param location The location to check.
+     * @return `true` if the location is within the height range, `false` otherwise.
+     */
+    private fun isInHeight(location: Location): Boolean =
+        location.y in height
+
+    /**
+     * Determines if a given location is within a specified radius of an area location.
+     *
+     * @param location The location to check.
+     * @param areaLocation The area location to compare against.
+     * @return `true` if the location is within the radius of the area location, `false` otherwise.
+     */
+    private fun isInRadius(location: Location, areaLocation: Location): Boolean =
+        sqrt((location.x - areaLocation.x).pow(2.0) + (location.z - areaLocation.z).pow(2.0)) <= radius
 
     override fun toString(): String {
         return "CylinderArea(location=$location, height=$height, radius=$radius)"

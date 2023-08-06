@@ -56,7 +56,7 @@ public class SharedGameData {
      * @param gameType The type of game to filter by.
      * @return The count of games of the specified type.
      */
-    public fun games(gameType: String): Int = games.filter { it.type == gameType }.size
+    public fun games(gameType: String): Int = games.count { it.type == gameType }
 
     /**
      * Subscribes a listener that gets called when the game data changes.

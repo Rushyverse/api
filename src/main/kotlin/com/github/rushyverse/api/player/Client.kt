@@ -43,7 +43,9 @@ public open class Client(
      * Send a message to the player.
      * @param text The message as component.
      */
-    public fun send(text: Component): Unit = requirePlayer().sendMessage(text)
+    public fun send(text: Component) {
+        requirePlayer().sendMessage(text)
+    }
 
     /**
      * Send a message to the player.
@@ -55,7 +57,9 @@ public open class Client(
      *
      * @param message The string message.
      */
-    public fun send(message: String): Unit = send(message.asComponent())
+    public fun send(message: String) {
+        send(message.asComponent())
+    }
 
 
     /**

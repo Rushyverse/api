@@ -8,10 +8,12 @@ import org.bukkit.command.CommandSender
  * @receiver Sender that will receive the message.
  * @param message Message.
  */
-public fun CommandSender.sendMessageError(message: String): Unit = sendMessage(text {
-    content(message)
-    color(NamedTextColor.RED)
-})
+public fun CommandSender.sendMessageError(message: String){
+    sendMessage(text {
+        content(message)
+        color(NamedTextColor.RED)
+    })
+}
 
 /**
  * Verify if a sender has several permissions.

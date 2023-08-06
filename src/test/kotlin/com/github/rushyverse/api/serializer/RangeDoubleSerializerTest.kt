@@ -66,7 +66,7 @@ class RangeDoubleSerializerTest {
                   "end": $end
                 }
             """.trimIndent()
-            Json.decodeFromString(RangeDoubleSerializer, json) shouldBe (start..end)
+            Json.decodeFromString(RangeDoubleSerializer, json) shouldBe start..end
         }
 
     }

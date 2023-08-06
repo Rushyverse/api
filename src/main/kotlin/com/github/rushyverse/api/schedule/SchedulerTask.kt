@@ -200,8 +200,10 @@ public class SchedulerTask(
      * Throws exception if no task is present at the index.
      * @param index Index of the task that will be removed.
      */
-    public suspend fun removeAt(index: Int): Unit = mutex.withLock {
-        removeAtUnsafe(index)
+    public suspend fun removeAt(index: Int) {
+        mutex.withLock {
+            removeAtUnsafe(index)
+        }
     }
 
     /**

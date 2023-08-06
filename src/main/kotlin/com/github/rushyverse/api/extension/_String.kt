@@ -26,6 +26,27 @@ private val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
 public const val UUID_SIZE: Int = 36
 
 /**
+ * Number of dashes in a UUID.
+ */
+private const val NUMBER_DASHES_UUID = 4
+
+/**
+ * Radix for hexadecimal numbers.
+ */
+private const val HEXADECIMAL_RADIX = 16
+
+/**
+ * The constant value representing the number of bits in a UUID high and low bits.
+ */
+private const val UUID_HIGH_LOW_BITS: Int = 64
+
+/**
+ * Default max line for a lore line.
+ * This value is defined by looking with the default Minecraft size application.
+ */
+public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
+
+/**
  * Wraps a given string with a color tag.
  * Example: "Hello".wrapColorWith("red") will return `<red>Hello</red>`.
  *
@@ -113,18 +134,14 @@ public fun String.toUUID(): UUID {
     val length = this.length
     if (length == UUID_SIZE) {
         return toUUIDStrict()
-    } else if (length == UUID_SIZE - 4) { // -4 because of dashes
-        val idHex = BigInteger(this, 16)
-        return UUID(idHex.shiftRight(64).toLong(), idHex.toLong())
+    } else {
+        if (length == UUID_SIZE - NUMBER_DASHES_UUID) { // -4 because of dashes
+            val idHex = BigInteger(this, HEXADECIMAL_RADIX)
+            return UUID(idHex.shiftRight(UUID_HIGH_LOW_BITS).toLong(), idHex.toLong())
+        }
     }
     throw IllegalArgumentException("Invalid UUID format: $this")
 }
-
-/**
- * Default max line for a lore line.
- * This value is defined by looking with the default Minecraft size application.
- */
-public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
  * Transform a sequence of strings to a component.
@@ -216,5 +233,7 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.asComponent(vararg tagResolver: TagResolver, miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT): Component =
-    miniMessage.deserialize(this, *tagResolver)
+public fun String.asComponent(
+    vararg tagResolver: TagResolver,
+    miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT
+): Component = miniMessage.deserialize(this, *tagResolver)
