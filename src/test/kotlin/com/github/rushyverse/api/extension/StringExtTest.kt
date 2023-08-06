@@ -15,26 +15,6 @@ import kotlin.test.assertNull
 class StringExtTest {
 
     @Nested
-    @DisplayName("Colored sentence")
-    inner class Colored {
-
-        @Test
-        fun `no change if there is no specific char`() {
-            fun verifyIntegrity(sentence: String) {
-                assertEquals(sentence, sentence.colored())
-            }
-            verifyIntegrity("Hello minecraft world !")
-            verifyIntegrity("§4It's a good §6day.")
-        }
-
-        @Test
-        fun `change applied if there is specific char`() {
-            assertEquals("§1Hello §2minecraft §3world !", "&1Hello &2minecraft &3world !".colored())
-            assertEquals("§4It's a good day.", "&4It's a good day.".colored())
-        }
-    }
-
-    @Nested
     @DisplayName("Base64")
     inner class Base64Test {
 
@@ -70,7 +50,12 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = ["", "a", "c7e4ca3236d942408e53de44bef8eeeb", "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"])
+            @ValueSource(strings = [
+                "",
+                "a",
+                "c7e4ca3236d942408e53de44bef8eeeb",
+                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+            ])
             fun `throws exception if invalid`(value: String) {
                 assertThrows<IllegalArgumentException> {
                     value.toUUIDStrict()
@@ -85,7 +70,12 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = ["", "a", "c7e4ca3236d942408e53de44bef8eeeb", "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"])
+            @ValueSource(strings = [
+                "",
+                "a",
+                "c7e4ca3236d942408e53de44bef8eeeb",
+                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+            ])
             fun `nulls if invalid`(value: String) {
                 assertNull(value.toUUIDStrictOrNull())
             }
@@ -96,14 +86,22 @@ class StringExtTest {
         inner class NoStrict {
 
             @ParameterizedTest
-            @ValueSource(strings = ["c7e4ca3236d942408e53de44bef8eeeb", "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"])
+            @ValueSource(strings = [
+                "c7e4ca3236d942408e53de44bef8eeeb",
+                "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"
+            ])
             fun `can convert if the string is valid`(value: String) {
                 val uuid = UUID.fromString("c7e4ca32-36d9-4240-8e53-de44bef8eeeb")
                 assertEquals(uuid, value.toUUID())
             }
 
             @ParameterizedTest
-            @ValueSource(strings = ["", "a", "c7e4ca3236d942408e53de44bef8eeeba", "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"])
+            @ValueSource(strings = [
+                "",
+                "a",
+                "c7e4ca3236d942408e53de44bef8eeeba",
+                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+            ])
             fun `throws exception if invalid`(value: String) {
                 assertThrows<IllegalArgumentException> {
                     value.toUUID()
@@ -118,7 +116,12 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = ["", "a", "c7e4ca3236d942408e53de44bef8eeeba", "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"])
+            @ValueSource(strings = [
+                "",
+                "a",
+                "c7e4ca3236d942408e53de44bef8eeeba",
+                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+            ])
             fun `nulls if invalid`(value: String) {
                 assertNull(value.toUUIDStrictOrNull())
             }

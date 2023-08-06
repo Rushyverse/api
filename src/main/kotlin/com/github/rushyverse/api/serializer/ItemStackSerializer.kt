@@ -201,25 +201,19 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
                     destroyableKeys?.also(it::setDestroyableKeys)
                     placeableKeys?.also(it::setPlaceableKeys)
                     displayName?.also(it::displayName)
-                    lore?.toList()?.also(it::lore)
+                    lore?.run { toList().also(it::lore) }
                     flags?.also { itemFlags -> it.addItemFlags(*itemFlags.toTypedArray()) }
 
                     when (it) {
-                        is Damageable -> {
-                            durability?.also(it::damage)
+                        is Damageable -> durability?.also(it::damage)
+
+                        is SkullMeta -> texture?.let { texture ->
+                            val profile = Bukkit.createProfile(UUID.randomUUID())
+                            profile.setTextures(texture)
+                            it.playerProfile = profile
                         }
 
-                        is SkullMeta -> {
-                            texture?.let { texture ->
-                                val profile = Bukkit.createProfile(UUID.randomUUID())
-                                profile.setTextures(texture)
-                                it.playerProfile = profile
-                            }
-                        }
-
-                        is BannerMeta -> {
-                            patterns?.also(it::setPatterns)
-                        }
+                        is BannerMeta -> patterns?.also(it::setPatterns)
                     }
                 }
             }

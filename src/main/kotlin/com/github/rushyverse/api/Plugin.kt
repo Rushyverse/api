@@ -15,7 +15,6 @@ import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.serializer.*
 import com.github.rushyverse.api.translation.ResourceBundleTranslationProvider
-import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import kotlinx.serialization.modules.SerializersModule
@@ -27,10 +26,17 @@ import org.koin.dsl.bind
 import java.util.*
 
 /**
- * Abstract plugin with the necessary component to create a plugin.
+ * Represents the base functionality required to create a plugin.
+ * This abstract class provides necessary tools and life-cycle methods to facilitate the creation
+ * and management of a plugin that utilizes asynchronous operations, dependency injection, and
+ * other utility functions.
  */
 public abstract class Plugin : SuspendingJavaPlugin() {
 
+    /**
+     * A unique identifier for this plugin. This ID is used for tasks like identifying
+     * the Koin application, loading Koin modules, etc.
+     */
     public abstract val id: String
 
     override suspend fun onEnableAsync() {
@@ -44,15 +50,31 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         registerListener { VillagerListener(this) }
     }
 
+    /**
+     * Creates and loads a Koin module that stores instances of this plugin and of his child.
+     *
+     * @return The Koin module containing the plugin instances.
+     */
     protected inline fun <reified T : Plugin> modulePlugin(): Module = loadModule(id) {
         single { this@Plugin }
         single { this@Plugin as T }
     }
 
+    /**
+     * Creates and loads a Koin module containing client management components.
+     *
+     * @return The Koin module for client management.
+     */
     protected fun moduleClients(): Module = loadModule(id) {
         single { ClientManagerImpl() } bind ClientManager::class
     }
 
+    /**
+     * Creates and loads a Koin module with Bukkit-specific components.
+     * Can be overridden by derived classes to provide additional or customized components.
+     *
+     * @return The Koin module for Bukkit components.
+     */
     protected open fun moduleBukkit(): Module = loadModule(id) {
         single { getLogger() }
     }
@@ -63,8 +85,12 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     }
 
     /**
-     * Create a new instance of yaml reader.
-     * @return The instance of the yaml reader.
+     * Creates a new YAML reader instance to handle YAML configurations.
+     * Allows for customization of serializers and configurations.
+     *
+     * @param configuration Configuration options for the YAML reader.
+     * @param serializerModuleBuilder Provides additional serializers.
+     * @return A configured YAML reader instance.
      */
     protected open fun createYamlReader(
         configuration: YamlConfiguration = YamlConfiguration(),
@@ -90,15 +116,18 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     }
 
     /**
-     * Create a new instance of a client.
-     * @param player Player linked to the client.
-     * @return C The instance of the client.
+     * Abstract function to create a new client instance associated with a given player.
+     *
+     * @param player The player for whom the client instance should be created.
+     * @return The created client instance.
      */
     public abstract fun createClient(player: Player): Client
 
     /**
-     * Create a translation provider to provide translations for the [supported languages][SupportedLanguage].
-     * @return New translation provider.
+     * Creates a new translation provider to fetch translations for the supported languages.
+     * Can be overridden by derived classes to provide custom translation providers.
+     *
+     * @return A translation provider configured for the supported languages.
      */
     protected open suspend fun createTranslationProvider(): ResourceBundleTranslationProvider =
         ResourceBundleTranslationProvider().apply {

@@ -9,7 +9,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
-import org.bukkit.ChatColor
 import java.math.BigInteger
 import java.util.*
 
@@ -27,12 +26,25 @@ private val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
 public const val UUID_SIZE: Int = 36
 
 /**
- * Apply the coloration of Bukkit
- * @see ChatColor.translateAlternateColorCodes
- * @receiver String that will be analyzed to create a String colored
- * @return A new String with the coloration of Bukkit
+ * Number of dashes in a UUID.
  */
-public fun String.colored(): String = ChatColor.translateAlternateColorCodes('&', this)
+private const val NUMBER_DASHES_UUID = 4
+
+/**
+ * Radix for hexadecimal numbers.
+ */
+private const val HEXADECIMAL_RADIX = 16
+
+/**
+ * The constant value representing the number of bits in a UUID high and low bits.
+ */
+private const val UUID_HIGH_LOW_BITS: Int = 64
+
+/**
+ * Default max line for a lore line.
+ * This value is defined by looking with the default Minecraft size application.
+ */
+public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
  * Wraps a given string with a color tag.
@@ -122,18 +134,14 @@ public fun String.toUUID(): UUID {
     val length = this.length
     if (length == UUID_SIZE) {
         return toUUIDStrict()
-    } else if (length == UUID_SIZE - 4) { // -4 because of dashes
-        val idHex = BigInteger(this, 16)
-        return UUID(idHex.shiftRight(64).toLong(), idHex.toLong())
+    } else {
+        if (length == UUID_SIZE - NUMBER_DASHES_UUID) { // -4 because of dashes
+            val idHex = BigInteger(this, HEXADECIMAL_RADIX)
+            return UUID(idHex.shiftRight(UUID_HIGH_LOW_BITS).toLong(), idHex.toLong())
+        }
     }
     throw IllegalArgumentException("Invalid UUID format: $this")
 }
-
-/**
- * Default max line for a lore line.
- * This value is defined by looking with the default Minecraft size application.
- */
-public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
  * Transform a sequence of strings to a component.
@@ -168,7 +176,8 @@ public inline fun Collection<String>.toLore(
 
 /**
  * Transform a string into a list of string by cutting it.
- * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space,
+ * it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
  * @param lineLength Max size of each string.
@@ -180,7 +189,8 @@ public fun String.toFormattedLore(lineLength: Int = DEFAULT_LORE_LINE_LENGTH): L
 
 /**
  * Transform a string into a sequence of string by cutting.
- * If the string is too large and doesn't have any space, it will be cut each [lineLength] characters and a '-' will be added.
+ * If the string is too large and doesn't have any space,
+ * it will be cut each [lineLength] characters and a '-' will be added.
  * If the string contains a space, it will be cut at the space.
  * @receiver String to transform.
  * @param lineLength Max size of each string.
@@ -223,5 +233,7 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.asComponent(vararg tagResolver: TagResolver, miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT): Component =
-    miniMessage.deserialize(this, *tagResolver)
+public fun String.asComponent(
+    vararg tagResolver: TagResolver,
+    miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT
+): Component = miniMessage.deserialize(this, *tagResolver)

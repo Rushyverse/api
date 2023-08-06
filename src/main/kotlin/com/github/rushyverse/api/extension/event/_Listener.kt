@@ -14,7 +14,9 @@ import kotlin.time.Duration
 /**
  * Unregister the listener.
  */
-public fun Listener.unregister(): Unit = HandlerList.unregisterAll(this)
+public fun Listener.unregister() {
+    HandlerList.unregisterAll(this)
+}
 
 /**
  * Wait events corresponding to an event type.
@@ -25,7 +27,8 @@ public fun Listener.unregister(): Unit = HandlerList.unregisterAll(this)
  * @param plugin Java plugin to register the listener.
  * @param priority Priority to register this event at.
  * @param ignoreCancelled Whether to pass canceled events or not.
- * @param block Function to treat the received event, returns `true` to valid the event and stop the listening, `false` otherwise.
+ * @param block Function to treat the received event,
+ * returns `true` to valid the event and stop the listening, `false` otherwise.
  */
 public suspend inline fun <reified T : Event> waitEvent(
     plugin: JavaPlugin,
@@ -52,7 +55,8 @@ public suspend inline fun <reified T : Event> waitEvent(
  * @param plugin Java plugin to register the listener.
  * @param priority Priority to register this event at.
  * @param ignoreCancelled Whether to pass canceled events or not.
- * @param block Function to treat the received event, returns `true` to valid the event and stop the listening, `false` otherwise.
+ * @param block Function to treat the received event,
+ * returns `true` to valid the event and stop the listening, `false` otherwise.
  */
 public suspend inline fun <reified T : Event> waitEvent(
     plugin: JavaPlugin,

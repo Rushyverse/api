@@ -10,6 +10,21 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 
 /**
+ * Width of the craft table.
+ */
+private const val CRAFT_TABLE_WIDTH = 3
+
+/**
+ * Height of the craft table.
+ */
+private const val CRAFT_TABLE_HEIGHT = 3
+
+/**
+ * Size of the craft table.
+ */
+private const val CRAFT_TABLE_SIZE = CRAFT_TABLE_WIDTH * CRAFT_TABLE_HEIGHT
+
+/**
  * Slots with index corresponding to the index defined in minecraft for the craft table.
  * @property index Index in the craft table.
  */
@@ -72,7 +87,7 @@ public class CraftBuilder {
      * Storage of the item with the position assigned for the recipe's shape.
      * The top left position is defined by 0 and bottom right 8
      */
-    private val craft: Array<ItemStack?> = arrayOfNulls(9)
+    private val craft: Array<ItemStack?> = arrayOfNulls(CRAFT_TABLE_SIZE)
 
     /**
      * Result item of the craft.
@@ -194,7 +209,7 @@ public class CraftBuilder {
             // ["abcdefghi"]
             .joinToString(separator = "")
             // ["abc", "def", "ghi"]
-            .chunked(3)
+            .chunked(CRAFT_TABLE_WIDTH)
             .toTypedArray()
 
     /**

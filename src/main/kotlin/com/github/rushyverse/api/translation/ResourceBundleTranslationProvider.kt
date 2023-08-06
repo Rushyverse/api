@@ -23,7 +23,7 @@ private val logger = KotlinLogging.logger { }
  * Translation provider backed by Java's [ResourceBundle]s. This makes use of `.properties` files that are standard
  * across the Java ecosystem.
  */
-public open class ResourceBundleTranslationProvider : TranslationProvider() {
+public open class ResourceBundleTranslationProvider : TranslationProvider {
 
     private val bundles: MutableMap<Pair<String, Locale>, ResourceBundle> = mutableMapOf()
 
@@ -40,7 +40,7 @@ public open class ResourceBundleTranslationProvider : TranslationProvider() {
         val string = try {
             get(key, locale, bundleName)
         } catch (e: MissingResourceException) {
-            logger.error("Unable to find translation for key '$key' in bundles: '$bundleName'")
+            logger.error("Unable to find translation for key '$key' in bundles: '$bundleName'", e)
             return key
         }
 

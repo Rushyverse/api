@@ -152,7 +152,8 @@ public fun Component.withoutUnderlined(): Component =
     this.decoration(TextDecoration.UNDERLINED, TextDecoration.State.FALSE)
 
 /**
- * Set as [not set][TextDecoration.State.NOT_SET] the [underlined][TextDecoration.UNDERLINED] decoration of the component.
+ * Set as [not set][TextDecoration.State.NOT_SET] the
+ * [underlined][TextDecoration.UNDERLINED] decoration of the component.
  * @receiver Component to transform.
  * @return The same component.
  */
@@ -176,7 +177,8 @@ public fun Component.withoutStrikethrough(): Component =
     this.decoration(TextDecoration.STRIKETHROUGH, TextDecoration.State.FALSE)
 
 /**
- * Set as [not set][TextDecoration.State.NOT_SET] the [strikethrough][TextDecoration.STRIKETHROUGH] decoration of the component.
+ * Set as [not set][TextDecoration.State.NOT_SET] the
+ * [strikethrough][TextDecoration.STRIKETHROUGH] decoration of the component.
  * @receiver Component to transform.
  * @return The same component.
  */
@@ -199,7 +201,8 @@ public fun Component.withoutObfuscated(): Component =
     this.decoration(TextDecoration.OBFUSCATED, TextDecoration.State.FALSE)
 
 /**
- * Set as [not set][TextDecoration.State.NOT_SET] the [obfuscated][TextDecoration.OBFUSCATED] decoration of the component.
+ * Set as [not set][TextDecoration.State.NOT_SET] the
+ * [obfuscated][TextDecoration.OBFUSCATED] decoration of the component.
  * @receiver Component to transform.
  * @return The same component.
  */

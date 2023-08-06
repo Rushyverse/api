@@ -10,7 +10,7 @@ import org.koin.dsl.ModuleDeclaration
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
-abstract class AbstractKoinTest {
+open class AbstractKoinTest {
 
     lateinit var plugin: Plugin
 

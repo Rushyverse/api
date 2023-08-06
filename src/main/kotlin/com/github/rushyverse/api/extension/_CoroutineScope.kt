@@ -9,8 +9,8 @@ import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
 
 /**
- * Calls the specified suspending block with a given coroutine context into the [CoroutineScope], suspends until it completes, and returns
- * the result.
+ * Calls the specified suspending block with a given coroutine context into the [CoroutineScope],
+ * suspends until it completes, and returns the result.
  *
  * The resulting context for the [block] is derived by merging the current [coroutineContext] with the
  * specified context using `coroutineContext + context` (see [CoroutineContext.plus]).

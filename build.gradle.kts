@@ -107,6 +107,7 @@ kotlin {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")
                 optIn("kotlin.ExperimentalStdlibApi")
+                optIn("kotlinx.serialization.ExperimentalSerializationApi")
                 optIn("kotlin.contracts.ExperimentalContracts")
                 optIn("kotlinx.coroutines.ExperimentalCoroutinesApi")
             }

@@ -13,7 +13,15 @@ import org.bukkit.plugin.java.JavaPlugin
 public class APIPlugin : JavaPlugin() {
 
     public companion object {
+        /**
+         * A unique identifier for this plugin. This ID is used for tasks like identifying
+         * the Koin application, loading Koin modules, etc.
+         */
         public const val ID_API: String = "api"
+
+        /**
+         * This ID is used to identify the resource bundle of API translations in the project files.
+         */
         public const val BUNDLE_API: String = "api_translate"
     }
 
