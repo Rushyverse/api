@@ -39,10 +39,6 @@ public abstract class Plugin : SuspendingJavaPlugin() {
      */
     public abstract val id: String
 
-    /**
-     * Called asynchronously when the plugin is enabled.
-     * Handles the setup required for the plugin, like starting Koin, registering listeners, etc.
-     */
     override suspend fun onEnableAsync() {
         super.onEnableAsync()
 
@@ -83,10 +79,6 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         single { getLogger() }
     }
 
-    /**
-     * Called asynchronously when the plugin is disabled.
-     * Handles cleanup tasks, like stopping Koin.
-     */
     override suspend fun onDisableAsync() {
         CraftContext.stopKoin(id)
         super.onDisableAsync()

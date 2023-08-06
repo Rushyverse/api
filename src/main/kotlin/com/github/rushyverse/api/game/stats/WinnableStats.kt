@@ -15,13 +15,6 @@ public open class WinnableStats(
     public var loses: Int = 0
 ) : Stats {
 
-    /**
-     * Calculates the score based on the wins and losses of the player.
-     * The score is determined by subtracting the number of losses from wins.
-     * If the resultant score is negative, it returns 0 (to avoid negative scores).
-     *
-     * @return Calculated score.
-     */
     override fun calculateScore(): Int {
         val score = wins - loses
         if (score < 0)

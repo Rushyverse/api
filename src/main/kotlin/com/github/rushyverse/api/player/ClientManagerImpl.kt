@@ -57,11 +57,6 @@ public class ClientManagerImpl : ClientManager {
      */
     private fun getKey(p: Player): String = p.name
 
-    /**
-     * Check if a client is linked to a player.
-     * @param player Player
-     * @return `true` if there is a client for the player, `false` otherwise.
-     */
     override suspend fun contains(player: Player): Boolean = mutex.withLock {
         _clients.containsKey(getKey(player))
     }
