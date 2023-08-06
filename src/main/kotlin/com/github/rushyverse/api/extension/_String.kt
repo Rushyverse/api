@@ -9,7 +9,6 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
-import org.bukkit.ChatColor
 import java.math.BigInteger
 import java.util.*
 
@@ -25,14 +24,6 @@ private val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
  * Length of a UUID.
  */
 public const val UUID_SIZE: Int = 36
-
-/**
- * Apply the coloration of Bukkit
- * @see ChatColor.translateAlternateColorCodes
- * @receiver String that will be analyzed to create a String colored
- * @return A new String with the coloration of Bukkit
- */
-public fun String.colored(): String = ChatColor.translateAlternateColorCodes('&', this)
 
 /**
  * Wraps a given string with a color tag.
