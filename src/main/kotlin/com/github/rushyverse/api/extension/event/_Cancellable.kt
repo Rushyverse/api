@@ -8,3 +8,12 @@ import org.bukkit.event.Cancellable
 public fun Cancellable.cancel() {
     isCancelled = true
 }
+
+/**
+ * Extension function allowing to cancel the current process by method calling with a condition.
+ */
+public inline fun <T : Cancellable> T.cancelIf(condition: T.() -> Boolean) {
+    if (condition()) {
+        cancel()
+    }
+}
