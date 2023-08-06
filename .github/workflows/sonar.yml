@@ -28,8 +28,8 @@ jobs:
         uses: gradle/gradle-build-action@v2.7.0
         env:
           DETEKT_IGNORE_FAILURES: true
-        with: # TODO add detekt
-          arguments: build test jacocoTestReport
+        with:
+          arguments: build detekt test jacocoTestReport
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
