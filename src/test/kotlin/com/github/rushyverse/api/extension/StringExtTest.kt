@@ -15,26 +15,6 @@ import kotlin.test.assertNull
 class StringExtTest {
 
     @Nested
-    @DisplayName("Colored sentence")
-    inner class Colored {
-
-        @Test
-        fun `no change if there is no specific char`() {
-            fun verifyIntegrity(sentence: String) {
-                assertEquals(sentence, sentence.colored())
-            }
-            verifyIntegrity("Hello minecraft world !")
-            verifyIntegrity("§4It's a good §6day.")
-        }
-
-        @Test
-        fun `change applied if there is specific char`() {
-            assertEquals("§1Hello §2minecraft §3world !", "&1Hello &2minecraft &3world !".colored())
-            assertEquals("§4It's a good day.", "&4It's a good day.".colored())
-        }
-    }
-
-    @Nested
     @DisplayName("Base64")
     inner class Base64Test {
 
