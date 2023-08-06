@@ -5,8 +5,24 @@ plugins {
     embeddedKotlin("plugin.serialization")
     id("org.jetbrains.dokka") version "1.8.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+//    id("io.gitlab.arturbosch.detekt") version "1.23.1"
     `maven-publish`
     `java-library`
+    jacoco
+}
+
+//detekt {
+//    // Allows having different behavior for CI.
+//    // When building a branch, we want to fail the build if detekt fails.
+//    // When building a PR, we want to ignore failures to report them in sonar.
+//    val envIgnoreFailures = System.getenv("DETEKT_IGNORE_FAILURES")?.toBooleanStrictOrNull() ?: false
+//    ignoreFailures = envIgnoreFailures
+//
+//    config.from(file("config/detekt/detekt.yml"))
+//}
+
+jacoco {
+    reportsDirectory.set(file("${layout.buildDirectory.get()}/reports/jacoco"))
 }
 
 repositories {
@@ -128,6 +144,14 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.required.set(true)
+            html.required.set(true)
+            csv.required.set(false)
+        }
     }
 }
 
