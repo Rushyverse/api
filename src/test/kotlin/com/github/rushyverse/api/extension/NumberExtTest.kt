@@ -4,6 +4,7 @@ import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.CsvFileSource
 import org.junit.jupiter.params.provider.ValueSource
 import kotlin.test.Test
 
@@ -83,16 +84,10 @@ class NumberExtTest {
                 number.toRomanNumerals() shouldBe expected
             }
 
-            @Test
-            fun `should return complex roman numerals`() {
-                NumberExtTest::class.java.getResourceAsStream("/cases/roman/numerals.txt")!!
-                    .bufferedReader()
-                    .useLines { lines ->
-                        lines.forEach { line ->
-                            val (number, expected) = line.split(" ")
-                            number.toInt().toRomanNumerals() shouldBe expected
-                        }
-                    }
+            @ParameterizedTest
+            @CsvFileSource(resources = ["/cases/roman/numerals.csv"])
+            fun `should return complex roman numerals`(number: Int, expectedRoman: String) {
+                number.toRomanNumerals() shouldBe expectedRoman
             }
         }
     }
