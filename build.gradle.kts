@@ -17,7 +17,7 @@ dependencies {
     val minestomVersion = "aebf72de90"
     val loggingVersion = "3.0.5"
     val mockkVersion = "1.13.4"
-    val coroutinesVersion = "1.6.4"
+    val coroutinesVersion = "1.7.3"
     val kotlinSerializationVersion = "1.5.0"
     val commonsNetVersion = "3.9.0"
     val icu4jVersion = "72.1"
