@@ -44,5 +44,5 @@ public enum class SupportedLanguage(
     /**
      * Chinese language for China.
      */
-    CHINESE("Chinese", Locale("zh", "ch"))
+    CHINESE("Chinese", Locale("zh", "cn"))
 }
