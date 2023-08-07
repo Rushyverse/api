@@ -14,8 +14,7 @@ public const val PROPERTY_TEXTURES: String = "textures"
  * @param skin Skin in string format.
  * @param signature Signature of the skin for validation.
  */
-@Suppress("NOTHING_TO_INLINE")
-public inline fun PlayerProfile.setTextures(skin: String, signature: String? = null) {
+public fun PlayerProfile.setTextures(skin: String, signature: String? = null) {
     setProperty(ProfileProperty(PROPERTY_TEXTURES, skin, signature))
 }
 
@@ -24,6 +23,5 @@ public inline fun PlayerProfile.setTextures(skin: String, signature: String? = n
  * @receiver Profile of a player.
  * @return The property with the name, `null` otherwise.
  */
-@Suppress("NOTHING_TO_INLINE")
-public inline fun PlayerProfile.getTexturesProperty(): ProfileProperty? =
+public fun PlayerProfile.getTexturesProperty(): ProfileProperty? =
     properties.find { it.name == PROPERTY_TEXTURES }

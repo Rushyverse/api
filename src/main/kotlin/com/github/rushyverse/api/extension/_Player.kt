@@ -21,8 +21,7 @@ public inline fun Player.editProfile(editor: PlayerProfile.() -> Unit) {
  * @param item Item to compare the item in hands.
  * @return `true` if present in one of hands, `false` otherwise.
  */
-@Suppress("NOTHING_TO_INLINE")
-public inline fun Player.itemInHand(item: ItemStack): Boolean = itemInHand {
+public fun Player.itemInHand(item: ItemStack): Boolean = itemInHand {
     it == item
 }
 

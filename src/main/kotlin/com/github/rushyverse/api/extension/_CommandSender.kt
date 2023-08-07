@@ -22,8 +22,7 @@ public fun CommandSender.sendMessageError(message: String){
  * @param permissions Bukkit Permissions.
  * @return `true` if the sender has all permission, `false` otherwise.
  */
-@Suppress("NOTHING_TO_INLINE")
-public inline fun CommandSender.hasPermissions(permissions: Array<String>): Boolean =
+public fun CommandSender.hasPermissions(permissions: Array<String>): Boolean =
     permissions.all(this::hasPermission)
 
 /**
@@ -33,6 +32,5 @@ public inline fun CommandSender.hasPermissions(permissions: Array<String>): Bool
  * @param permissions Bukkit Permissions.
  * @return `true` if the sender has all permission, `false` otherwise.
  */
-@Suppress("NOTHING_TO_INLINE")
-public inline fun CommandSender.hasPermissions(permissions: Iterable<String>): Boolean =
+public fun CommandSender.hasPermissions(permissions: Iterable<String>): Boolean =
     permissions.all(this::hasPermission)

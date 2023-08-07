@@ -154,8 +154,7 @@ public class CraftBuilder {
      * Define the value of the [result] property.
      * @param item Item assign to the result of the craft.
      */
-    @Suppress("NOTHING_TO_INLINE")
-    public inline fun result(item: ItemStack) {
+    public fun result(item: ItemStack) {
         result = item
     }
 
