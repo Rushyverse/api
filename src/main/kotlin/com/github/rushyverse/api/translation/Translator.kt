@@ -5,12 +5,7 @@ import java.util.*
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
  */
-public interface TranslationProvider {
-
-    /**
-     * Get a translation by key from the given locale and bundle name.
-     */
-    public fun get(key: String, locale: Locale, bundleName: String): String
+public interface Translator {
 
     /**
      * Get a formatted translation using the provided arguments.

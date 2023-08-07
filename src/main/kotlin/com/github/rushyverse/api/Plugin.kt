@@ -14,7 +14,7 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.serializer.*
-import com.github.rushyverse.api.translation.ResourceBundleTranslationProvider
+import com.github.rushyverse.api.translation.ResourceBundleTranslator
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import kotlinx.serialization.modules.SerializersModule
@@ -124,13 +124,13 @@ public abstract class Plugin : SuspendingJavaPlugin() {
     public abstract fun createClient(player: Player): Client
 
     /**
-     * Creates a new translation provider to fetch translations for the supported languages.
+     * Creates a new translator to fetch translations for the supported languages.
      * Can be overridden by derived classes to provide custom translation providers.
      *
-     * @return A translation provider configured for the supported languages.
+     * @return A translator configured for the supported languages.
      */
-    protected open suspend fun createTranslationProvider(): ResourceBundleTranslationProvider =
-        ResourceBundleTranslationProvider().apply {
+    protected open suspend fun createTranslator(): ResourceBundleTranslator =
+        ResourceBundleTranslator().apply {
             registerResourceBundleForSupportedLocales(BUNDLE_API, ResourceBundle::getBundle)
         }
 }

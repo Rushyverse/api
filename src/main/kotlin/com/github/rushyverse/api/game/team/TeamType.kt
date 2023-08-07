@@ -2,7 +2,7 @@ package com.github.rushyverse.api.game.team
 
 import com.github.rushyverse.api.APIPlugin.Companion.BUNDLE_API
 import com.github.rushyverse.api.translation.SupportedLanguage
-import com.github.rushyverse.api.translation.TranslationProvider
+import com.github.rushyverse.api.translation.Translator
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import java.util.*
@@ -34,7 +34,7 @@ public enum class TeamType(
      * @return The translated name of the team.
      */
     public fun name(
-        translator: TranslationProvider,
+        translator: Translator,
         locale: Locale = SupportedLanguage.ENGLISH.locale
     ): String = translator.translate("team.${name.lowercase()}", locale, BUNDLE_API)
 }
