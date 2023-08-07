@@ -4,6 +4,7 @@ import com.github.rushyverse.api.delegate.DelegatePlayer
 import com.github.rushyverse.api.extension.asComponent
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
+import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.SupportedLanguage
 import fr.mrmicky.fastboard.adventure.FastBoard
@@ -21,13 +22,11 @@ import java.util.*
 public open class Client(
     public val playerUUID: UUID,
     coroutineScope: CoroutineScope,
-    /**
-     * The current language of the player.
-     */
-    public var lang: SupportedLanguage = SupportedLanguage.ENGLISH
 ) : CoroutineScope by coroutineScope {
 
     private val scoreboardManager: ScoreboardManager by inject()
+
+    private val languageManager: LanguageManager by inject()
 
     public val player: Player? by DelegatePlayer(playerUUID)
 
@@ -68,5 +67,11 @@ public open class Client(
      * @return The scoreboard of the player.
      */
     public suspend fun scoreboard(): FastBoard = scoreboardManager.getOrCreate(requirePlayer())
+
+    /**
+     * Get the language of the player.
+     * @return The language of the player.
+     */
+    public suspend fun lang(): SupportedLanguage = languageManager.get(requirePlayer())
 
 }

@@ -15,7 +15,7 @@ import java.util.*
 /**
  * MiniMessage instance to deserialize components without strict mode.
  */
-private val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
+public val MINI_MESSAGE_NON_STRICT: MiniMessage = MiniMessage.builder()
     .strict(false)
     .tags(StandardTags.defaults())
     .build()
@@ -233,7 +233,8 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * @param tagResolver The tag resolver used to resolve the custom tags.
  * @return The component created from the string.
  */
-public fun String.asComponent(
+public inline fun String.asComponent(
     vararg tagResolver: TagResolver,
-    miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT
-): Component = miniMessage.deserialize(this, *tagResolver)
+    miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT,
+    modifier: (Component) -> Component = { it }
+): Component = miniMessage.deserialize(this, *tagResolver).let(modifier)

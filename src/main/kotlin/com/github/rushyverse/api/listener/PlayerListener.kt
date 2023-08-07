@@ -6,6 +6,7 @@ import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
+import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import kotlinx.coroutines.cancel
 import org.bukkit.entity.Player
@@ -25,7 +26,10 @@ public class PlayerListener(
 ) : Listener {
 
     private val clients: ClientManager by inject(plugin.id)
+
     private val scoreboardManager: ScoreboardManager by inject()
+
+    private val languageManager: LanguageManager by inject()
 
     /**
      * Handle the join event to create and store a new client.
@@ -61,6 +65,7 @@ public class PlayerListener(
     public suspend fun onQuit(event: PlayerQuitEvent) {
         val player = event.player
         scoreboardManager.remove(player)
+        languageManager.remove(player)
 
         val client = clients.removeClient(player) ?: return
         client.cancel(SilentCancellationException("The player ${player.name} (${player.uniqueId}) left"))

@@ -3,6 +3,7 @@ package com.github.rushyverse.api
 import com.github.rushyverse.api.game.SharedGameData
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
+import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
@@ -31,6 +32,7 @@ public class APIPlugin : JavaPlugin() {
         loadModule(ID_API) {
             single { Bukkit.getServer() }
             single { ScoreboardManager() }
+            single { LanguageManager() }
             single { SharedGameData() }
         }
     }

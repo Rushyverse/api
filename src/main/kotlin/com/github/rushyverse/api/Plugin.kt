@@ -5,22 +5,28 @@ import com.charleskorn.kaml.YamlConfiguration
 import com.github.rushyverse.api.APIPlugin.Companion.BUNDLE_API
 import com.github.rushyverse.api.configuration.reader.IFileReader
 import com.github.rushyverse.api.configuration.reader.YamlFileReader
+import com.github.rushyverse.api.extension.asComponent
 import com.github.rushyverse.api.extension.registerListener
 import com.github.rushyverse.api.koin.CraftContext
+import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.listener.PlayerListener
 import com.github.rushyverse.api.listener.VillagerListener
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
+import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.serializer.*
 import com.github.rushyverse.api.translation.ResourceBundleTranslator
+import com.github.rushyverse.api.translation.Translator
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.SerializersModuleBuilder
 import kotlinx.serialization.modules.contextual
+import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
+import org.jetbrains.annotations.Blocking
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import java.util.*
@@ -30,14 +36,16 @@ import java.util.*
  * This abstract class provides necessary tools and life-cycle methods to facilitate the creation
  * and management of a plugin that utilizes asynchronous operations, dependency injection, and
  * other utility functions.
+ * @property id A unique identifier for this plugin.
+ * This ID is used for tasks like identifying the Koin application and loading Koin modules.
  */
-public abstract class Plugin : SuspendingJavaPlugin() {
+public abstract class Plugin(public val id: String) : SuspendingJavaPlugin() {
 
-    /**
-     * A unique identifier for this plugin. This ID is used for tasks like identifying
-     * the Koin application, loading Koin modules, etc.
-     */
-    public abstract val id: String
+    public val clientManager: ClientManager by inject(id)
+
+    public val translator: Translator by inject(id)
+
+    public val languageManager: LanguageManager by inject()
 
     override suspend fun onEnableAsync() {
         super.onEnableAsync()
@@ -45,6 +53,7 @@ public abstract class Plugin : SuspendingJavaPlugin() {
         CraftContext.startKoin(id)
         moduleBukkit()
         moduleClients()
+        moduleTranslation()
 
         registerListener { PlayerListener(this) }
         registerListener { VillagerListener(this) }
@@ -67,6 +76,15 @@ public abstract class Plugin : SuspendingJavaPlugin() {
      */
     protected fun moduleClients(): Module = loadModule(id) {
         single { ClientManagerImpl() } bind ClientManager::class
+    }
+
+    /**
+     * Creates and loads a Koin module containing translation components.
+     *
+     * @return The Koin module for translation.
+     */
+    protected fun moduleTranslation(): Module = loadModule(id) {
+        single { createTranslator() } bind Translator::class
     }
 
     /**
@@ -129,8 +147,41 @@ public abstract class Plugin : SuspendingJavaPlugin() {
      *
      * @return A translator configured for the supported languages.
      */
-    protected open suspend fun createTranslator(): ResourceBundleTranslator =
+    @Blocking
+    protected open fun createTranslator(): ResourceBundleTranslator =
         ResourceBundleTranslator().apply {
             registerResourceBundleForSupportedLocales(BUNDLE_API, ResourceBundle::getBundle)
         }
+
+    /**
+     * Broadcasts a localized message to all players in the specified world.
+     *
+     * This function groups players by their language preferences, translates the message once per language,
+     * and then sends the appropriate localized message to each player.
+     *
+     * @param players The players to whom the message should be sent.
+     * @param key The key used to look up the translation in the resource bundle.
+     * @param bundle The resource bundle to use for the translation.
+     * @param argumentBuilder A function that builds the arguments for the translation.
+     * @param messageModifier A function that modifies the translated message before it is sent.
+     */
+    public suspend inline fun broadcast(
+        players: Collection<Player>,
+        key: String,
+        bundle: String,
+        argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
+        messageModifier: (Component) -> Component = { it },
+    ) {
+        val playerLocales = players.groupBy {
+            languageManager.get(it).locale
+        }
+
+        for ((lang, receiver) in playerLocales) {
+            val translatedComponent = translator
+                .translate(key, lang, bundle, translator.argumentBuilder(lang))
+                .asComponent(modifier = messageModifier)
+
+            receiver.forEach { it.sendMessage(translatedComponent) }
+        }
+    }
 }
