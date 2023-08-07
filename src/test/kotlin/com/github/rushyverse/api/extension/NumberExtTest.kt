@@ -85,12 +85,14 @@ class NumberExtTest {
 
             @Test
             fun `should return complex roman numerals`() {
-                NumberExtTest::class.java.getResourceAsStream("/cases/roman/numerals.txt")!!.bufferedReader().useLines { lines ->
-                    lines.forEach { line ->
-                        val (number, expected) = line.split(" ")
-                        number.toInt().toRomanNumerals() shouldBe expected
+                NumberExtTest::class.java.getResourceAsStream("/cases/roman/numerals.txt")!!
+                    .bufferedReader()
+                    .useLines { lines ->
+                        lines.forEach { line ->
+                            val (number, expected) = line.split(" ")
+                            number.toInt().toRomanNumerals() shouldBe expected
+                        }
                     }
-                }
             }
         }
     }
