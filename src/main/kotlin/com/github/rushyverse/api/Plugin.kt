@@ -39,7 +39,10 @@ import java.util.*
  * @property id A unique identifier for this plugin.
  * This ID is used for tasks like identifying the Koin application and loading Koin modules.
  */
-public abstract class Plugin(public val id: String) : SuspendingJavaPlugin() {
+public abstract class Plugin(
+    public val id: String,
+    public val bundle: String
+) : SuspendingJavaPlugin() {
 
     public val clientManager: ClientManager by inject(id)
 
@@ -149,7 +152,7 @@ public abstract class Plugin(public val id: String) : SuspendingJavaPlugin() {
      */
     @Blocking
     protected open fun createTranslator(): ResourceBundleTranslator =
-        ResourceBundleTranslator().apply {
+        ResourceBundleTranslator(bundle).apply {
             registerResourceBundleForSupportedLocales(BUNDLE_API, ResourceBundle::getBundle)
         }
 
@@ -168,7 +171,7 @@ public abstract class Plugin(public val id: String) : SuspendingJavaPlugin() {
     public suspend inline fun broadcast(
         players: Collection<Player>,
         key: String,
-        bundle: String,
+        bundle: String = this.bundle,
         messageModifier: (Component) -> Component = { it },
         argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
     ) {

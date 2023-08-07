@@ -5,15 +5,15 @@ import java.util.*
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
  */
-public interface Translator {
+public abstract class Translator(protected val defaultBundle: String) {
 
     /**
      * Get a formatted translation using the provided arguments.
      */
-    public fun translate(
+    public abstract fun translate(
         key: String,
         locale: Locale,
-        bundleName: String,
+        bundleName: String = defaultBundle,
         arguments: Array<Any> = emptyArray()
     ): String
 }
