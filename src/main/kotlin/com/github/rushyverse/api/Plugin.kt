@@ -169,8 +169,8 @@ public abstract class Plugin(public val id: String) : SuspendingJavaPlugin() {
         players: Collection<Player>,
         key: String,
         bundle: String,
-        argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
         messageModifier: (Component) -> Component = { it },
+        argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
     ) {
         val playerLocales = players.groupBy {
             languageManager.get(it).locale
