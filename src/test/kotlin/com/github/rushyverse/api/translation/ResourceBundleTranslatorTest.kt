@@ -18,7 +18,7 @@ class ResourceBundleTranslatorTest {
 
     @BeforeTest
     fun onBefore() {
-        provider = ResourceBundleTranslator()
+        provider = ResourceBundleTranslator(BUNDLE_NAME)
     }
 
     @Nested
