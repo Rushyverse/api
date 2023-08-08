@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender
  * @receiver Sender that will receive the message.
  * @param message Message.
  */
-public fun CommandSender.sendMessageError(message: String){
+public fun CommandSender.sendMessageError(message: String) {
     sendMessage(text {
         content(message)
         color(NamedTextColor.RED)

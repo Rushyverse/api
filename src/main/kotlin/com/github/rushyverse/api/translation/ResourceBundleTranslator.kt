@@ -23,15 +23,15 @@ private val logger = KotlinLogging.logger { }
  * Translation provider backed by Java's [ResourceBundle]s. This makes use of `.properties` files that are standard
  * across the Java ecosystem.
  */
-public open class ResourceBundleTranslator : Translator {
+public open class ResourceBundleTranslator(defaultBundle: String) : Translator(defaultBundle) {
 
     private val bundles: MutableMap<Pair<String, Locale>, ResourceBundle> = mutableMapOf()
 
-    override fun translate(
+    override fun get(
         key: String,
         locale: Locale,
-        bundleName: String,
-        arguments: Array<Any>
+        args: Array<Any>,
+        bundleName: String
     ): String {
         val string = try {
             getBundle(locale, bundleName).getString(key)
@@ -40,7 +40,7 @@ public open class ResourceBundleTranslator : Translator {
             return key
         }
 
-        return MessageFormat(string, locale).format(arguments)
+        return MessageFormat(string, locale).format(args)
     }
 
     /**

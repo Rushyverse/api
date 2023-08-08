@@ -24,6 +24,7 @@ class EnchantmentSerializerTest {
 
     class EnchantmentMock(private val enchantmentName: String, namespace: NamespacedKey) : Enchantment(namespace) {
         override fun translationKey(): String = error("Not implemented")
+
         @Deprecated("Deprecated in Java")
         override fun getName(): String = enchantmentName
         override fun getMaxLevel(): Int = error("Not implemented")

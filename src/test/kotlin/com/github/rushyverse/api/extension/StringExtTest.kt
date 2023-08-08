@@ -2,6 +2,12 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.utils.randomString
 import io.kotest.matchers.shouldBe
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -50,12 +56,14 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = [
-                "",
-                "a",
-                "c7e4ca3236d942408e53de44bef8eeeb",
-                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
-            ])
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
             fun `throws exception if invalid`(value: String) {
                 assertThrows<IllegalArgumentException> {
                     value.toUUIDStrict()
@@ -70,12 +78,14 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = [
-                "",
-                "a",
-                "c7e4ca3236d942408e53de44bef8eeeb",
-                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
-            ])
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
             fun `nulls if invalid`(value: String) {
                 assertNull(value.toUUIDStrictOrNull())
             }
@@ -86,22 +96,26 @@ class StringExtTest {
         inner class NoStrict {
 
             @ParameterizedTest
-            @ValueSource(strings = [
-                "c7e4ca3236d942408e53de44bef8eeeb",
-                "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"
-            ])
+            @ValueSource(
+                strings = [
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"
+                ]
+            )
             fun `can convert if the string is valid`(value: String) {
                 val uuid = UUID.fromString("c7e4ca32-36d9-4240-8e53-de44bef8eeeb")
                 assertEquals(uuid, value.toUUID())
             }
 
             @ParameterizedTest
-            @ValueSource(strings = [
-                "",
-                "a",
-                "c7e4ca3236d942408e53de44bef8eeeba",
-                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
-            ])
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeba",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
             fun `throws exception if invalid`(value: String) {
                 assertThrows<IllegalArgumentException> {
                     value.toUUID()
@@ -116,12 +130,14 @@ class StringExtTest {
             }
 
             @ParameterizedTest
-            @ValueSource(strings = [
-                "",
-                "a",
-                "c7e4ca3236d942408e53de44bef8eeeba",
-                "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
-            ])
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeba",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
             fun `nulls if invalid`(value: String) {
                 assertNull(value.toUUIDStrictOrNull())
             }
@@ -156,6 +172,52 @@ class StringExtTest {
         )
         fun `should wrap empty string`(value: String) {
             "" withColor value shouldBe "<$value></$value>"
+        }
+
+    }
+
+    @Nested
+    inner class AsComponent {
+
+        @Test
+        fun `should transform non empty string`() {
+            val string = randomString()
+            string.asComponent() shouldBe Component.text(string)
+        }
+
+        @Test
+        fun `should transform empty string`() {
+            "".asComponent() shouldBe Component.empty()
+        }
+
+        @Test
+        fun `should read mini message tag`() {
+            val string = "<red><bold>hello</red>"
+            string.asComponent() shouldBe Component.text("hello").color(NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+        }
+
+        @Test
+        fun `should use tag if defined`() {
+            val string = "<red><test>hello"
+            string.asComponent(
+                Placeholder.parsed("test", "myvalue")
+            ) shouldBe Component.text("myvaluehello").color(NamedTextColor.RED)
+        }
+
+        @Test
+        fun `should use custom instance of mini message`() {
+            val string = "<red><test>hello"
+
+            val miniMessage = MiniMessage.builder()
+                .tags(
+                    TagResolver.resolver(
+                        Placeholder.parsed("test", "myvalue")
+                    )
+                )
+                .build()
+
+            string.asComponent(miniMessage = miniMessage) shouldBe Component.text("<red>myvaluehello")
         }
 
     }

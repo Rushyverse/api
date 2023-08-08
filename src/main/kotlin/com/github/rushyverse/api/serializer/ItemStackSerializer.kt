@@ -82,29 +82,29 @@ public object ItemStackSerializer : KSerializer<ItemStack> {
             encodeSerializableElement(descriptor, 1, amountSerializer, value.amount)
             encodeSerializableElement(descriptor, 2, enchantmentsSerializer, value.enchantments)
 
-            if(itemMeta == null) return@encodeStructure
+            if (itemMeta == null) return@encodeStructure
 
             encodeSerializableElement(descriptor, 3, unbreakableSerializer, itemMeta.isUnbreakable)
             encodeSerializableElement(descriptor, 4, customModelSerializer, itemMeta.let {
-                if(it.hasCustomModelData()) it.customModelData else null
+                if (it.hasCustomModelData()) it.customModelData else null
             })
             encodeSerializableElement(
                 descriptor,
                 5,
                 destroyableKeysSerializer,
-                itemMeta.let { if(it.hasDestroyableKeys()) it.destroyableKeys.toList() else null }
+                itemMeta.let { if (it.hasDestroyableKeys()) it.destroyableKeys.toList() else null }
             )
             encodeSerializableElement(
                 descriptor,
                 6,
                 placeableKeysSerializer,
-                itemMeta.let { if(it.hasPlaceableKeys()) it.placeableKeys.toList() else null }
+                itemMeta.let { if (it.hasPlaceableKeys()) it.placeableKeys.toList() else null }
             )
             encodeSerializableElement(descriptor, 7, displayNameSerializer, itemMeta.let {
-                if(it.hasDisplayName()) it.displayName() else null
+                if (it.hasDisplayName()) it.displayName() else null
             })
             encodeSerializableElement(descriptor, 8, loreSerializer, itemMeta.let {
-                if(it.hasLore()) it.lore() else null
+                if (it.hasLore()) it.lore() else null
             })
             encodeSerializableElement(
                 descriptor,

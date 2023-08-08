@@ -14,6 +14,14 @@ import org.bukkit.NamespacedKey
  */
 public object NamespacedSerializer : KSerializer<Namespaced> {
 
+    /**
+     * The default separator used to separate the namespace and the key.
+     */
+    private const val DEFAULT_SEPARATOR = ":"
+
+    /**
+     * Regex used to replace uppercase letters with "_[a-z]".
+     */
     private val regexUppercase = Regex("([A-Z])")
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor(
@@ -22,12 +30,12 @@ public object NamespacedSerializer : KSerializer<Namespaced> {
     )
 
     override fun serialize(encoder: Encoder, value: Namespaced) {
-        encoder.encodeString(value.namespace + NamespacedKey.DEFAULT_SEPARATOR + value.key)
+        encoder.encodeString(value.namespace + DEFAULT_SEPARATOR + value.key)
     }
 
     override fun deserialize(decoder: Decoder): Namespaced {
         return decoder.decodeString().let { decodedString ->
-            val namespacedString = decodedString.split(NamespacedKey.DEFAULT_SEPARATOR).map {
+            val namespacedString = decodedString.split(DEFAULT_SEPARATOR).map {
                 // Replace " " to "_". Example: blue wool -> blue_wool
                 it.replace(' ', '_')
                     // Replace "A-Z" to "_a-z". Example: blueWool -> blue_wool
