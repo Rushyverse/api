@@ -5,7 +5,7 @@ import java.util.*
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
  */
-public abstract class Translator(protected val defaultBundle: String) {
+public abstract class Translator(public val defaultBundle: String) {
 
     /**
      * Get a formatted translation using the provided arguments.
