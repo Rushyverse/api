@@ -36,5 +36,5 @@ public enum class TeamType(
     public fun name(
         translator: Translator,
         locale: Locale = SupportedLanguage.ENGLISH.locale
-    ): String = translator.translate("team.${name.lowercase()}", locale, bundleName = BUNDLE_API)
+    ): String = translator.get("team.${name.lowercase()}", locale, bundleName = BUNDLE_API)
 }

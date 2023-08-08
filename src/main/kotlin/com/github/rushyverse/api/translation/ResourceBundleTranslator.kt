@@ -27,7 +27,7 @@ public open class ResourceBundleTranslator(defaultBundle: String) : Translator(d
 
     private val bundles: MutableMap<Pair<String, Locale>, ResourceBundle> = mutableMapOf()
 
-    override fun translate(
+    override fun get(
         key: String,
         locale: Locale,
         arguments: Array<Any>,

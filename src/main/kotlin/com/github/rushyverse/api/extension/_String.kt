@@ -231,10 +231,12 @@ public fun String.toFormattedLoreSequence(lineLength: Int = DEFAULT_LORE_LINE_LE
  * The [tagResolver] will be used to resolve the custom tags and replace values.
  * @receiver The string used to create the component.
  * @param tagResolver The tag resolver used to resolve the custom tags.
+ * @param miniMessage The mini message instance used to parse the string.
+ * @param modifier The modifier function to apply to the component.
  * @return The component created from the string.
  */
 public inline fun String.asComponent(
     vararg tagResolver: TagResolver,
     miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT,
-    modifier: (Component) -> Component = { it }
+    modifier: Component.() -> Component = { this }
 ): Component = miniMessage.deserialize(this, *tagResolver).let(modifier)

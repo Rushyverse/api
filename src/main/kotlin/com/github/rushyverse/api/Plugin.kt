@@ -182,7 +182,7 @@ public abstract class Plugin(
         players: Collection<Player>,
         key: String,
         bundle: String = this.bundle,
-        messageModifier: (Component) -> Component = { it },
+        messageModifier: Component.() -> Component = { this },
         argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
     ) {
         val playerLocales = players.groupBy {
@@ -191,7 +191,7 @@ public abstract class Plugin(
 
         for ((lang, receiver) in playerLocales) {
             val translatedComponent = translator
-                .translate(key, lang, translator.argumentBuilder(lang), bundle)
+                .get(key, lang, translator.argumentBuilder(lang), bundle)
                 .asComponent(modifier = messageModifier)
 
             receiver.forEach { it.sendMessage(translatedComponent) }
