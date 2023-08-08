@@ -23,16 +23,16 @@ public fun Translator.getComponent(
  * @receiver Translator The translator to use.
  * @param key Key in the bundle to find the translation for.
  * @param locale Language to translate to.
- * @param arguments Arguments to format the translation with.
+ * @param args Arguments to format the translation with.
  * @param bundleName Name of the bundle to use, by default [Translator.defaultBundle].
  * @return The translated string or the key if no translation was found in a [Component].
  */
 public fun Translator.getComponent(
     key: String,
     locale: Locale,
-    arguments: Array<Any> = emptyArray(),
+    args: Array<Any> = emptyArray(),
     bundleName: String = defaultBundle
-): Component = get(key, locale, arguments, bundleName).asComponent()
+): Component = get(key, locale, args, bundleName).asComponent()
 
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
@@ -57,14 +57,14 @@ public abstract class Translator(public val defaultBundle: String) {
      * Get a formatted translation using the provided arguments.
      * @param key Key in the bundle to find the translation for.
      * @param locale Language to translate to.
-     * @param arguments Arguments to format the translation with.
+     * @param args Arguments to format the translation with.
      * @param bundleName Name of the bundle to use, by default [defaultBundle].
      * @return The translated string or the key if no translation was found.
      */
     public abstract fun get(
         key: String,
         locale: Locale,
-        arguments: Array<Any> = emptyArray(),
+        args: Array<Any> = emptyArray(),
         bundleName: String = defaultBundle
     ): String
 }

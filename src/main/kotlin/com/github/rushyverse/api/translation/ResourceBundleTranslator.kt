@@ -30,7 +30,7 @@ public open class ResourceBundleTranslator(defaultBundle: String) : Translator(d
     override fun get(
         key: String,
         locale: Locale,
-        arguments: Array<Any>,
+        args: Array<Any>,
         bundleName: String
     ): String {
         val string = try {
@@ -40,7 +40,7 @@ public open class ResourceBundleTranslator(defaultBundle: String) : Translator(d
             return key
         }
 
-        return MessageFormat(string, locale).format(arguments)
+        return MessageFormat(string, locale).format(args)
     }
 
     /**
