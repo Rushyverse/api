@@ -4,6 +4,7 @@ import java.util.*
 
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.
+ * @property defaultBundle The default bundle to use for translations.
  */
 public abstract class Translator(public val defaultBundle: String) {
 

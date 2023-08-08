@@ -153,7 +153,11 @@ class ResourceBundleTranslatorTest {
             provider.translate("simple_value", SupportedLanguage.ENGLISH.locale) shouldBe "simple_value"
 
             provider = ResourceBundleTranslator(SECOND_BUNDLE_NAME)
-            provider.registerResourceBundle(SECOND_BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+            provider.registerResourceBundle(
+                SECOND_BUNDLE_NAME,
+                SupportedLanguage.ENGLISH.locale,
+                ResourceBundle::getBundle
+            )
 
             provider.translate("simple_value", SupportedLanguage.ENGLISH.locale) shouldBe "English value"
             // Key not found in default bundle

@@ -37,6 +37,7 @@ import java.util.*
  * and management of a plugin that utilizes asynchronous operations, dependency injection, and
  * other utility functions.
  * @property id A unique identifier for this plugin.
+ * @property bundle The name of the resource bundle to use for this plugin.
  * This ID is used for tasks like identifying the Koin application and loading Koin modules.
  */
 public abstract class Plugin(
@@ -44,10 +45,19 @@ public abstract class Plugin(
     public val bundle: String
 ) : SuspendingJavaPlugin() {
 
+    /**
+     * Client manager linked to this plugin.
+     */
     public val clientManager: ClientManager by inject(id)
 
+    /**
+     * Translator linked to this plugin.
+     */
     public val translator: Translator by inject(id)
 
+    /**
+     * Common language manager for all plugins.
+     */
     public val languageManager: LanguageManager by inject()
 
     override suspend fun onEnableAsync() {
