@@ -143,5 +143,22 @@ class ResourceBundleTranslatorTest {
             provider.translate("test1", SupportedLanguage.FRENCH.locale, BUNDLE_NAME) shouldBe "français_value_1"
         }
 
+        @Test
+        fun `should use default bundle if no bundle is specified`() {
+            provider = ResourceBundleTranslator(BUNDLE_NAME)
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+
+            provider.translate("test1", SupportedLanguage.ENGLISH.locale) shouldBe "english_value_1"
+            // Key not found in default bundle
+            provider.translate("simple_value", SupportedLanguage.ENGLISH.locale) shouldBe "simple_value"
+
+            provider = ResourceBundleTranslator(SECOND_BUNDLE_NAME)
+            provider.registerResourceBundle(SECOND_BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+
+            provider.translate("simple_value", SupportedLanguage.ENGLISH.locale) shouldBe "English value"
+            // Key not found in default bundle
+            provider.translate("test1", SupportedLanguage.ENGLISH.locale) shouldBe "test1"
+        }
+
     }
 }
