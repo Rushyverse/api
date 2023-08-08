@@ -69,7 +69,10 @@ dependencies {
     implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
 
     // Minecraft server framework
-    compileOnly("io.papermc.paper:paper-api:$paperVersion")
+    "io.papermc.paper:paper-api:$paperVersion".let {
+        compileOnly(it)
+        testImplementation(it)
+    }
 
     // Scoreboard framework
     implementation("fr.mrmicky:fastboard:$fastboardVersion")
@@ -77,21 +80,18 @@ dependencies {
     api("com.github.Rushyverse:core:6ae31a9250")
 
     // Tests
+    testImplementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutineVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
-    implementation("io.kotest:kotest-assertions-json:$kotestVersion")
+    testImplementation("io.kotest:kotest-assertions-json:$kotestVersion")
 
-    testImplementation("io.papermc.paper:paper-api:$paperVersion")
-    implementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
     testImplementation("io.insert-koin:koin-test:$koinVersion") {
         exclude("org.jetbrains.kotlin", "kotlin-test-junit")
     }
     testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("org.slf4j:slf4j-api:$slf4jVersion")
-    testImplementation("org.slf4j:slf4j-simple:$slf4jVersion")
 }
 
 val javaVersion get() = JavaVersion.VERSION_17
