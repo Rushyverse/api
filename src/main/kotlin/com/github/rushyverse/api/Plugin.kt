@@ -167,7 +167,7 @@ public abstract class Plugin(
         }
 
     /**
-     * Broadcasts a localized message to all players in the specified world.
+     * Broadcasts a localized message to all players.
      *
      * This function groups players by their language preferences, translates the message once per language,
      * and then sends the appropriate localized message to each player.
@@ -186,16 +186,13 @@ public abstract class Plugin(
         messageModifier: (Component) -> Component = { it },
         argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
     ) {
-        val playerLocales = players.groupBy {
-            languageManager.get(it).locale
-        }
+        players.groupBy { languageManager.get(it).locale }
+            .forEach { (lang, receiver) ->
+                val translatedComponent = translator
+                    .get(key, lang, translator.argumentBuilder(lang), bundle)
+                    .asComponent().let(messageModifier)
 
-        for ((lang, receiver) in playerLocales) {
-            val translatedComponent = translator
-                .get(key, lang, translator.argumentBuilder(lang), bundle)
-                .asComponent().let(messageModifier)
-
-            receiver.forEach { it.sendMessage(translatedComponent) }
-        }
+                receiver.forEach { it.sendMessage(translatedComponent) }
+            }
     }
 }
