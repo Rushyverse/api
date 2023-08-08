@@ -10,15 +10,13 @@ import java.util.*
  * @param key Key in the bundle to find the translation for.
  * @param locale Language to translate to.
  * @param bundleName Name of the bundle to use, by default [Translator.defaultBundle].
- * @param modifier Modifier to apply to the component.
  * @return The translated string or the key if no translation was found in a [Component].
  */
-public inline fun Translator.getComponent(
+public fun Translator.getComponent(
     key: String,
     locale: Locale,
     bundleName: String = defaultBundle,
-    modifier: Component.() -> Component = { this }
-): Component = getComponent(key, locale, emptyArray(), bundleName, modifier)
+): Component = getComponent(key, locale, emptyArray(), bundleName)
 
 /**
  * Get a translation using the provided arguments.
@@ -27,16 +25,14 @@ public inline fun Translator.getComponent(
  * @param locale Language to translate to.
  * @param arguments Arguments to format the translation with.
  * @param bundleName Name of the bundle to use, by default [Translator.defaultBundle].
- * @param modifier Modifier to apply to the component.
  * @return The translated string or the key if no translation was found in a [Component].
  */
-public inline fun Translator.getComponent(
+public fun Translator.getComponent(
     key: String,
     locale: Locale,
     arguments: Array<Any> = emptyArray(),
-    bundleName: String = defaultBundle,
-    modifier: Component.() -> Component = { this }
-): Component = get(key, locale, arguments, bundleName).asComponent(modifier = modifier)
+    bundleName: String = defaultBundle
+): Component = get(key, locale, arguments, bundleName).asComponent()
 
 /**
  * Translation provider interface, in charge of taking string keys and returning translated strings.

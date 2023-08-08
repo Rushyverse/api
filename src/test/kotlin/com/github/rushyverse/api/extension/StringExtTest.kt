@@ -2,6 +2,9 @@ package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.utils.randomString
 import io.kotest.matchers.shouldBe
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
@@ -166,6 +169,28 @@ class StringExtTest {
         )
         fun `should wrap empty string`(value: String) {
             "" withColor value shouldBe "<$value></$value>"
+        }
+
+    }
+
+    @Nested
+    inner class AsComponent {
+
+        @Test
+        fun `should transform non empty string`() {
+            val string = randomString()
+            string.asComponent() shouldBe Component.text(string)
+        }
+
+        @Test
+        fun `should transform empty string`() {
+            "".asComponent() shouldBe Component.empty()
+        }
+
+        @Test
+        fun `should read minimessage tag`() {
+            val string = "<red><bold>hello</red>"
+            string.asComponent() shouldBe Component.text("hello").color(NamedTextColor.RED).decorate(TextDecoration.BOLD)
         }
 
     }

@@ -177,12 +177,13 @@ public abstract class Plugin(
      * @param bundle The resource bundle to use for the translation.
      * @param argumentBuilder A function that builds the arguments for the translation.
      * @param messageModifier A function that modifies the translated message before it is sent.
+     * The modification must be chained.
      */
     public suspend inline fun broadcast(
         players: Collection<Player>,
         key: String,
         bundle: String = this.bundle,
-        messageModifier: Component.() -> Component = { this },
+        messageModifier: (Component) -> Component = { it },
         argumentBuilder: Translator.(Locale) -> Array<Any> = { emptyArray() },
     ) {
         val playerLocales = players.groupBy {
@@ -192,7 +193,7 @@ public abstract class Plugin(
         for ((lang, receiver) in playerLocales) {
             val translatedComponent = translator
                 .get(key, lang, translator.argumentBuilder(lang), bundle)
-                .asComponent(modifier = messageModifier)
+                .asComponent().let(messageModifier)
 
             receiver.forEach { it.sendMessage(translatedComponent) }
         }
