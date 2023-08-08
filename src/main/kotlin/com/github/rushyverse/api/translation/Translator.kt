@@ -8,13 +8,19 @@ import java.util.*
  */
 public abstract class Translator(public val defaultBundle: String) {
 
+    public fun translate(
+        key: String,
+        locale: Locale,
+        bundleName: String = defaultBundle
+    ): String = translate(key, locale, emptyArray(), bundleName)
+
     /**
      * Get a formatted translation using the provided arguments.
      */
     public abstract fun translate(
         key: String,
         locale: Locale,
-        bundleName: String = defaultBundle,
-        arguments: Array<Any> = emptyArray()
+        arguments: Array<Any> = emptyArray(),
+        bundleName: String = defaultBundle
     ): String
 }

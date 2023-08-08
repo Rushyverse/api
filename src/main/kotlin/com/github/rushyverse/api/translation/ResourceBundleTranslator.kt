@@ -30,8 +30,8 @@ public open class ResourceBundleTranslator(defaultBundle: String) : Translator(d
     override fun translate(
         key: String,
         locale: Locale,
-        bundleName: String,
-        arguments: Array<Any>
+        arguments: Array<Any>,
+        bundleName: String
     ): String {
         val string = try {
             getBundle(locale, bundleName).getString(key)

@@ -191,7 +191,7 @@ public abstract class Plugin(
 
         for ((lang, receiver) in playerLocales) {
             val translatedComponent = translator
-                .translate(key, lang, bundle, translator.argumentBuilder(lang))
+                .translate(key, lang, translator.argumentBuilder(lang), bundle)
                 .asComponent(modifier = messageModifier)
 
             receiver.forEach { it.sendMessage(translatedComponent) }
