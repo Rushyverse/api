@@ -87,6 +87,15 @@ class YamlFileReaderTest {
             shouldCreateFileAndDecode(configFile, value) { reader.readConfigurationFile(TestValue.serializer(), it) }
         }
 
+        @ParameterizedTest
+        @CsvSource(
+            "fake_config.yml, withoutParent",
+            "configuration/fake_config.yml, withParent"
+        )
+        fun `should create file and decode it using reified type`(configFile: String, value: String) {
+            shouldCreateFileAndDecode(configFile, value) { reader.readConfigurationFile<TestValue>(it) }
+        }
+
         @Test
         fun `should not create file if exists and read it`() {
             shouldNotCreateFileIfExistsAndDecode { reader.readConfigurationFile(TestValue.serializer(), it) }
