@@ -2,6 +2,7 @@ package com.github.rushyverse.api.translation
 
 import com.github.rushyverse.api.utils.randomString
 import io.kotest.matchers.shouldBe
+import net.kyori.adventure.text.Component
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import java.util.*
@@ -98,13 +99,21 @@ class ResourceBundleTranslatorTest {
         @Test
         fun `should return the default value if the value is not defined for language`() {
             provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
-            provider.get("test_undefined", SupportedLanguage.ENGLISH.locale, bundleName = BUNDLE_NAME) shouldBe "default_value"
+            provider.get(
+                "test_undefined",
+                SupportedLanguage.ENGLISH.locale,
+                bundleName = BUNDLE_NAME
+            ) shouldBe "default_value"
         }
 
         @Test
         fun `should return the value with template for args if no replacement args are defined`() {
             provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
-            provider.get("test_args", SupportedLanguage.ENGLISH.locale, bundleName = BUNDLE_NAME) shouldBe "english_value {0}"
+            provider.get(
+                "test_args",
+                SupportedLanguage.ENGLISH.locale,
+                bundleName = BUNDLE_NAME
+            ) shouldBe "english_value {0}"
         }
 
         @Test
@@ -164,5 +173,42 @@ class ResourceBundleTranslatorTest {
             provider.get("test1", SupportedLanguage.ENGLISH.locale) shouldBe "test1"
         }
 
+    }
+
+    @Nested
+    inner class TranslateValueToComponent {
+
+        @Test
+        fun `should return the value for the given key`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+            provider.getComponent(
+                "test1",
+                SupportedLanguage.ENGLISH.locale,
+                bundleName = BUNDLE_NAME
+            ) shouldBe Component.text("english_value_1")
+        }
+
+        @Test
+        fun `should return the value for the given key with the given array arguments`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+            provider.getComponent(
+                "test_args",
+                SupportedLanguage.ENGLISH.locale,
+                arrayOf("with arguments"),
+                bundleName = BUNDLE_NAME
+            ) shouldBe Component.text("english_value with arguments")
+        }
+
+        @Test
+        fun `should return key in component if not found`() {
+            provider.registerResourceBundle(BUNDLE_NAME, SupportedLanguage.ENGLISH.locale, ResourceBundle::getBundle)
+
+            val key = randomString()
+            provider.getComponent(
+                key,
+                SupportedLanguage.ENGLISH.locale,
+                bundleName = BUNDLE_NAME
+            ) shouldBe Component.text(key)
+        }
     }
 }
