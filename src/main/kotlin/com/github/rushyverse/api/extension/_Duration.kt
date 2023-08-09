@@ -47,6 +47,28 @@ public val UShort.ticks: Duration get() = toShort().ticks
  */
 public val Short.ticks: Duration get() = (this * MILLISECOND_PER_TICK).milliseconds
 
+/**
+ * Format a [Duration] to a string.
+ *
+ * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
+ *
+ * Will use the translation key `time.hour.short`, `time.minute.short` and `time.second.short` to format the duration.
+ *
+ * Example:
+ * ```kotlin
+ * (1.hours + 2.minutes + 3.seconds).format(..) // 01h 02m 03s
+ * (2.minutes + 3.seconds).format(..) // 02m 03s
+ * (3.seconds).format(..) // 03s
+ * ```
+ *
+ * @receiver Duration The duration to format.
+ * @param translator Translator to use to get the translation.
+ * @param locale Locale to use to get the translation.
+ * @param bundle Bundle to use to get the translation.
+ * @param separator Use to separate the hour, minute and second
+ * @param infiniteSymbol Symbol to use when the duration is infinite.
+ * @return Formatted string.
+ */
 public fun Duration.format(
     translator: Translator,
     locale: Locale,
@@ -63,6 +85,36 @@ public fun Duration.format(
     )
 }
 
+/**
+ * Format a [Duration] to a string.
+ *
+ * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
+ *
+ * If the duration is not infinite, the [formatHour], [formatMinute]
+ * and [formatSecond] functions will be used to format.
+ *
+ * If the duration contains only seconds, the [formatSecond] function will be used to format.
+ *
+ * If the duration contains at least minute, the [formatMinute] and [formatSecond] functions will be used to format.
+ *
+ * If the duration contains at least one hour, the [formatHour], [formatMinute]
+ * and [formatSecond] functions will be used to format.
+ *
+ * Example:
+ * ```kotlin
+ * (1.hours + 2.minutes + 3.seconds).format(..) // 01h 02m 03s
+ * (2.minutes + 3.seconds).format(..) // 02m 03s
+ * (3.seconds).format(..) // 03s
+ * ```
+ *
+ * @receiver Duration The duration to format.
+ * @param formatHour Function that received [infiniteSymbol] or time string with format `00` and return hour string.
+ * @param formatMinute Function that received [infiniteSymbol] or time string with format `00` and return minute string.
+ * @param formatSecond Function that received [infiniteSymbol] or time string with format `00` and return second string.
+ * @param separator Use to separate the hour, minute and second
+ * @param infiniteSymbol Symbol to use when the duration is infinite.
+ * @return Formatted string.
+ */
 public inline fun Duration.format(
     formatHour: (String) -> String,
     formatMinute: (String) -> String,
@@ -80,12 +132,11 @@ public inline fun Duration.format(
     val minutesString: String
     val secondsString: String
 
-    if(isInfinite()) {
+    if (isInfinite()) {
         hoursString = infiniteSymbol
         minutesString = infiniteSymbol
         secondsString = infiniteSymbol
     } else {
-        // TODO Change format in translation file
         hoursString = String.format("%02d", hours)
         minutesString = String.format("%02d", minutes)
         secondsString = String.format("%02d", seconds)
