@@ -7,6 +7,11 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
+ * Type of function used to format a [Duration] part to a string.
+ */
+public typealias FormatPartTime = (String) -> String
+
+/**
  * Number of milliseconds corresponding to one tick.
  */
 public const val MILLISECOND_PER_TICK: Int = 50
@@ -77,9 +82,10 @@ public fun Duration.format(
     infiniteSymbol: String = "∞"
 ): String {
     return format(
-        formatHour = { translator.get("time.hour.short", locale, arrayOf(it), bundle) },
-        formatMinute = { translator.get("time.minute.short", locale, arrayOf(it), bundle) },
         formatSecond = { translator.get("time.second.short", locale, arrayOf(it), bundle) },
+        formatMinute = { translator.get("time.minute.short", locale, arrayOf(it), bundle) },
+        formatHour = { translator.get("time.hour.short", locale, arrayOf(it), bundle) },
+        formatDay = { translator.get("time.day.short", locale, arrayOf(it), bundle) },
         separator = separator,
         infiniteSymbol = infiniteSymbol
     )
@@ -108,6 +114,7 @@ public fun Duration.format(
  * ```
  *
  * @receiver Duration The duration to format.
+ * @param formatDay Function that received [infiniteSymbol] or time string with format `00` and return day string.
  * @param formatHour Function that received [infiniteSymbol] or time string with format `00` and return hour string.
  * @param formatMinute Function that received [infiniteSymbol] or time string with format `00` and return minute string.
  * @param formatSecond Function that received [infiniteSymbol] or time string with format `00` and return second string.
@@ -115,44 +122,74 @@ public fun Duration.format(
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
  */
-public inline fun Duration.format(
-    formatHour: (String) -> String,
-    formatMinute: (String) -> String,
-    formatSecond: (String) -> String,
+public fun Duration.format(
+    formatSecond: FormatPartTime,
+    formatMinute: FormatPartTime,
+    formatHour: FormatPartTime,
+    formatDay: FormatPartTime,
     separator: String = " ",
     infiniteSymbol: String = "∞"
 ): String {
     require(!this.isNegative()) { "Number must be positive" }
-
-    val hours = this.inWholeHours
-    val minutes = this.inWholeMinutes % 60
-    val seconds = this.inWholeSeconds % 60
-
-    val hoursString: String
-    val minutesString: String
-    val secondsString: String
-
-    if (isInfinite()) {
-        hoursString = infiniteSymbol
-        minutesString = infiniteSymbol
-        secondsString = infiniteSymbol
-    } else {
-        hoursString = String.format("%02d", hours)
-        minutesString = String.format("%02d", minutes)
-        secondsString = String.format("%02d", seconds)
+    if(isInfinite()) {
+        return formatInfiniteTime(formatSecond, formatMinute, formatHour, formatDay, separator, infiniteSymbol)
     }
 
     return buildString {
-        if (hours > 0) {
-            append(formatHour(hoursString))
+        var hasValue = false
+
+        val days = inWholeDays
+        if (days > 0) {
+            append(formatDay(String.format("%02d", days)))
+            append(separator)
+            hasValue = true
+        }
+
+        val hours = inWholeHours % 24
+        if (hasValue || hours > 0) {
+            append(formatHour(String.format("%02d", hours)))
+            append(separator)
+            hasValue = true
+        }
+
+        val minutes = inWholeMinutes % 60
+        if (hasValue || minutes > 0) {
+            append(formatMinute(String.format("%02d", minutes)))
             append(separator)
         }
 
-        if (hours > 0 || minutes > 0) {
-            append(formatMinute(minutesString))
-            append(separator)
-        }
+        val seconds = inWholeSeconds % 60
+        append(formatSecond(String.format("%02d", seconds)))
+    }
+}
 
-        append(formatSecond(secondsString))
+/**
+ * Format an infinite time to a string.
+ *
+ * Example:
+ * ```kotlin
+ * formatInfinite(..) // ∞d ∞h ∞m ∞s
+ * ```
+ * @param formatSecond Function that received [infiniteSymbol] and return second string.
+ * @param formatMinute Function that received [infiniteSymbol] and return minute string, if null, minute will not be displayed.
+ * @param formatHour Function that received [infiniteSymbol] and return hour string, if null, hour will not be displayed.
+ * @param formatDay Function that received [infiniteSymbol] and return day string, if null, day will not be displayed.
+ * @param separator Use to separate the hour, minute and second
+ * @param infiniteSymbol Symbol to use when the duration is infinite.
+ * @return Formatted string.
+ */
+public fun formatInfiniteTime(
+    formatSecond: FormatPartTime,
+    formatMinute: FormatPartTime? = null,
+    formatHour: FormatPartTime? = null,
+    formatDay: FormatPartTime? = null,
+    separator: String = " ",
+    infiniteSymbol: String = "∞"
+): String {
+    return buildString {
+        formatDay?.let { append(it(infiniteSymbol)).append(separator) }
+        formatHour?.let { append(it(infiniteSymbol)).append(separator) }
+        formatMinute?.let { append(it(infiniteSymbol)).append(separator) }
+        append(formatSecond(infiniteSymbol))
     }
 }
