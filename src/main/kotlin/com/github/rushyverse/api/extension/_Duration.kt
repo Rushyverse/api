@@ -57,7 +57,7 @@ public fun Duration.format(
     return format(
         formatHour = { translator.get("time.hour.short", locale, arrayOf(it), bundle) },
         formatMinute = { translator.get("time.minute.short", locale, arrayOf(it), bundle) },
-        formatSecond = { translator.get("time.short", locale, arrayOf(it), bundle) },
+        formatSecond = { translator.get("time.second.short", locale, arrayOf(it), bundle) },
         separator = separator,
         infiniteSymbol = infiniteSymbol
     )
@@ -85,6 +85,7 @@ public inline fun Duration.format(
         minutesString = infiniteSymbol
         secondsString = infiniteSymbol
     } else {
+        // TODO Change format in translation file
         hoursString = String.format("%02d", hours)
         minutesString = String.format("%02d", minutes)
         secondsString = String.format("%02d", seconds)
