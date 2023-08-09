@@ -174,42 +174,52 @@ class DurationExtTest {
 
         @Test
         fun `should return the correct format for 0`() {
-            assertEquals("00s", Duration.ZERO.format(
-                translator,
-                SupportedLanguage.ENGLISH.locale
-            ))
+            assertEquals(
+                "00s", Duration.ZERO.format(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 minute`() {
-            assertEquals("01m 00s", 1.minutes.format(
-                translator,
-                SupportedLanguage.ENGLISH.locale
-            ))
+            assertEquals(
+                "01m 00s", 1.minutes.format(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 hour`() {
-            assertEquals("01h 00m 00s", 1.hours.format(
-                translator,
-                SupportedLanguage.ENGLISH.locale
-            ))
+            assertEquals(
+                "01h 00m 00s", 1.hours.format(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 hour 1 minute`() {
-            assertEquals("01h 01m 00s", (1.hours + 1.minutes).format(
-                translator,
-                SupportedLanguage.ENGLISH.locale
-            ))
+            assertEquals(
+                "01h 01m 00s", (1.hours + 1.minutes).format(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale
+                )
+            )
         }
 
         @Test
         fun `should use selected language`() {
-            assertEquals("04天 12小时 38分 01秒", (4.days + 12.hours + 38.minutes + 1.seconds).format(
-                translator,
-                SupportedLanguage.CHINESE.locale
-            ))
+            assertEquals(
+                "04天 12小时 38分 01秒", (4.days + 12.hours + 38.minutes + 1.seconds).format(
+                    translator,
+                    SupportedLanguage.CHINESE.locale
+                )
+            )
         }
 
     }
@@ -267,142 +277,170 @@ class DurationExtTest {
 
         @Test
         fun `should return the correct format for 0`() {
-            assertEquals("00s", Duration.ZERO.format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "00s", Duration.ZERO.format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 second`() {
-            assertEquals("01s", 1.seconds.format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01s", 1.seconds.format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 minute`() {
-            assertEquals("01m 00s", 1.minutes.format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01m 00s", 1.minutes.format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 hour`() {
-            assertEquals("01h 00m 00s", 1.hours.format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01h 00m 00s", 1.hours.format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 hour 1 minute`() {
-            assertEquals("01h 01m 00s", (1.hours + 1.minutes).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01h 01m 00s", (1.hours + 1.minutes).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 hour 1 second`() {
-            assertEquals("01h 00m 01s", (1.hours + 1.seconds).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01h 00m 01s", (1.hours + 1.seconds).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 minute 1 second`() {
-            assertEquals("01m 01s", (1.minutes + 1.seconds).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01m 01s", (1.minutes + 1.seconds).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day`() {
-            assertEquals("01d 00h 00m 00s", 1.days.format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 00h 00m 00s", 1.days.format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day 1 hour`() {
-            assertEquals("01d 01h 00m 00s", (1.days + 1.hours).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 01h 00m 00s", (1.days + 1.hours).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day 1 minute`() {
-            assertEquals("01d 00h 01m 00s", (1.days + 1.minutes).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 00h 01m 00s", (1.days + 1.minutes).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day 1 second`() {
-            assertEquals("01d 00h 00m 01s", (1.days + 1.seconds).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 00h 00m 01s", (1.days + 1.seconds).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day 1 hour 1 minute`() {
-            assertEquals("01d 01h 01m 00s", (1.days + 1.hours + 1.minutes).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 01h 01m 00s", (1.days + 1.hours + 1.minutes).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for 1 day 1 hour 1 second`() {
-            assertEquals("01d 01h 00m 01s", (1.days + 1.hours + 1.seconds).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "01d 01h 00m 01s", (1.days + 1.hours + 1.seconds).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should return the correct format for more one month`() {
-            assertEquals("69d 00h 00m 00s", (69.days).format(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "69d 00h 00m 00s", (69.days).format(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
     }
@@ -417,62 +455,74 @@ class DurationExtTest {
 
         @Test
         fun `should display all time`() {
-            assertEquals("∞d ∞h ∞m ∞s", formatInfiniteTime(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                formatDay
-            ))
+            assertEquals(
+                "∞d ∞h ∞m ∞s", formatInfiniteTime(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    formatDay
+                )
+            )
         }
 
         @Test
         fun `should display seconds, minute and hour`() {
-            assertEquals("∞h ∞m ∞s", formatInfiniteTime(
-                formatSecond,
-                formatMinute,
-                formatHour,
-                null,
-            ))
+            assertEquals(
+                "∞h ∞m ∞s", formatInfiniteTime(
+                    formatSecond,
+                    formatMinute,
+                    formatHour,
+                    null,
+                )
+            )
         }
 
         @Test
         fun `should display seconds, minute`() {
-            assertEquals("∞m ∞s", formatInfiniteTime(
-                formatSecond,
-                formatMinute,
-                null,
-                null,
-            ))
+            assertEquals(
+                "∞m ∞s", formatInfiniteTime(
+                    formatSecond,
+                    formatMinute,
+                    null,
+                    null,
+                )
+            )
         }
 
         @Test
         fun `should display seconds, hour`() {
-            assertEquals("∞h ∞s", formatInfiniteTime(
-                formatSecond,
-                null,
-                formatHour,
-                null,
-            ))
+            assertEquals(
+                "∞h ∞s", formatInfiniteTime(
+                    formatSecond,
+                    null,
+                    formatHour,
+                    null,
+                )
+            )
         }
 
         @Test
         fun `should display seconds, day`() {
-            assertEquals("∞h ∞s", formatInfiniteTime(
-                formatSecond,
-                null,
-                null,
-                formatDay,
-            ))
+            assertEquals(
+                "∞h ∞s", formatInfiniteTime(
+                    formatSecond,
+                    null,
+                    null,
+                    formatDay,
+                )
+            )
         }
 
         @Test
         fun `should display seconds`() {
-            assertEquals("∞s", formatInfiniteTime(
-                formatSecond,
-                null,
-                null,
-                null,
-            ))
+            assertEquals(
+                "∞s", formatInfiniteTime(
+                    formatSecond,
+                    null,
+                    null,
+                    null,
+                )
+            )
         }
 
         @ParameterizedTest

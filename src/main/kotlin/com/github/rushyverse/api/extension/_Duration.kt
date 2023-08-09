@@ -131,7 +131,7 @@ public fun Duration.format(
     infiniteSymbol: String = "∞"
 ): String {
     require(!this.isNegative()) { "Number must be positive" }
-    if(isInfinite()) {
+    if (isInfinite()) {
         return formatInfiniteTime(formatSecond, formatMinute, formatHour, formatDay, separator, infiniteSymbol)
     }
 
