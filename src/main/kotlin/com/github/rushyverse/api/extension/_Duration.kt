@@ -83,6 +83,21 @@ private val patternTranslationWithSingleDigitTime = Regex("^(?<text1>\\D*)(?<num
 private const val INFINITE_SYMBOL = "∞"
 
 /**
+ * Number of hours in a day.
+ */
+private const val HOUR_IN_DAY = 24
+
+/**
+ * Number of minutes in an hour.
+ */
+private const val MINUTE_IN_HOUR = 60
+
+/**
+ * Number of seconds in a minute.
+ */
+private const val SECOND_IN_MINUTE = 60
+
+/**
  * Number of milliseconds corresponding to one tick.
  */
 public const val MILLISECOND_PER_TICK: Int = 50
@@ -164,7 +179,7 @@ public fun Duration.format(
         }
 
         format.hour?.let { formatter ->
-            val hours = if(hasValue) inWholeHours % 24 else inWholeHours
+            val hours = if(hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
             if (hasValue || hours > 0) {
                 append(prefixSingleDigitWithZero(formatter(hours.toString())))
                 append(separator)
@@ -173,7 +188,7 @@ public fun Duration.format(
         }
 
         format.minute?.let { formatter ->
-            val minutes = if(hasValue) inWholeMinutes % 60 else inWholeMinutes
+            val minutes = if(hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
             if (hasValue || minutes > 0) {
                 append(prefixSingleDigitWithZero(formatter(minutes.toString())))
                 append(separator)
@@ -182,7 +197,7 @@ public fun Duration.format(
         }
 
         format.second?.let { formatter ->
-            val seconds = if(hasValue) inWholeSeconds % 60 else inWholeSeconds
+            val seconds = if(hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
             append(prefixSingleDigitWithZero(formatter(seconds.toString())))
         }
     }
@@ -209,9 +224,12 @@ private fun prefixSingleDigitWithZero(string: String): String {
  * formatInfinite(..) // ∞d ∞h ∞m ∞s
  * ```
  * @param formatSecond Function that received [infiniteSymbol] and return second string.
- * @param formatMinute Function that received [infiniteSymbol] and return minute string, if null, minute will not be displayed.
- * @param formatHour Function that received [infiniteSymbol] and return hour string, if null, hour will not be displayed.
- * @param formatDay Function that received [infiniteSymbol] and return day string, if null, day will not be displayed.
+ * @param formatMinute Function that received [infiniteSymbol] and return minute string,
+ * if null, minute will not be displayed.
+ * @param formatHour Function that received [infiniteSymbol] and return hour string,
+ * if null, hour will not be displayed.
+ * @param formatDay Function that received [infiniteSymbol] and return day string,
+ * if null, day will not be displayed.
  * @param separator Use to separate the hour, minute and second
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
