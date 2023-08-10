@@ -7,6 +7,66 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
+ * Data class that represents a time format.
+ * It provides properties and companion functions to create time formats.
+ * Each function is nullable, if it is null, the time part will not be formatted.
+ *
+ * @property second A function that formats the seconds.
+ * @property minute A function that formats the minutes.
+ * @property hour A function that formats the hours.
+ * @property day A function that formats the days.
+ * @constructor Creates a new instance of FormatTime.
+ */
+public data class FormatTime(
+    val second: FormatPartTime? = null,
+    val minute: FormatPartTime? = null,
+    val hour: FormatPartTime? = null,
+    val day: FormatPartTime? = null,
+) {
+
+    public companion object {
+
+        /**
+         * Constructs a FormatTime object for displaying time in long format.
+         * The long format is used for displaying time in a more readable way.
+         * @param translator The translator used for retrieving translations.
+         * @param locale The desired locale for the translations.
+         * @param bundle The name of the translation bundle to use.
+         * @return A FormatTime object configured for long format.
+         */
+        public fun long(
+            translator: Translator,
+            locale: Locale,
+            bundle: String = APIPlugin.BUNDLE_API,
+        ): FormatTime = FormatTime(
+            second = { translator.get("time.second.long", locale, arrayOf(it.toIntOrString()), bundle) },
+            minute = { translator.get("time.minute.long", locale, arrayOf(it.toIntOrString()), bundle) },
+            hour = { translator.get("time.hour.long", locale, arrayOf(it.toIntOrString()), bundle) },
+            day = { translator.get("time.day.long", locale, arrayOf(it.toIntOrString()), bundle) },
+        )
+
+        /**
+         * Constructs a FormatTime object for displaying time in short format.
+         * The short format is used for displaying time in a more compact way.
+         * @param translator The translator used for retrieving translations.
+         * @param locale The desired locale for the translations.
+         * @param bundle The name of the translation bundle to use.
+         * @return A FormatTime object configured for short format.
+         */
+        public fun short(
+            translator: Translator,
+            locale: Locale,
+            bundle: String = APIPlugin.BUNDLE_API,
+        ): FormatTime = FormatTime(
+            second = { translator.get("time.second.short", locale, arrayOf(it.toIntOrString()), bundle) },
+            minute = { translator.get("time.minute.short", locale, arrayOf(it.toIntOrString()), bundle) },
+            hour = { translator.get("time.hour.short", locale, arrayOf(it.toIntOrString()), bundle) },
+            day = { translator.get("time.day.short", locale, arrayOf(it.toIntOrString()), bundle) },
+        )
+    }
+}
+
+/**
  * Type of function used to format a [Duration] part to a string.
  */
 public typealias FormatPartTime = (String) -> String
@@ -16,7 +76,12 @@ public typealias FormatPartTime = (String) -> String
  * Will create groups named `text1`, `number` and `text2` to get the text before and after the number.
  * The number found has to be a single digit.
  */
-private val numberRegex = Regex("^(?<text1>\\D*)(?<number>\\d)(?<text2>\\D*)$")
+private val patternTranslationWithSingleDigitTime = Regex("^(?<text1>\\D*)(?<number>\\d)(?<text2>\\D*)$")
+
+/**
+ * String used to represent an infinite duration.
+ */
+private const val INFINITE_SYMBOL = "∞"
 
 /**
  * Number of milliseconds corresponding to one tick.
@@ -64,84 +129,6 @@ public val Short.ticks: Duration get() = (this * MILLISECOND_PER_TICK).milliseco
  *
  * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
  *
- * Will use the translation key `time.hour.short`, `time.minute.short` and `time.second.short` to format the duration.
- *
- * Example:
- * ```kotlin
- * (1.hours + 2.minutes + 3.seconds).longFormat(..) // 01hour 02minutes 03seconds
- * (2.minutes + 3.seconds).longFormat(..) // 02minutes 03seconds
- * (3.seconds).longFormat(..) // 03seconds
- * ```
- *
- * @receiver Duration The duration to format.
- * @param translator Translator to use to get the translation.
- * @param locale Locale to use to get the translation.
- * @param bundle Bundle to use to get the translation.
- * @param separator Use to separate the hour, minute and second
- * @param infiniteSymbol Symbol to use when the duration is infinite.
- * @return Formatted string.
- */
-public fun Duration.longFormat(
-    translator: Translator,
-    locale: Locale,
-    bundle: String = APIPlugin.BUNDLE_API,
-    separator: String = " ",
-    infiniteSymbol: String = "∞"
-): String {
-    return format(
-        formatSecond = { translator.get("time.second.long", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatMinute = { translator.get("time.minute.long", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatHour = { translator.get("time.hour.long", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatDay = { translator.get("time.day.long", locale, arrayOf(it.toIntOrString()), bundle) },
-        separator = separator,
-        infiniteSymbol = infiniteSymbol
-    )
-}
-
-/**
- * Format a [Duration] to a string.
- *
- * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
- *
- * Will use the translation key `time.hour.short`, `time.minute.short` and `time.second.short` to format the duration.
- *
- * Example:
- * ```kotlin
- * (1.hours + 2.minutes + 3.seconds).shortFormat(..) // 01h 02m 03s
- * (2.minutes + 3.seconds).shortFormat(..) // 02m 03s
- * (3.seconds).shortFormat(..) // 03s
- * ```
- *
- * @receiver Duration The duration to format.
- * @param translator Translator to use to get the translation.
- * @param locale Locale to use to get the translation.
- * @param bundle Bundle to use to get the translation.
- * @param separator Use to separate the hour, minute and second
- * @param infiniteSymbol Symbol to use when the duration is infinite.
- * @return Formatted string.
- */
-public fun Duration.shortFormat(
-    translator: Translator,
-    locale: Locale,
-    bundle: String = APIPlugin.BUNDLE_API,
-    separator: String = " ",
-    infiniteSymbol: String = "∞"
-): String {
-    return format(
-        formatSecond = { translator.get("time.second.short", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatMinute = { translator.get("time.minute.short", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatHour = { translator.get("time.hour.short", locale, arrayOf(it.toIntOrString()), bundle) },
-        formatDay = { translator.get("time.day.short", locale, arrayOf(it.toIntOrString()), bundle) },
-        separator = separator,
-        infiniteSymbol = infiniteSymbol
-    )
-}
-
-/**
- * Format a [Duration] to a string.
- *
- * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
- *
  * If the duration is not infinite, the [formatHour], [formatMinute]
  * and [formatSecond] functions will be used to format.
  *
@@ -160,52 +147,55 @@ public fun Duration.shortFormat(
  * ```
  *
  * @receiver Duration The duration to format.
- * @param formatDay Function that received [infiniteSymbol] or time string with format `00` and return day string.
- * @param formatHour Function that received [infiniteSymbol] or time string with format `00` and return hour string.
- * @param formatMinute Function that received [infiniteSymbol] or time string with format `00` and return minute string.
- * @param formatSecond Function that received [infiniteSymbol] or time string with format `00` and return second string.
+ * @param format The format to use.
  * @param separator Use to separate the hour, minute and second
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
  */
 public fun Duration.format(
-    formatSecond: FormatPartTime,
-    formatMinute: FormatPartTime,
-    formatHour: FormatPartTime,
-    formatDay: FormatPartTime,
+    format: FormatTime,
     separator: String = " ",
-    infiniteSymbol: String = "∞"
+    infiniteSymbol: String = INFINITE_SYMBOL
 ): String {
     require(!this.isNegative()) { "Number must be positive" }
     if (isInfinite()) {
-        return formatInfiniteTime(formatSecond, formatMinute, formatHour, formatDay, separator, infiniteSymbol)
+        return formatInfiniteTime(format, separator, infiniteSymbol)
     }
 
     return buildString {
         var hasValue = false
 
-        val days = inWholeDays
-        if (days > 0) {
-            append(prefixSingleDigitWithZero(formatDay(days.toString())))
-            append(separator)
-            hasValue = true
+        format.day?.let { formatter ->
+            val days = inWholeDays
+            if (days > 0) {
+                append(prefixSingleDigitWithZero(formatter(days.toString())))
+                append(separator)
+                hasValue = true
+            }
         }
 
-        val hours = inWholeHours % 24
-        if (hasValue || hours > 0) {
-            append(prefixSingleDigitWithZero(formatHour(hours.toString())))
-            append(separator)
-            hasValue = true
+        format.hour?.let { formatter ->
+            val hours = if(hasValue) inWholeHours % 24 else inWholeHours
+            if (hasValue || hours > 0) {
+                append(prefixSingleDigitWithZero(formatter(hours.toString())))
+                append(separator)
+                hasValue = true
+            }
         }
 
-        val minutes = inWholeMinutes % 60
-        if (hasValue || minutes > 0) {
-            append(prefixSingleDigitWithZero(formatMinute(minutes.toString())))
-            append(separator)
+        format.minute?.let { formatter ->
+            val minutes = if(hasValue) inWholeMinutes % 60 else inWholeMinutes
+            if (hasValue || minutes > 0) {
+                append(prefixSingleDigitWithZero(formatter(minutes.toString())))
+                append(separator)
+                hasValue = true
+            }
         }
 
-        val seconds = inWholeSeconds % 60
-        append(prefixSingleDigitWithZero(formatSecond(seconds.toString())))
+        format.second?.let { formatter ->
+            val seconds = if(hasValue) inWholeSeconds % 60 else inWholeSeconds
+            append(prefixSingleDigitWithZero(formatter(seconds.toString())))
+        }
     }
 }
 
@@ -216,7 +206,7 @@ public fun Duration.format(
  * @return The modified string with prefix zero for single-digit numbers.
  */
 private fun prefixSingleDigitWithZero(string: String): String {
-    return string.replace(numberRegex) { matchResult ->
+    return string.replace(patternTranslationWithSingleDigitTime) { matchResult ->
         val (text1, number, text2) = matchResult.destructured
         "${text1}0${number}${text2}"
     }
@@ -238,17 +228,14 @@ private fun prefixSingleDigitWithZero(string: String): String {
  * @return Formatted string.
  */
 public fun formatInfiniteTime(
-    formatSecond: FormatPartTime,
-    formatMinute: FormatPartTime? = null,
-    formatHour: FormatPartTime? = null,
-    formatDay: FormatPartTime? = null,
+    format: FormatTime,
     separator: String = " ",
     infiniteSymbol: String = "∞"
 ): String {
     return buildString {
-        formatDay?.let { append(it(infiniteSymbol)).append(separator) }
-        formatHour?.let { append(it(infiniteSymbol)).append(separator) }
-        formatMinute?.let { append(it(infiniteSymbol)).append(separator) }
-        append(formatSecond(infiniteSymbol))
+        format.day?.let { append(it(infiniteSymbol)).append(separator) }
+        format.hour?.let { append(it(infiniteSymbol)).append(separator) }
+        format.minute?.let { append(it(infiniteSymbol)).append(separator) }
+        format.second?.let { append(it(infiniteSymbol)) }
     }
 }
