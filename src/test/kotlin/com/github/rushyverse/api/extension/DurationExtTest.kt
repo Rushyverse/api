@@ -137,6 +137,179 @@ class DurationExtTest {
             translator.registerResourceBundleForSupportedLocales(APIPlugin.BUNDLE_API, ResourceBundle::getBundle)
         }
 
+        @Nested
+        inner class French {
+
+            private val locale = SupportedLanguage.FRENCH.locale
+
+            @ParameterizedTest
+            @ValueSource(ints = [0, 1])
+            fun `should return the correct format for singular value second`(time: Int) {
+                assertEquals("0${time}seconde", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit`(time: Int) {
+                assertEquals("0${time}secondes", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit`(time: Int) {
+                assertEquals("${time}secondes", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value minute`(time: Int) {
+                assertEquals("0${time}minute 00seconde", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit minute`(time: Int) {
+                assertEquals("0${time}minutes 00seconde", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit minute`(time: Int) {
+                assertEquals("${time}minutes 00seconde", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value hour`(time: Int) {
+                assertEquals("0${time}heure 00minute 00seconde", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit hour`(time: Int) {
+                assertEquals("0${time}heures 00minute 00seconde", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit hour`(time: Int) {
+                assertEquals("${time}heures 00minute 00seconde", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value day`(time: Int) {
+                assertEquals("0${time}jour 00heure 00minute 00seconde", time.days.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit day`(time: Int) {
+                assertEquals("0${time}jours 00heure 00minute 00seconde", time.days.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit day`(time: Int) {
+                assertEquals("${time}jours 00heure 00minute 00seconde", time.days.longFormat(translator, locale))
+            }
+
+            @Test
+            fun `should return the correct format for multiple values`() {
+                assertEquals(
+                    "04jours 01heure 02minutes 03secondes",
+                    (4.days + 1.hours + 2.minutes + 3.seconds).longFormat(translator, locale)
+                )
+            }
+
+        }
+
+        @Nested
+        inner class English {
+
+            private val locale = SupportedLanguage.ENGLISH.locale
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value second`(time: Int) {
+                assertEquals("0${time}second", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [0, 2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit`(time: Int) {
+                assertEquals("0${time}seconds", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit`(time: Int) {
+                assertEquals("${time}seconds", time.seconds.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value minute`(time: Int) {
+                assertEquals("0${time}minute 00seconds", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit minute`(time: Int) {
+                assertEquals("0${time}minutes 00seconds", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit minute`(time: Int) {
+                assertEquals("${time}minutes 00seconds", time.minutes.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value hour`(time: Int) {
+                assertEquals("0${time}hour 00minutes 00seconds", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit hour`(time: Int) {
+                assertEquals("0${time}hours 00minutes 00seconds", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit hour`(time: Int) {
+                assertEquals("${time}hours 00minutes 00seconds", time.hours.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [1])
+            fun `should return the correct format for singular value day`(time: Int) {
+                assertEquals("0${time}day 00hours 00minutes 00seconds", time.days.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
+            fun `should return the correct format for plural value with single digit day`(time: Int) {
+                assertEquals("0${time}days 00hours 00minutes 00seconds", time.days.longFormat(translator, locale))
+            }
+
+            @ParameterizedTest
+            @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+            fun `should return the correct format for plural value with double digit day`(time: Int) {
+                assertEquals("${time}days 00hours 00minutes 00seconds", time.days.longFormat(translator, locale))
+            }
+
+            @Test
+            fun `should return the correct format for multiple values`() {
+                assertEquals(
+                    "04days 01hour 02minutes 03seconds",
+                    (4.days + 1.hours + 2.minutes + 3.seconds).longFormat(translator, locale)
+                )
+            }
+        }
+
         @Test
         fun `should throw an exception if the duration is negative`() {
             assertThrows<IllegalArgumentException> {
