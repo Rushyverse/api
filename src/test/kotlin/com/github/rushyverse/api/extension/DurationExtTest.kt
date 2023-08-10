@@ -476,6 +476,25 @@ class DurationExtTest {
         )
 
         @Test
+        fun `should return empty string if format does not contain any part`() {
+            val nullFormat = FormatTime(
+                second = null,
+                minute = null,
+                hour = null,
+                day = null,
+            )
+
+            assertEquals(
+                "",
+                (10.days + 1.hours + 2.minutes + 3.seconds).format(nullFormat)
+            )
+            assertEquals(
+                "",
+                Duration.INFINITE.format(nullFormat)
+            )
+        }
+
+        @Test
         fun `should throw an exception if the duration is negative`() {
             assertThrows<IllegalArgumentException> {
                 (-1).seconds.format(
