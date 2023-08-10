@@ -127,6 +127,8 @@ class DurationExtTest {
     @Nested
     inner class TimeLongFormatFromTranslation {
 
+        // TODO Add lot of tests
+
         private lateinit var translator: ResourceBundleTranslator
 
         @BeforeTest
@@ -554,7 +556,7 @@ class DurationExtTest {
         @Test
         fun `should display seconds, day`() {
             assertEquals(
-                "∞h ∞s", formatInfiniteTime(
+                "∞d ∞s", formatInfiniteTime(
                     formatSecond,
                     null,
                     null,

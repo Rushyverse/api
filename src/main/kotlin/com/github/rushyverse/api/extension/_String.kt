@@ -47,6 +47,14 @@ private const val UUID_HIGH_LOW_BITS: Int = 64
 public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
+ * Converts the receiver String to Int if possible, otherwise returns the same String.
+ *
+ * @receiver The input String.
+ * @return The converted Int value if successful or the original String itself if not.
+ */
+public fun String.toIntOrString(): Any = toIntOrNull() ?: this
+
+/**
  * Wraps a given string with a color tag.
  * Example: "Hello".wrapColorWith("red") will return `<red>Hello</red>`.
  *

@@ -12,6 +12,13 @@ import kotlin.time.Duration.Companion.milliseconds
 public typealias FormatPartTime = (String) -> String
 
 /**
+ * Regex used to get the number in a string.
+ * Will create groups named `text1`, `number` and `text2` to get the text before and after the number.
+ * The number found has to be a single digit.
+ */
+private val numberRegex = Regex("^(?<text1>\\D*)(?<number>\\d)(?<text2>\\D*)$")
+
+/**
  * Number of milliseconds corresponding to one tick.
  */
 public const val MILLISECOND_PER_TICK: Int = 50
@@ -82,10 +89,10 @@ public fun Duration.longFormat(
     infiniteSymbol: String = "∞"
 ): String {
     return format(
-        formatSecond = { translator.get("time.second.long", locale, arrayOf(it), bundle) },
-        formatMinute = { translator.get("time.minute.long", locale, arrayOf(it), bundle) },
-        formatHour = { translator.get("time.hour.long", locale, arrayOf(it), bundle) },
-        formatDay = { translator.get("time.day.long", locale, arrayOf(it), bundle) },
+        formatSecond = { translator.get("time.second.long", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatMinute = { translator.get("time.minute.long", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatHour = { translator.get("time.hour.long", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatDay = { translator.get("time.day.long", locale, arrayOf(it.toIntOrString()), bundle) },
         separator = separator,
         infiniteSymbol = infiniteSymbol
     )
@@ -121,10 +128,10 @@ public fun Duration.shortFormat(
     infiniteSymbol: String = "∞"
 ): String {
     return format(
-        formatSecond = { translator.get("time.second.short", locale, arrayOf(it), bundle) },
-        formatMinute = { translator.get("time.minute.short", locale, arrayOf(it), bundle) },
-        formatHour = { translator.get("time.hour.short", locale, arrayOf(it), bundle) },
-        formatDay = { translator.get("time.day.short", locale, arrayOf(it), bundle) },
+        formatSecond = { translator.get("time.second.short", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatMinute = { translator.get("time.minute.short", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatHour = { translator.get("time.hour.short", locale, arrayOf(it.toIntOrString()), bundle) },
+        formatDay = { translator.get("time.day.short", locale, arrayOf(it.toIntOrString()), bundle) },
         separator = separator,
         infiniteSymbol = infiniteSymbol
     )
@@ -179,26 +186,39 @@ public fun Duration.format(
 
         val days = inWholeDays
         if (days > 0) {
-            append(formatDay(String.format("%02d", days)))
+            append(prefixSingleDigitWithZero(formatDay(days.toString())))
             append(separator)
             hasValue = true
         }
 
         val hours = inWholeHours % 24
         if (hasValue || hours > 0) {
-            append(formatHour(String.format("%02d", hours)))
+            append(prefixSingleDigitWithZero(formatHour(hours.toString())))
             append(separator)
             hasValue = true
         }
 
         val minutes = inWholeMinutes % 60
         if (hasValue || minutes > 0) {
-            append(formatMinute(String.format("%02d", minutes)))
+            append(prefixSingleDigitWithZero(formatMinute(minutes.toString())))
             append(separator)
         }
 
         val seconds = inWholeSeconds % 60
-        append(formatSecond(String.format("%02d", seconds)))
+        append(prefixSingleDigitWithZero(formatSecond(seconds.toString())))
+    }
+}
+
+/**
+ * Adds a prefix zero for single-digit numbers in a given string.
+ *
+ * @param string The input string.
+ * @return The modified string with prefix zero for single-digit numbers.
+ */
+private fun prefixSingleDigitWithZero(string: String): String {
+    return string.replace(numberRegex) { matchResult ->
+        val (text1, number, text2) = matchResult.destructured
+        "${text1}0${number}${text2}"
     }
 }
 
