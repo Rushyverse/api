@@ -125,7 +125,7 @@ class DurationExtTest {
     }
 
     @Nested
-    inner class TimeFormatFromTranslation {
+    inner class TimeLongFormatFromTranslation {
 
         private lateinit var translator: ResourceBundleTranslator
 
@@ -138,7 +138,7 @@ class DurationExtTest {
         @Test
         fun `should throw an exception if the duration is negative`() {
             assertThrows<IllegalArgumentException> {
-                (-1).seconds.format(
+                (-1).seconds.longFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale,
                 )
@@ -148,7 +148,57 @@ class DurationExtTest {
         @ParameterizedTest
         @ValueSource(strings = ["", " ", "-"])
         fun `should use separator between the different parts`(separator: String) {
-            val time = (4.days + 1.hours + 2.minutes + 3.seconds).format(
+            val time = (4.days + 1.hours + 2.minutes + 3.seconds).longFormat(
+                translator,
+                SupportedLanguage.ENGLISH.locale,
+                separator = separator
+            )
+            assertEquals(
+                "04days${separator}01hour${separator}02minutes${separator}03seconds",
+                time
+            )
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["∞", "inf"])
+        fun `should return infinity if the duration is infinite`(infinity: String) {
+            assertEquals(
+                "${infinity}d ${infinity}h ${infinity}m ${infinity}s",
+                Duration.INFINITE.shortFormat(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale,
+                    infiniteSymbol = infinity
+                )
+            )
+        }
+
+    }
+
+    @Nested
+    inner class TimeShortFormatFromTranslation {
+
+        private lateinit var translator: ResourceBundleTranslator
+
+        @BeforeTest
+        fun onBefore() {
+            translator = ResourceBundleTranslator(APIPlugin.BUNDLE_API)
+            translator.registerResourceBundleForSupportedLocales(APIPlugin.BUNDLE_API, ResourceBundle::getBundle)
+        }
+
+        @Test
+        fun `should throw an exception if the duration is negative`() {
+            assertThrows<IllegalArgumentException> {
+                (-1).seconds.shortFormat(
+                    translator,
+                    SupportedLanguage.ENGLISH.locale,
+                )
+            }
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = ["", " ", "-"])
+        fun `should use separator between the different parts`(separator: String) {
+            val time = (4.days + 1.hours + 2.minutes + 3.seconds).shortFormat(
                 translator,
                 SupportedLanguage.ENGLISH.locale,
                 separator = separator
@@ -164,7 +214,7 @@ class DurationExtTest {
         fun `should return infinity if the duration is infinite`(infinity: String) {
             assertEquals(
                 "${infinity}d ${infinity}h ${infinity}m ${infinity}s",
-                Duration.INFINITE.format(
+                Duration.INFINITE.shortFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale,
                     infiniteSymbol = infinity
@@ -175,7 +225,7 @@ class DurationExtTest {
         @Test
         fun `should return the correct format for 0`() {
             assertEquals(
-                "00s", Duration.ZERO.format(
+                "00s", Duration.ZERO.shortFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale
                 )
@@ -185,7 +235,7 @@ class DurationExtTest {
         @Test
         fun `should return the correct format for 1 minute`() {
             assertEquals(
-                "01m 00s", 1.minutes.format(
+                "01m 00s", 1.minutes.shortFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale
                 )
@@ -195,7 +245,7 @@ class DurationExtTest {
         @Test
         fun `should return the correct format for 1 hour`() {
             assertEquals(
-                "01h 00m 00s", 1.hours.format(
+                "01h 00m 00s", 1.hours.shortFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale
                 )
@@ -205,7 +255,7 @@ class DurationExtTest {
         @Test
         fun `should return the correct format for 1 hour 1 minute`() {
             assertEquals(
-                "01h 01m 00s", (1.hours + 1.minutes).format(
+                "01h 01m 00s", (1.hours + 1.minutes).shortFormat(
                     translator,
                     SupportedLanguage.ENGLISH.locale
                 )
@@ -215,7 +265,7 @@ class DurationExtTest {
         @Test
         fun `should use selected language`() {
             assertEquals(
-                "04天 12小时 38分 01秒", (4.days + 12.hours + 38.minutes + 1.seconds).format(
+                "04天 12小时 38分 01秒", (4.days + 12.hours + 38.minutes + 1.seconds).shortFormat(
                     translator,
                     SupportedLanguage.CHINESE.locale
                 )

@@ -61,9 +61,9 @@ public val Short.ticks: Duration get() = (this * MILLISECOND_PER_TICK).milliseco
  *
  * Example:
  * ```kotlin
- * (1.hours + 2.minutes + 3.seconds).format(..) // 01h 02m 03s
- * (2.minutes + 3.seconds).format(..) // 02m 03s
- * (3.seconds).format(..) // 03s
+ * (1.hours + 2.minutes + 3.seconds).longFormat(..) // 01hour 02minutes 03seconds
+ * (2.minutes + 3.seconds).longFormat(..) // 02minutes 03seconds
+ * (3.seconds).longFormat(..) // 03seconds
  * ```
  *
  * @receiver Duration The duration to format.
@@ -74,7 +74,46 @@ public val Short.ticks: Duration get() = (this * MILLISECOND_PER_TICK).milliseco
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
  */
-public fun Duration.format(
+public fun Duration.longFormat(
+    translator: Translator,
+    locale: Locale,
+    bundle: String = APIPlugin.BUNDLE_API,
+    separator: String = " ",
+    infiniteSymbol: String = "∞"
+): String {
+    return format(
+        formatSecond = { translator.get("time.second.long", locale, arrayOf(it), bundle) },
+        formatMinute = { translator.get("time.minute.long", locale, arrayOf(it), bundle) },
+        formatHour = { translator.get("time.hour.long", locale, arrayOf(it), bundle) },
+        formatDay = { translator.get("time.day.long", locale, arrayOf(it), bundle) },
+        separator = separator,
+        infiniteSymbol = infiniteSymbol
+    )
+}
+
+/**
+ * Format a [Duration] to a string.
+ *
+ * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
+ *
+ * Will use the translation key `time.hour.short`, `time.minute.short` and `time.second.short` to format the duration.
+ *
+ * Example:
+ * ```kotlin
+ * (1.hours + 2.minutes + 3.seconds).shortFormat(..) // 01h 02m 03s
+ * (2.minutes + 3.seconds).shortFormat(..) // 02m 03s
+ * (3.seconds).shortFormat(..) // 03s
+ * ```
+ *
+ * @receiver Duration The duration to format.
+ * @param translator Translator to use to get the translation.
+ * @param locale Locale to use to get the translation.
+ * @param bundle Bundle to use to get the translation.
+ * @param separator Use to separate the hour, minute and second
+ * @param infiniteSymbol Symbol to use when the duration is infinite.
+ * @return Formatted string.
+ */
+public fun Duration.shortFormat(
     translator: Translator,
     locale: Locale,
     bundle: String = APIPlugin.BUNDLE_API,
