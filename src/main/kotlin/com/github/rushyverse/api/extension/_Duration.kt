@@ -9,7 +9,6 @@ import kotlin.time.Duration.Companion.milliseconds
 /**
  * Data class that represents a time format.
  * It provides properties and companion functions to create time formats.
- * Each function is nullable, if it is null, the time part will not be formatted.
  *
  * @property second A function that formats the seconds.
  * @property minute A function that formats the minutes.
@@ -128,16 +127,6 @@ public val Short.ticks: Duration get() = (this * MILLISECOND_PER_TICK).milliseco
  * Format a [Duration] to a string.
  *
  * If the duration is infinite, the [infiniteSymbol] will be used, for example `∞h ∞m ∞s`.
- *
- * If the duration is not infinite, the [formatHour], [formatMinute]
- * and [formatSecond] functions will be used to format.
- *
- * If the duration contains only seconds, the [formatSecond] function will be used to format.
- *
- * If the duration contains at least minute, the [formatMinute] and [formatSecond] functions will be used to format.
- *
- * If the duration contains at least one hour, the [formatHour], [formatMinute]
- * and [formatSecond] functions will be used to format.
  *
  * Example:
  * ```kotlin
