@@ -495,6 +495,82 @@ class DurationExtTest {
         }
 
         @Test
+        fun `should only display day if other is null`() {
+            val nullFormat = FormatTime(
+                second = null,
+                minute = null,
+                hour = null,
+                day = { it + "d" },
+            )
+
+            assertEquals(
+                "10d",
+                (10.days).format(nullFormat)
+            )
+            assertEquals(
+                "∞d",
+                Duration.INFINITE.format(nullFormat)
+            )
+        }
+
+        @Test
+        fun `should only display hour if other is null`() {
+            val nullFormat = FormatTime(
+                second = null,
+                minute = null,
+                hour = { it + "h" },
+                day = null,
+            )
+
+            assertEquals(
+                "10h",
+                (10.hours).format(nullFormat)
+            )
+            assertEquals(
+                "∞h",
+                Duration.INFINITE.format(nullFormat)
+            )
+        }
+
+        @Test
+        fun `should only display minute if other is null`() {
+            val nullFormat = FormatTime(
+                second = null,
+                minute = { it + "m" },
+                hour = null,
+                day = null,
+            )
+
+            assertEquals(
+                "10m",
+                (10.minutes).format(nullFormat)
+            )
+            assertEquals(
+                "∞m",
+                Duration.INFINITE.format(nullFormat)
+            )
+        }
+
+        @Test
+        fun `should only display second if other is null`() {
+            val nullFormat = FormatTime(
+                second = { it + "s" },
+                minute = null,
+                hour = null,
+                day = null,
+            )
+
+            assertEquals(
+                "10s",
+                (10.seconds).format(nullFormat)
+            )
+            assertEquals(
+                "∞s",
+                Duration.INFINITE.format(nullFormat)
+            )
+        }
+
+        @Test
         fun `should throw an exception if the duration is negative`() {
             assertThrows<IllegalArgumentException> {
                 (-1).seconds.format(
