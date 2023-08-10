@@ -196,9 +196,13 @@ public fun Duration.format(
             }
         }
 
-        format.second?.let { formatter ->
+        val secondFormatter = format.second
+        if(secondFormatter != null) {
             val seconds = if(hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
-            append(prefixSingleDigitWithZero(formatter(seconds.toString())))
+            append(prefixSingleDigitWithZero(secondFormatter(seconds.toString())))
+        }
+        else {
+            deleteLast(separator.length)
         }
     }
 }
@@ -223,13 +227,7 @@ private fun prefixSingleDigitWithZero(string: String): String {
  * ```kotlin
  * formatInfinite(..) // ∞d ∞h ∞m ∞s
  * ```
- * @param formatSecond Function that received [infiniteSymbol] and return second string.
- * @param formatMinute Function that received [infiniteSymbol] and return minute string,
- * if null, minute will not be displayed.
- * @param formatHour Function that received [infiniteSymbol] and return hour string,
- * if null, hour will not be displayed.
- * @param formatDay Function that received [infiniteSymbol] and return day string,
- * if null, day will not be displayed.
+ * @param format The format to use.
  * @param separator Use to separate the hour, minute and second
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
@@ -243,6 +241,13 @@ public fun formatInfiniteTime(
         format.day?.let { append(it(infiniteSymbol)).append(separator) }
         format.hour?.let { append(it(infiniteSymbol)).append(separator) }
         format.minute?.let { append(it(infiniteSymbol)).append(separator) }
-        format.second?.let { append(it(infiniteSymbol)) }
+
+        val secondFormatter = format.second
+        if(secondFormatter != null) {
+            append(secondFormatter(infiniteSymbol))
+        }
+        else {
+            deleteLast(separator.length)
+        }
     }
 }

@@ -246,3 +246,20 @@ public fun String.asComponent(
     vararg tagResolver: TagResolver,
     miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT,
 ): Component = miniMessage.deserialize(this, *tagResolver)
+
+/**
+ * Deletes the last [size] characters from the `StringBuilder`.
+ *
+ * @receiver the [StringBuilder] to delete from.
+ * @param size the number of characters to delete.
+ * @return the modified [StringBuilder] after deleting the characters.
+ * @throws IllegalArgumentException if [StringBuilder] is negative.
+ */
+public fun StringBuilder.deleteLast(size: Int): StringBuilder {
+    return when {
+        size < 0 -> throw IllegalArgumentException("Size must be positive, but was $size")
+        size == 0 -> this
+        size >= length -> clear()
+        else -> delete(length - size, length)
+    }
+}
