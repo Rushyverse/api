@@ -506,7 +506,7 @@ class DurationExtTest {
 
             assertEquals(
                 "10d",
-                (10.days).format(nullFormat)
+                10.days.format(nullFormat)
             )
             assertEquals(
                 "∞d",
@@ -525,7 +525,7 @@ class DurationExtTest {
 
             assertEquals(
                 "10h",
-                (10.hours).format(nullFormat)
+                10.hours.format(nullFormat)
             )
             assertEquals(
                 "∞h",
@@ -544,7 +544,7 @@ class DurationExtTest {
 
             assertEquals(
                 "10m",
-                (10.minutes).format(nullFormat)
+                10.minutes.format(nullFormat)
             )
             assertEquals(
                 "∞m",
@@ -563,7 +563,7 @@ class DurationExtTest {
 
             assertEquals(
                 "10s",
-                (10.seconds).format(nullFormat)
+                10.seconds.format(nullFormat)
             )
             assertEquals(
                 "∞s",
