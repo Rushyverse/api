@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.APIPlugin
+import com.github.rushyverse.api.time.FormatTime
 import com.github.rushyverse.api.translation.ResourceBundleTranslator
 import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales

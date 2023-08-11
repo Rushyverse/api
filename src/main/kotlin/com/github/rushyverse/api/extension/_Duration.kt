@@ -1,74 +1,8 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.APIPlugin
-import com.github.rushyverse.api.translation.Translator
-import java.util.*
+import com.github.rushyverse.api.time.FormatTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-
-/**
- * Data class that represents a time format.
- * It provides properties and companion functions to create time formats.
- *
- * @property second A function that formats the seconds.
- * @property minute A function that formats the minutes.
- * @property hour A function that formats the hours.
- * @property day A function that formats the days.
- * @constructor Creates a new instance of FormatTime.
- */
-public data class FormatTime(
-    val second: FormatPartTime? = null,
-    val minute: FormatPartTime? = null,
-    val hour: FormatPartTime? = null,
-    val day: FormatPartTime? = null,
-) {
-
-    public companion object {
-
-        /**
-         * Constructs a FormatTime object for displaying time in long format.
-         * The long format is used for displaying time in a more readable way.
-         * @param translator The translator used for retrieving translations.
-         * @param locale The desired locale for the translations.
-         * @param bundle The name of the translation bundle to use.
-         * @return A FormatTime object configured for long format.
-         */
-        public fun long(
-            translator: Translator,
-            locale: Locale,
-            bundle: String = APIPlugin.BUNDLE_API,
-        ): FormatTime = FormatTime(
-            second = { translator.get("time.second.long", locale, arrayOf(it.toIntOrString()), bundle) },
-            minute = { translator.get("time.minute.long", locale, arrayOf(it.toIntOrString()), bundle) },
-            hour = { translator.get("time.hour.long", locale, arrayOf(it.toIntOrString()), bundle) },
-            day = { translator.get("time.day.long", locale, arrayOf(it.toIntOrString()), bundle) },
-        )
-
-        /**
-         * Constructs a FormatTime object for displaying time in short format.
-         * The short format is used for displaying time in a more compact way.
-         * @param translator The translator used for retrieving translations.
-         * @param locale The desired locale for the translations.
-         * @param bundle The name of the translation bundle to use.
-         * @return A FormatTime object configured for short format.
-         */
-        public fun short(
-            translator: Translator,
-            locale: Locale,
-            bundle: String = APIPlugin.BUNDLE_API,
-        ): FormatTime = FormatTime(
-            second = { translator.get("time.second.short", locale, arrayOf(it.toIntOrString()), bundle) },
-            minute = { translator.get("time.minute.short", locale, arrayOf(it.toIntOrString()), bundle) },
-            hour = { translator.get("time.hour.short", locale, arrayOf(it.toIntOrString()), bundle) },
-            day = { translator.get("time.day.short", locale, arrayOf(it.toIntOrString()), bundle) },
-        )
-    }
-}
-
-/**
- * Type of function used to format a [Duration] part to a string.
- */
-public typealias FormatPartTime = (String) -> String
 
 /**
  * Regex used to get the number in a string.
@@ -80,22 +14,22 @@ private val patternTranslationWithSingleDigitTime = Regex("^(?<text1>\\D*)(?<num
 /**
  * String used to represent an infinite duration.
  */
-private const val INFINITE_SYMBOL = "∞"
+public const val INFINITE_SYMBOL: String = "∞"
 
 /**
  * Number of hours in a day.
  */
-private const val HOUR_IN_DAY = 24
+public const val HOUR_IN_DAY: Int = 24
 
 /**
  * Number of minutes in an hour.
  */
-private const val MINUTE_IN_HOUR = 60
+public const val MINUTE_IN_HOUR: Int = 60
 
 /**
  * Number of seconds in a minute.
  */
-private const val SECOND_IN_MINUTE = 60
+public const val SECOND_IN_MINUTE: Int = 60
 
 /**
  * Number of milliseconds corresponding to one tick.
@@ -179,7 +113,7 @@ public fun Duration.format(
         }
 
         format.hour?.let { formatter ->
-            val hours = if(hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
+            val hours = if (hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
             if (hasValue || hours > 0) {
                 append(prefixSingleDigitWithZero(formatter(hours.toString())))
                 append(separator)
@@ -188,7 +122,7 @@ public fun Duration.format(
         }
 
         format.minute?.let { formatter ->
-            val minutes = if(hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
+            val minutes = if (hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
             if (hasValue || minutes > 0) {
                 append(prefixSingleDigitWithZero(formatter(minutes.toString())))
                 append(separator)
@@ -197,11 +131,10 @@ public fun Duration.format(
         }
 
         val secondFormatter = format.second
-        if(secondFormatter != null) {
-            val seconds = if(hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
+        if (secondFormatter != null) {
+            val seconds = if (hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
             append(prefixSingleDigitWithZero(secondFormatter(seconds.toString())))
-        }
-        else {
+        } else if (hasValue) {
             deleteLast(separator.length)
         }
     }
@@ -243,10 +176,9 @@ public fun formatInfiniteTime(
         format.minute?.let { append(it(infiniteSymbol)).append(separator) }
 
         val secondFormatter = format.second
-        if(secondFormatter != null) {
+        if (secondFormatter != null) {
             append(secondFormatter(infiniteSymbol))
-        }
-        else {
+        } else {
             deleteLast(separator.length)
         }
     }
