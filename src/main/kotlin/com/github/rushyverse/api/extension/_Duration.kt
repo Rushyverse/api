@@ -138,7 +138,7 @@ public fun Duration.format(
  * @receiver The StringBuilder to append the day to.
  */
 context(Duration, StringBuilder)
-private fun appendDayTime(format: FormatPartTime, separator: String): Boolean {
+private inline fun appendDayTime(format: FormatPartTime, separator: String): Boolean {
     val days = inWholeDays
     if (days > 0) {
         append(prefixSingleDigitWithZero(format(days.toString())))
@@ -160,7 +160,7 @@ private fun appendDayTime(format: FormatPartTime, separator: String): Boolean {
  * @receiver The StringBuilder to append the hour to.
  */
 context(Duration, StringBuilder)
-private fun appendHourTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
+private inline fun appendHourTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
     val hours = if (hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
     if (hasValue || hours > 0) {
         append(prefixSingleDigitWithZero(format(hours.toString())))
@@ -182,7 +182,7 @@ private fun appendHourTime(format: FormatPartTime, hasValue: Boolean, separator:
  * @receiver The StringBuilder to append the minute to.
  */
 context(Duration, StringBuilder)
-private fun appendMinuteTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
+private inline fun appendMinuteTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
     val minutes = if (hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
     if (hasValue || minutes > 0) {
         append(prefixSingleDigitWithZero(format(minutes.toString())))
@@ -203,7 +203,7 @@ private fun appendMinuteTime(format: FormatPartTime, hasValue: Boolean, separato
  * @receiver The StringBuilder to append the seconds to.
  */
 context(Duration, StringBuilder)
-private fun appendSecondTime(format: FormatPartTime, hasValue: Boolean) {
+private inline fun appendSecondTime(format: FormatPartTime, hasValue: Boolean) {
     val seconds = if (hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
     append(prefixSingleDigitWithZero(format(seconds.toString())))
 }
