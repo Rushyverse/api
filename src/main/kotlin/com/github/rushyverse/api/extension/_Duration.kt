@@ -1,5 +1,6 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.time.FormatPartTime
 import com.github.rushyverse.api.time.FormatTime
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
@@ -101,43 +102,110 @@ public fun Duration.format(
     }
 
     return buildString {
-        var hasValue = false
+        var hasValue = format.day?.let {
+            appendDayTime(it, separator)
+        } ?: false
 
-        format.day?.let { formatter ->
-            val days = inWholeDays
-            if (days > 0) {
-                append(prefixSingleDigitWithZero(formatter(days.toString())))
-                append(separator)
-                hasValue = true
-            }
-        }
+        hasValue = hasValue or (format.hour?.let {
+            appendHourTime(it, hasValue, separator)
+        } ?: false)
 
-        format.hour?.let { formatter ->
-            val hours = if (hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
-            if (hasValue || hours > 0) {
-                append(prefixSingleDigitWithZero(formatter(hours.toString())))
-                append(separator)
-                hasValue = true
-            }
-        }
+        hasValue = hasValue or (format.minute?.let {
+            appendMinuteTime(it, hasValue, separator)
+        } ?: false)
 
-        format.minute?.let { formatter ->
-            val minutes = if (hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
-            if (hasValue || minutes > 0) {
-                append(prefixSingleDigitWithZero(formatter(minutes.toString())))
-                append(separator)
-                hasValue = true
-            }
-        }
-
-        val secondFormatter = format.second
-        if (secondFormatter != null) {
-            val seconds = if (hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
-            append(prefixSingleDigitWithZero(secondFormatter(seconds.toString())))
+        val secondFormat = format.second
+        if (secondFormat != null) {
+            appendSecondTime(secondFormat, hasValue)
         } else if (hasValue) {
+            /**
+             * If there is another formatter (minute, hour, etc.) applied and there is no second formatter, we need
+             * to remove the last separator added because the other formatter doesn't know if there is a next formatter
+             * or not.
+             */
             deleteLast(separator.length)
         }
     }
+}
+
+/**
+ * Appends the day time to a StringBuilder object.
+ *
+ * @param format The function to format the day to a string representation.
+ * @param separator The separator to append between two time values.
+ *
+ * @receiver The Duration value representing the time.
+ * @receiver The StringBuilder to append the day to.
+ */
+context(Duration, StringBuilder)
+private fun appendDayTime(format: FormatPartTime, separator: String): Boolean {
+    val days = inWholeDays
+    if (days > 0) {
+        append(prefixSingleDigitWithZero(format(days.toString())))
+        append(separator)
+        return true
+    }
+    return false
+}
+
+/**
+ * Appends the hour time to a StringBuilder object.
+ *
+ * @param format The function to format the hour to a string representation.
+ * @param hasValue `true` if another time (day, etc.) has been appended to the StringBuilder before,
+ * `false` otherwise.
+ * @param separator The separator to append between two time values.
+ *
+ * @receiver The Duration value representing the time.
+ * @receiver The StringBuilder to append the hour to.
+ */
+context(Duration, StringBuilder)
+private fun appendHourTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
+    val hours = if (hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
+    if (hasValue || hours > 0) {
+        append(prefixSingleDigitWithZero(format(hours.toString())))
+        append(separator)
+        return true
+    }
+    return false
+}
+
+/**
+ * Appends the minute time to a StringBuilder object.
+ *
+ * @param format The function to format the minute to a string representation.
+ * @param hasValue `true` if another time (hour, etc.) has been appended to the StringBuilder before,
+ * `false` otherwise.
+ * @param separator The separator to append between two time values.
+ *
+ * @receiver The Duration value representing the time.
+ * @receiver The StringBuilder to append the minute to.
+ */
+context(Duration, StringBuilder)
+private fun appendMinuteTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
+    val minutes = if (hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
+    if (hasValue || minutes > 0) {
+        append(prefixSingleDigitWithZero(format(minutes.toString())))
+        append(separator)
+        return true
+    }
+    return false
+}
+
+/**
+ * Appends the second time to a StringBuilder object.
+ *
+ * @param format The function to format the seconds to a string representation.
+ * @param hasValue `true` if another time (minute, hour, etc.) has been appended to the StringBuilder before,
+ * `false` otherwise.
+ *
+ * @receiver The Duration value representing the time.
+ * @receiver The StringBuilder to append the seconds to.
+ */
+context(Duration, StringBuilder)
+private fun appendSecondTime(format: FormatPartTime, hasValue: Boolean) {
+    val seconds = if (hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
+    append(prefixSingleDigitWithZero(format(seconds.toString())))
 }
 
 /**

@@ -103,6 +103,10 @@ kotlin {
     jvmToolchain(javaVersionInt)
 
     sourceSets {
+        compilerOptions {
+            freeCompilerArgs = listOf("-Xcontext-receivers")
+        }
+
         all {
             languageSettings {
                 optIn("kotlin.RequiresOptIn")
