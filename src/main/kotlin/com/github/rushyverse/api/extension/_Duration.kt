@@ -1,21 +1,9 @@
 package com.github.rushyverse.api.extension
 
-import com.github.rushyverse.api.time.FormatPartTime
 import com.github.rushyverse.api.time.FormatTime
+import com.github.rushyverse.api.time.INFINITE_SYMBOL
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-
-/**
- * Regex used to get the number in a string.
- * Will create groups named `text1`, `number` and `text2` to get the text before and after the number.
- * The number found has to be a single digit.
- */
-private val patternTranslationWithSingleDigitTime = Regex("^(?<text1>\\D*)(?<number>\\d)(?<text2>\\D*)$")
-
-/**
- * String used to represent an infinite duration.
- */
-public const val INFINITE_SYMBOL: String = "∞"
 
 /**
  * Number of hours in a day.
@@ -97,127 +85,57 @@ public fun Duration.format(
     infiniteSymbol: String = INFINITE_SYMBOL
 ): String {
     require(!this.isNegative()) { "Number must be positive" }
-    if (isInfinite()) {
-        return formatInfiniteTime(format, separator, infiniteSymbol)
-    }
-
     return buildString {
-        var hasValue = format.day?.let {
-            appendDayTime(it, separator)
-        } ?: false
+        if (isInfinite()) {
+            formatInfiniteTime(format, separator, infiniteSymbol)
+        } else {
+            formatTime(format, this@format, separator)
+        }
 
-        hasValue = hasValue or (format.hour?.let {
-            appendHourTime(it, hasValue, separator)
-        } ?: false)
-
-        hasValue = hasValue or (format.minute?.let {
-            appendMinuteTime(it, hasValue, separator)
-        } ?: false)
-
-        val secondFormat = format.second
-        if (secondFormat != null) {
-            appendSecondTime(secondFormat, hasValue)
-        } else if (hasValue) {
-            /**
-             * If there is another formatter (minute, hour, etc.) applied and there is no second formatter, we need
-             * to remove the last separator added because the other formatter doesn't know if there is a next formatter
-             * or not.
-             */
+        if (endsWith(separator)) {
             deleteLast(separator.length)
         }
     }
 }
 
 /**
- * Appends the day time to a StringBuilder object.
+ * Format a [Duration] to a string.
  *
- * @param format The function to format the day to a string representation.
- * @param separator The separator to append between two time values.
- *
- * @receiver The Duration value representing the time.
- * @receiver The StringBuilder to append the day to.
+ * Example:
+ * ```kotlin
+ * formatTime(..) // 10d 01h 02m 03s
+ * ```
+ * @receiver The string builder to append the formatted string.
+ * @param format The format to use.
+ * @param separator Use to separate the hour, minute and second
+ * @return Formatted string.
  */
-context(Duration, StringBuilder)
-private inline fun appendDayTime(format: FormatPartTime, separator: String): Boolean {
-    val days = inWholeDays
-    if (days > 0) {
-        append(prefixSingleDigitWithZero(format(days.toString())))
+private fun StringBuilder.formatTime(
+    format: FormatTime,
+    duration: Duration,
+    separator: String = " "
+) {
+    var isFirstUnit = true
+    format.getDay(duration)?.let {
+        append(it)
         append(separator)
-        return true
+        isFirstUnit = false
     }
-    return false
-}
 
-/**
- * Appends the hour time to a StringBuilder object.
- *
- * @param format The function to format the hour to a string representation.
- * @param hasValue `true` if another time (day, etc.) has been appended to the StringBuilder before,
- * `false` otherwise.
- * @param separator The separator to append between two time values.
- *
- * @receiver The Duration value representing the time.
- * @receiver The StringBuilder to append the hour to.
- */
-context(Duration, StringBuilder)
-private inline fun appendHourTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
-    val hours = if (hasValue) inWholeHours % HOUR_IN_DAY else inWholeHours
-    if (hasValue || hours > 0) {
-        append(prefixSingleDigitWithZero(format(hours.toString())))
+    format.getHour(duration, isFirstUnit)?.let {
+        append(it)
         append(separator)
-        return true
+        isFirstUnit = false
     }
-    return false
-}
 
-/**
- * Appends the minute time to a StringBuilder object.
- *
- * @param format The function to format the minute to a string representation.
- * @param hasValue `true` if another time (hour, etc.) has been appended to the StringBuilder before,
- * `false` otherwise.
- * @param separator The separator to append between two time values.
- *
- * @receiver The Duration value representing the time.
- * @receiver The StringBuilder to append the minute to.
- */
-context(Duration, StringBuilder)
-private inline fun appendMinuteTime(format: FormatPartTime, hasValue: Boolean, separator: String): Boolean {
-    val minutes = if (hasValue) inWholeMinutes % MINUTE_IN_HOUR else inWholeMinutes
-    if (hasValue || minutes > 0) {
-        append(prefixSingleDigitWithZero(format(minutes.toString())))
+    format.getMinute(duration, isFirstUnit)?.let {
+        append(it)
         append(separator)
-        return true
+        isFirstUnit = false
     }
-    return false
-}
 
-/**
- * Appends the second time to a StringBuilder object.
- *
- * @param format The function to format the seconds to a string representation.
- * @param hasValue `true` if another time (minute, hour, etc.) has been appended to the StringBuilder before,
- * `false` otherwise.
- *
- * @receiver The Duration value representing the time.
- * @receiver The StringBuilder to append the seconds to.
- */
-context(Duration, StringBuilder)
-private inline fun appendSecondTime(format: FormatPartTime, hasValue: Boolean) {
-    val seconds = if (hasValue) inWholeSeconds % SECOND_IN_MINUTE else inWholeSeconds
-    append(prefixSingleDigitWithZero(format(seconds.toString())))
-}
-
-/**
- * Adds a prefix zero for single-digit numbers in a given string.
- *
- * @param string The input string.
- * @return The modified string with prefix zero for single-digit numbers.
- */
-private fun prefixSingleDigitWithZero(string: String): String {
-    return string.replace(patternTranslationWithSingleDigitTime) { matchResult ->
-        val (text1, number, text2) = matchResult.destructured
-        "${text1}0${number}${text2}"
+    format.getSecond(duration, isFirstUnit)?.let {
+        append(it)
     }
 }
 
@@ -226,28 +144,21 @@ private fun prefixSingleDigitWithZero(string: String): String {
  *
  * Example:
  * ```kotlin
- * formatInfinite(..) // ∞d ∞h ∞m ∞s
+ * formatInfiniteTime(..) // ∞d ∞h ∞m ∞s
  * ```
+ * @receiver The string builder to append the formatted string.
  * @param format The format to use.
  * @param separator Use to separate the hour, minute and second
  * @param infiniteSymbol Symbol to use when the duration is infinite.
  * @return Formatted string.
  */
-public fun formatInfiniteTime(
+private fun StringBuilder.formatInfiniteTime(
     format: FormatTime,
     separator: String = " ",
-    infiniteSymbol: String = "∞"
-): String {
-    return buildString {
-        format.day?.let { append(it(infiniteSymbol)).append(separator) }
-        format.hour?.let { append(it(infiniteSymbol)).append(separator) }
-        format.minute?.let { append(it(infiniteSymbol)).append(separator) }
-
-        val secondFormatter = format.second
-        if (secondFormatter != null) {
-            append(secondFormatter(infiniteSymbol))
-        } else {
-            deleteLast(separator.length)
-        }
-    }
+    infiniteSymbol: String = INFINITE_SYMBOL
+) {
+    format.day?.let { append(it(infiniteSymbol)).append(separator) }
+    format.hour?.let { append(it(infiniteSymbol)).append(separator) }
+    format.minute?.let { append(it(infiniteSymbol)).append(separator) }
+    format.second?.let { append(it(infiniteSymbol)) }
 }
