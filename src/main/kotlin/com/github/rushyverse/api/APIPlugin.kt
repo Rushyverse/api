@@ -1,8 +1,11 @@
 package com.github.rushyverse.api
 
+import com.github.rushyverse.api.extension.registerListener
 import com.github.rushyverse.api.game.SharedGameData
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
+import com.github.rushyverse.api.listener.api.LanguageListener
+import com.github.rushyverse.api.listener.api.ScoreboardListener
 import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import org.bukkit.Bukkit
@@ -35,6 +38,9 @@ public class APIPlugin : JavaPlugin() {
             single { LanguageManager() }
             single { SharedGameData() }
         }
+
+        registerListener { LanguageListener() }
+        registerListener { ScoreboardListener() }
     }
 
     override fun onDisable() {

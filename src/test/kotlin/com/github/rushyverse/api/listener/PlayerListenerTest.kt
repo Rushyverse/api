@@ -5,11 +5,7 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.player.exception.ClientAlreadyExistsException
-import com.github.rushyverse.api.player.language.LanguageManager
-import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.utils.randomString
-import io.mockk.coJustRun
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.CoroutineScope
@@ -33,10 +29,6 @@ class PlayerListenerTest : AbstractKoinTest() {
 
     private lateinit var listener: PlayerListener
 
-    private lateinit var scoreboardManagerMock: ScoreboardManager
-
-    private lateinit var languageManager: LanguageManager
-
     @BeforeTest
     override fun onBefore() {
         super.onBefore()
@@ -45,12 +37,6 @@ class PlayerListenerTest : AbstractKoinTest() {
             single { clientManager }
         }
 
-        scoreboardManagerMock = mockk()
-        languageManager = mockk()
-        loadApiTestModule {
-            single { scoreboardManagerMock }
-            single { languageManager }
-        }
         listener = PlayerListener(plugin)
     }
 
@@ -119,8 +105,6 @@ class PlayerListenerTest : AbstractKoinTest() {
         @Test
         fun `client linked to the player is removed and cancelled`() = runTest {
             val player = createPlayerMock()
-            coJustRun { scoreboardManagerMock.remove(any()) }
-            coJustRun { languageManager.remove(any()) }
 
             val client = Client(player.uniqueId, CoroutineScope(Dispatchers.Main + SupervisorJob()))
             clientManager.put(player, client)
@@ -129,8 +113,6 @@ class PlayerListenerTest : AbstractKoinTest() {
 
             assertEquals(0, clientManager.clients.size)
             assertFalse { client.isActive }
-            coVerify { scoreboardManagerMock.remove(player) }
-            coVerify { languageManager.remove(player) }
         }
 
         private fun createEvent(player: Player): PlayerQuitEvent {
