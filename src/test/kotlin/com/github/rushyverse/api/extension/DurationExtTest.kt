@@ -154,26 +154,26 @@ class DurationExtTest {
             @ParameterizedTest
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value second`(time: Int) {
-                assertEquals("0${time}seconde", time.seconds.format(FormatTime.long(translator, locale)))
+                assertEquals("0${time} seconde", time.seconds.format(FormatTime.long(translator, locale)))
             }
 
             @ParameterizedTest
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit`(time: Int) {
-                assertEquals("0${time}secondes", time.seconds.format(FormatTime.long(translator, locale)))
+                assertEquals("0${time} secondes", time.seconds.format(FormatTime.long(translator, locale)))
             }
 
             @ParameterizedTest
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit`(time: Int) {
-                assertEquals("${time}secondes", time.seconds.format(FormatTime.long(translator, locale)))
+                assertEquals("${time} secondes", time.seconds.format(FormatTime.long(translator, locale)))
             }
 
             @ParameterizedTest
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value minute`(time: Int) {
                 assertEquals(
-                    "0${time}minute 00seconde", time.minutes.format(
+                    "0${time} minute 00 seconde", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -183,7 +183,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit minute`(time: Int) {
                 assertEquals(
-                    "0${time}minutes 00seconde", time.minutes.format(
+                    "0${time} minutes 00 seconde", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -193,7 +193,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit minute`(time: Int) {
                 assertEquals(
-                    "${time}minutes 00seconde", time.minutes.format(
+                    "$time minutes 00 seconde", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -203,7 +203,7 @@ class DurationExtTest {
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value hour`(time: Int) {
                 assertEquals(
-                    "0${time}heure 00minute 00seconde", time.hours.format(
+                    "0${time} heure 00 minute 00 seconde", time.hours.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -213,7 +213,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit hour`(time: Int) {
                 assertEquals(
-                    "0${time}heures 00minute 00seconde",
+                    "0${time} heures 00 minute 00 seconde",
                     time.hours.format(FormatTime.long(translator, locale, acceptZero = true))
                 )
             }
@@ -222,7 +222,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit hour`(time: Int) {
                 assertEquals(
-                    "${time}heures 00minute 00seconde", time.hours.format(
+                    "$time heures 00 minute 00 seconde", time.hours.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -232,7 +232,7 @@ class DurationExtTest {
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value day`(time: Int) {
                 assertEquals(
-                    "0${time}jour 00heure 00minute 00seconde",
+                    "0${time} jour 00 heure 00 minute 00 seconde",
                     time.days.format(FormatTime.long(translator, locale, acceptZero = true))
                 )
             }
@@ -241,7 +241,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit day`(time: Int) {
                 assertEquals(
-                    "0${time}jours 00heure 00minute 00seconde",
+                    "0${time} jours 00 heure 00 minute 00 seconde",
                     time.days.format(FormatTime.long(translator, locale, acceptZero = true))
                 )
             }
@@ -250,7 +250,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit day`(time: Int) {
                 assertEquals(
-                    "${time}jours 00heure 00minute 00seconde",
+                    "$time jours 00 heure 00 minute 00 seconde",
                     time.days.format(FormatTime.long(translator, locale, acceptZero = true))
                 )
             }
@@ -258,7 +258,7 @@ class DurationExtTest {
             @Test
             fun `should return the correct format for multiple values`() {
                 assertEquals(
-                    "04jours 01heure 02minutes 03secondes",
+                    "04 jours 01 heure 02 minutes 03 secondes",
                     (4.days + 1.hours + 2.minutes + 3.seconds).format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
@@ -285,14 +285,14 @@ class DurationExtTest {
             @ParameterizedTest
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value second`(time: Int) {
-                assertEquals("0${time}second", time.seconds.format(FormatTime.long(translator, locale)))
+                assertEquals("0${time} second", time.seconds.format(FormatTime.long(translator, locale)))
             }
 
             @ParameterizedTest
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit`(time: Int) {
                 assertEquals(
-                    "0${time}seconds", time.seconds.format(
+                    "0${time} seconds", time.seconds.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -302,7 +302,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit`(time: Int) {
                 assertEquals(
-                    "${time}seconds", time.seconds.format(
+                    "${time} seconds", time.seconds.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -312,7 +312,7 @@ class DurationExtTest {
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value minute`(time: Int) {
                 assertEquals(
-                    "0${time}minute 00seconds", time.minutes.format(
+                    "0${time} minute 00 seconds", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -322,7 +322,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit minute`(time: Int) {
                 assertEquals(
-                    "0${time}minutes 00seconds", time.minutes.format(
+                    "0${time} minutes 00 seconds", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -332,7 +332,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit minute`(time: Int) {
                 assertEquals(
-                    "${time}minutes 00seconds", time.minutes.format(
+                    "$time minutes 00 seconds", time.minutes.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -342,7 +342,7 @@ class DurationExtTest {
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value hour`(time: Int) {
                 assertEquals(
-                    "0${time}hour 00minutes 00seconds", time.hours.format(
+                    "0${time} hour 00 minutes 00 seconds", time.hours.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -352,7 +352,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit hour`(time: Int) {
                 assertEquals(
-                    "0${time}hours 00minutes 00seconds", time.hours.format(
+                    "0${time} hours 00 minutes 00 seconds", time.hours.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -362,7 +362,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit hour`(time: Int) {
                 assertEquals(
-                    "${time}hours 00minutes 00seconds", time.hours.format(
+                    "$time hours 00 minutes 00 seconds", time.hours.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -372,7 +372,7 @@ class DurationExtTest {
             @ValueSource(ints = [1])
             fun `should return the correct format for singular value day`(time: Int) {
                 assertEquals(
-                    "0${time}day 00hours 00minutes 00seconds", time.days.format(
+                    "0${time} day 00 hours 00 minutes 00 seconds", time.days.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -382,7 +382,7 @@ class DurationExtTest {
             @ValueSource(ints = [2, 3, 4, 5, 6, 7, 8, 9])
             fun `should return the correct format for plural value with single digit day`(time: Int) {
                 assertEquals(
-                    "0${time}days 00hours 00minutes 00seconds", time.days.format(
+                    "0${time} days 00 hours 00 minutes 00 seconds", time.days.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -392,7 +392,7 @@ class DurationExtTest {
             @ValueSource(ints = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
             fun `should return the correct format for plural value with double digit day`(time: Int) {
                 assertEquals(
-                    "${time}days 00hours 00minutes 00seconds", time.days.format(
+                    "$time days 00 hours 00 minutes 00 seconds", time.days.format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
                 )
@@ -401,7 +401,7 @@ class DurationExtTest {
             @Test
             fun `should return the correct format for multiple values`() {
                 assertEquals(
-                    "04days 01hour 02minutes 03seconds",
+                    "04 days 01 hour 02 minutes 03 seconds",
                     (4.days + 1.hours + 2.minutes + 3.seconds).format(
                         FormatTime.long(translator, locale, acceptZero = true)
                     )
