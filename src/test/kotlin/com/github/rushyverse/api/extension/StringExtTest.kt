@@ -221,4 +221,40 @@ class StringExtTest {
         }
 
     }
+
+    @Nested
+    inner class StringBuilderDeleteLast {
+
+        @Test
+        fun `should throw if size is under 0`() {
+            assertThrows<IllegalArgumentException> {
+                StringBuilder().deleteLast(-1)
+            }
+        }
+
+        @Test
+        fun `should return the same string builder if size is 0`() {
+            val builder = StringBuilder().append(randomString())
+            builder.deleteLast(0) shouldBe builder
+        }
+
+
+        @Test
+        fun `should return the same string builder if size is bigger than length`() {
+            val string = randomString()
+            val builder = StringBuilder().append(string)
+            builder.deleteLast(string.length)
+            builder.length shouldBe 0
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        fun `should delete last char`(size: Int) {
+            val string = randomString()
+            val builder = StringBuilder().append(string)
+            builder.deleteLast(size)
+            builder.toString() shouldBe string.dropLast(size)
+        }
+
+    }
 }

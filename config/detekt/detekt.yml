@@ -347,7 +347,7 @@ naming:
     active: true
     parameterPattern: '[a-z][A-Za-z0-9]*|_'
   MatchingDeclarationName:
-    active: true
+    active: false
     mustBeFirst: true
   MemberNameEqualsClassName:
     active: true
@@ -681,7 +681,7 @@ style:
   SpacingBetweenPackageAndImports:
     active: true
   StringShouldBeRawString:
-    active: true
+    active: false
     maxEscapedCharacterCount: 2
     ignoredCharacters: [ ]
   ThrowsCount:

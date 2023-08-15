@@ -47,6 +47,14 @@ private const val UUID_HIGH_LOW_BITS: Int = 64
 public const val DEFAULT_LORE_LINE_LENGTH: Int = 30
 
 /**
+ * Converts the receiver String to Int if possible, otherwise returns the same String.
+ *
+ * @receiver The input String.
+ * @return The converted Int value if successful or the original String itself if not.
+ */
+public fun String.toIntOrString(): Any = toIntOrNull() ?: this
+
+/**
  * Wraps a given string with a color tag.
  * Example: "Hello".wrapColorWith("red") will return `<red>Hello</red>`.
  *
@@ -238,3 +246,20 @@ public fun String.asComponent(
     vararg tagResolver: TagResolver,
     miniMessage: MiniMessage = MINI_MESSAGE_NON_STRICT,
 ): Component = miniMessage.deserialize(this, *tagResolver)
+
+/**
+ * Deletes the last [size] characters from the `StringBuilder`.
+ *
+ * @receiver the [StringBuilder] to delete from.
+ * @param size the number of characters to delete.
+ * @return the modified [StringBuilder] after deleting the characters.
+ * @throws IllegalArgumentException if [StringBuilder] is negative.
+ */
+public fun StringBuilder.deleteLast(size: Int): StringBuilder {
+    return when {
+        size < 0 -> throw IllegalArgumentException("Size must be positive, but was $size")
+        size == 0 -> this
+        size >= length -> clear()
+        else -> delete(length - size, length)
+    }
+}
