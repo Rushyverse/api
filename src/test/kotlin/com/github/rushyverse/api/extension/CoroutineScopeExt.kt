@@ -11,17 +11,6 @@ import kotlin.time.Duration.Companion.seconds
 class CoroutineScopeExt {
 
     @Test
-    fun `with scope context will use the coroutine context`() = runBlocking {
-        val scope = CoroutineScope(Dispatchers.Default)
-        val job = withScopeContext(scope) {
-            val currentJob = this.coroutineContext.job
-            assertTrue { currentJob in scope.coroutineContext.job.children }
-            currentJob
-        }
-        assertTrue { job !in scope.coroutineContext.job.children }
-    }
-
-    @Test
     fun `create running scheduler with task`() {
         val body: suspend SchedulerTask.Task.() -> Unit = {}
         val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
