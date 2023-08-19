@@ -37,11 +37,10 @@ public open class EnumSerializer<T : Enum<T>>(
      * Finds the matching enum value for a given decoded string.
      * Will transform all spaces to underscore and uppercase all letters.
      * So for example, "foo bar" will be transformed to "FOO_BAR".
-     * If no matching enum value is found, an [SerializerException] will be thrown.
      *
      * @param decoded The decoded string used to search for the matching enum value.
      * @return The matching enum value.
-     * @throws IllegalArgumentException if no matching enum value is found.
+     * @throws SerializationException if no matching enum value is found.
      */
     public fun findEnumValue(decoded: String): T {
         val name = decoded.uppercase().replace(" ", "_")
