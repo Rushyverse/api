@@ -55,4 +55,4 @@ public fun Location.divide(value: Number): Location {
  * @param other The second position.
  * @return The center position between the two points.
  */
-public fun Location.centerRelative(other: Location): Location = add(other).divide(2)
+public fun Location.centerRelative(other: Location): Location = copy(yaw = 0f, pitch = 0f).add(other).divide(2)

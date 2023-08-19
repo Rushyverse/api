@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.world
 
 import com.github.rushyverse.api.extension.centerRelative
+import com.github.rushyverse.api.extension.copy
 import com.github.rushyverse.api.extension.minMaxOf
 import com.github.rushyverse.api.serializer.LocationSerializer
 import kotlinx.serialization.KSerializer
@@ -74,8 +75,8 @@ public class CubeArea(loc1: Location, loc2: Location) : Area {
         set(value) {
             // The new position becomes the center of the cube.
             val halfSize = max.centerRelative(min)
-            min = value.subtract(halfSize)
-            max = value.add(halfSize)
+            min = value.copy().subtract(halfSize)
+            max = value.copy().add(halfSize)
         }
 
     public var min: Location
