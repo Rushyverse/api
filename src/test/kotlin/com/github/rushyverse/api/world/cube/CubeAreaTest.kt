@@ -175,4 +175,93 @@ class CubeAreaTest {
         }
 
     }
+
+    @Nested
+    inner class SetPosition {
+
+        @Test
+        fun `should keep the same position if the new value is the same`() {
+            val area = CubeArea(Location(worldMock, 0.0, 0.0, 0.0), Location(worldMock, 10.5, 10.5, 10.5))
+            val oldMin = area.min
+            val oldMax = area.max
+
+            area.location = area.location
+            area.min shouldBe oldMin
+            area.max shouldBe oldMax
+        }
+
+        @Test
+        fun `should change the position if the new positive value is different`() {
+            val min = Location(worldMock, 0.0, 0.0, 0.0)
+            val max =  Location(worldMock, 10.0, 10.0, 10.0)
+            val area = CubeArea(min, max)
+            val newLocation =  Location(worldMock, 20.0, 20.0, 20.0)
+            area.location = newLocation
+
+            area.location shouldBe newLocation
+            area.min shouldBe Location(worldMock, 15.0, 15.0, 15.0)
+            area.max shouldBe Location(worldMock, 25.0, 25.0, 25.0)
+        }
+
+        @Test
+        fun `should change the position if the new negative value is different`() {
+            val min =  Location(worldMock, 0.0, 0.0, 0.0)
+            val max =  Location(worldMock, 10.0, 10.0, 10.0)
+            val area = CubeArea(min, max)
+            val newLocation =  Location(worldMock, -20.0, -20.0, -20.0)
+            area.location = newLocation
+            area.location shouldBe newLocation
+            area.min shouldBe Location(worldMock, -25.0, -25.0, -25.0)
+            area.max shouldBe Location(worldMock, -15.0, -15.0, -15.0)
+        }
+
+        @Test
+        fun `should change the position if the new mixed value is different`() {
+            val min =  Location(worldMock, 0.0, 0.0, 0.0)
+            val max =  Location(worldMock, 10.0, 10.0, 10.0)
+            val area = CubeArea(min, max)
+            val newLocation = Location(worldMock, 20.0, -20.0, -20.0)
+            area.location = newLocation
+            area.location shouldBe newLocation
+            area.min shouldBe Location(worldMock, 15.0, -25.0, -25.0)
+            area.max shouldBe Location(worldMock, 25.0, -15.0, -15.0)
+        }
+
+    }
+
+    @Nested
+    inner class GetPosition {
+
+        @Test
+        fun `should return the center of the area with positive values`() {
+            val min = Location(worldMock, 10.0, 10.0, 10.0)
+            val max = Location(worldMock, 20.0, 20.0, 20.0)
+            val area = CubeArea(min, max)
+            area.location shouldBe Location(worldMock, 15.0, 15.0, 15.0)
+        }
+
+        @Test
+        fun `should return the center of the area with negative values`() {
+            val min = Location(worldMock, -20.0, -20.0, -20.0)
+            val max = Location(worldMock, -10.0, -10.0, -10.0)
+            val area = CubeArea(min, max)
+            area.location shouldBe Location(worldMock, -15.0, -15.0, -15.0)
+        }
+
+        @Test
+        fun `should return the center of the area with mixed values`() {
+            val min = Location(worldMock, -20.0, 10.0, -20.0)
+            val max = Location(worldMock, -10.0, 20.0, -10.0)
+            val area = CubeArea(min, max)
+            area.location shouldBe Location(worldMock, -15.0, 15.0, -15.0)
+        }
+
+        @Test
+        fun `should return the center of the area with decimal value`() {
+            val min = Location(worldMock, 10.6, 10.8, 10.4)
+            val max = Location(worldMock, 10.0, 10.0, 20.0)
+            val area = CubeArea(min, max)
+            area.location shouldBe Location(worldMock, 10.3, 10.4, 15.2)
+        }
+    }
 }

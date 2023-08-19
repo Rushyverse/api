@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.utils.randomString
+import io.kotest.matchers.shouldBe
 import io.mockk.mockk
 import org.bukkit.Location
 import org.bukkit.World
@@ -92,6 +93,32 @@ class LocationExtTest {
             val yaw = loc.yaw + 40
             val pitch = loc.pitch + 50
             assertEquals(Location(world, x, y, z, yaw, pitch), loc.copy(world, x, y, z, yaw, pitch))
+        }
+    }
+
+    @Nested
+    inner class CenterRelative {
+
+        @Test
+        fun `should return the center position between two points at 0 0 0`() {
+            loc = Location(loc.world, 0.0, 0.0, 0.0)
+            val other = Location(loc.world, 0.0, 0.0, 0.0)
+            val expected = Location(loc.world, 0.0, 0.0, 0.0)
+            loc.centerRelative(other) shouldBe expected
+
+            other shouldBe Location(loc.world, 0.0, 0.0, 0.0)
+            loc shouldBe Location(loc.world, 0.0, 0.0, 0.0)
+        }
+
+        @Test
+        fun `should return the center position between two points`() {
+            val previousLoc = loc.copy()
+            val other = Location(loc.world, 10.0, 10.0, 10.0)
+            val expected = Location(loc.world, 5.0, 5.5, 6.0)
+            loc.centerRelative(other) shouldBe expected
+
+            other shouldBe Location(loc.world, 10.0, 10.0, 10.0)
+            loc shouldBe previousLoc
         }
     }
 }
