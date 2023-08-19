@@ -1,11 +1,7 @@
 package com.github.rushyverse.api.extension
 
 import com.github.rushyverse.api.schedule.SchedulerTask
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration
 
 /**
