@@ -135,10 +135,6 @@ tasks {
         useJUnitPlatform()
     }
 
-    build {
-        dependsOn(shadowJar)
-    }
-
     clean {
         delete(dokkaOutputDir)
     }
@@ -147,10 +143,6 @@ tasks {
         // CompileJava should be executed to build library in Jitpack
         dependsOn(deleteDokkaOutputDir, compileJava.get())
         outputDirectory.set(file(dokkaOutputDir))
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
     }
 
     jacocoTestReport {
@@ -168,28 +160,33 @@ val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
+    group = "build"
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {
+    group = "documentation"
+    dependsOn(tasks.dokkaHtml)
     dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
     archiveClassifier.set("javadoc")
     from(dokkaOutputDir)
 }
 
 publishing {
+    val projectName = project.name
+
     publications {
-        val projectOrganizationPath = "Rushyverse/${project.name}"
+        val projectOrganizationPath = "Rushyverse/$projectName"
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
-        create<MavenPublication>(project.name) {
-            shadow.component(this)
+        create<MavenPublication>(projectName) {
+            from(components["kotlin"])
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
             pom {
-                name.set(project.name)
+                name.set(projectName)
                 description.set(project.description)
                 url.set(projectGitUrl)
 
