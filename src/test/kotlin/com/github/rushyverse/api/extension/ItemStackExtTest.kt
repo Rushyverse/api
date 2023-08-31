@@ -1,361 +1,326 @@
 package com.github.rushyverse.api.extension
 
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.minestom.server.item.ItemStack
-import net.minestom.server.item.Material
+import com.github.rushyverse.api.utils.randomString
+import io.mockk.every
+import io.mockk.mockk
+import org.bukkit.Material
+import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
-import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ItemStackExtTest {
 
+    @Test
+    fun `get material property returns the value of type property`() {
+        val item = item {}
+        assertEquals(item.type, item.material)
+        item.type = Material.IRON_SHOVEL
+        assertEquals(item.type, item.material)
+    }
+
+    @Test
+    fun `set material property define the value of type property`() {
+        val item = item {}
+        assertEquals(item.type, item.material)
+        item.material = Material.IRON_SHOVEL
+        assertEquals(item.type, item.material)
+    }
+
+    @Test
+    fun `item function builder create init item stack with air material`() {
+        val item = item {}
+        assertEquals(Material.AIR, item.type)
+    }
+
+    @Test
+    fun `item function builder set the properties of item stack`() {
+        val expectedType = Material.STICK
+        val expectedAmount = 42
+
+        val item = item {
+            type = expectedType
+            amount = expectedAmount
+        }
+
+        assertEquals(expectedType, item.type)
+        assertEquals(expectedAmount, item.amount)
+    }
+
+    @Test
+    fun `ItemStack function builder create init item stack with air material`() {
+        val item = ItemStack {}
+        assertEquals(Material.AIR, item.type)
+    }
+
+    @Test
+    fun `ItemStack function builder set the properties of item stack`() {
+        val expectedType = Material.STICK
+        val expectedAmount = 42
+
+        val item = ItemStack {
+            type = expectedType
+            amount = expectedAmount
+        }
+
+        assertEquals(expectedType, item.type)
+        assertEquals(expectedAmount, item.amount)
+    }
+
+    @Test
+    fun `ItemStack function builder set the material by the parameter`() {
+        val expectedType = Material.STICK
+        val item = ItemStack(expectedType) { }
+        assertEquals(expectedType, item.type)
+    }
+
+    @Test
+    fun `ItemStack function builder set the properties by lambda`() {
+        val expectedAmount = 42
+        val item = ItemStack(Material.AIR) {
+            amount = expectedAmount
+        }
+        assertEquals(expectedAmount, item.amount)
+    }
+
     @Nested
-    inner class Builder {
+    inner class FilterNotAir {
+
+        @Test
+        fun `array of items`() {
+            val item1 = mockItem(Material.DIAMOND)
+            val item2 = mockItem(Material.AMETHYST_BLOCK)
+            assertEquals(
+                listOf(item1, item2), arrayOf(
+                    item1,
+                    mockItem(Material.AIR),
+                    item2,
+                    mockItem(Material.AIR)
+                ).filterNotAir()
+            )
+        }
+
+        @Test
+        fun `list of items`() {
+            val item1 = mockItem(Material.DIAMOND_HELMET)
+            val item2 = mockItem(Material.ATTACHED_PUMPKIN_STEM)
+            assertEquals(
+                listOf(item1, item2), listOf(
+                    item1,
+                    mockItem(Material.AIR),
+                    item2,
+                    mockItem(Material.AIR)
+                ).filterNotAir()
+            )
+        }
+
+        @Test
+        fun `sequence of items`() {
+            val item1 = mockItem(Material.BEDROCK)
+            val item2 = mockItem(Material.ACACIA_LEAVES)
+            assertEquals(
+                listOf(item1, item2), sequenceOf(
+                    item1,
+                    mockItem(Material.AIR),
+                    item2,
+                    mockItem(Material.AIR)
+                ).filterNotAir().toList()
+            )
+        }
+    }
+
+    @Nested
+    inner class ItemIndexed {
 
         @Nested
-        inner class FormattedLore {
+        inner class ArrayNotNullItems {
 
-            private lateinit var builder: ItemStack.Builder
-
-            @BeforeTest
-            fun onBefore() {
-                builder = ItemStack.builder(Material.DIAMOND_SWORD)
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptyArray<ItemStack>().itemsIndexed())
             }
 
             @Test
-            fun `should return an empty sequence if the string is empty`() {
-                val expected = ItemStack.builder(Material.DIAMOND_SWORD).lore().build()
-                assertEquals(expected, builder.formattedLore("").build())
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.ACACIA_DOOR)
+                val item2 = mockItem(Material.ACTIVATOR_RAIL)
+                val array = arrayOf(
+                    mockItem(Material.AIR),
+                    item1,
+                    mockItem(Material.AIR),
+                    mockItem(Material.AIR),
+                    item2
+                )
+                val map = array.itemsIndexed()
+                val expectedMap = mapOf(
+                    1 to item1,
+                    4 to item2
+                )
+
+                assertEquals(expectedMap, map)
+            }
+        }
+
+        @Nested
+        inner class ArrayNullableItems {
+
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptyArray<ItemStack?>().itemsIndexed())
             }
 
             @Test
-            fun `should cut sentence without space`() {
-                val expected = ItemStack.builder(Material.DIAMOND_SWORD).lore(
-                    Component.text("0123-").color(NamedTextColor.GRAY),
-                    Component.text("4567-").color(NamedTextColor.GRAY),
-                    Component.text("89ab-").color(NamedTextColor.GRAY),
-                    Component.text("cdef").color(NamedTextColor.GRAY)
-                ).build()
-                assertEquals(
-                    expected,
-                    builder.formattedLore("0123456789abcdef", 5).build()
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.ACACIA_DOOR)
+                val item2 = mockItem(Material.ACTIVATOR_RAIL)
+                val array = arrayOfNulls<ItemStack>(4)
+                array[0] = null
+                array[1] = item1
+                array[2] = item2
+                array[3] = mockItem(Material.AIR)
+
+                val map = array.itemsIndexed()
+                val expectedMap = mapOf(
+                    1 to item1,
+                    2 to item2
                 )
+
+                assertEquals(expectedMap, map)
+            }
+        }
+
+        @Nested
+        inner class SequenceNotNullItems {
+
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptySequence<ItemStack>().itemsIndexed())
             }
 
             @Test
-            fun `should create only one component if line length is equals to the string size`() {
-                val sentence = "Hello World"
-                val expected = ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(Component.text(sentence).color(NamedTextColor.GRAY))
-                    .build()
-                assertEquals(expected, builder.formattedLore(sentence).build())
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.STICK)
+                val item2 = mockItem(Material.AMETHYST_BLOCK)
+
+                val sequence = sequenceOf(
+                    item1,
+                    mockItem(Material.AIR),
+                    mockItem(Material.AIR),
+                    item2,
+                    mockItem(Material.AIR)
+                )
+
+                val map = sequence.itemsIndexed()
+                val expectedMap = mapOf(
+                    0 to item1,
+                    3 to item2
+                )
+
+                assertEquals(expectedMap, map)
+            }
+        }
+
+        @Nested
+        inner class SequenceNullableItems {
+
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptySequence<ItemStack?>().itemsIndexed())
             }
 
             @Test
-            fun `should create multiple components by cut on the line length char adding a '-'`() {
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Hel-").color(NamedTextColor.GRAY),
-                            Component.text("lo").color(NamedTextColor.GRAY),
-                            Component.text("Wor-").color(NamedTextColor.GRAY),
-                            Component.text("ld").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Hello World", 4).build()
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.STICK)
+                val item2 = mockItem(Material.AMETHYST_BLOCK)
+
+                val sequence = sequenceOf(
+                    item1,
+                    null,
+                    mockItem(Material.AIR),
+                    item2,
+                    null
                 )
 
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("He-").color(NamedTextColor.GRAY),
-                            Component.text("llo").color(NamedTextColor.GRAY),
-                            Component.text("Wo-").color(NamedTextColor.GRAY),
-                            Component.text("rld").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Hello World", 3).build()
+                val map = sequence.itemsIndexed()
+                val expectedMap = mapOf(
+                    0 to item1,
+                    3 to item2
                 )
+
+                assertEquals(expectedMap, map)
+            }
+        }
+
+        @Nested
+        inner class IterableNotNullItems {
+
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptyList<ItemStack>().itemsIndexed())
             }
 
             @Test
-            fun `should create multiple element by cut on the previous space char`() {
-                val sentence = "Hello World"
-                // Indexes of "W" to "d" chars
-                for (i in 6..10) {
-                    assertEquals(
-                        ItemStack.builder(Material.DIAMOND_SWORD)
-                            .lore(
-                                Component.text("Hello").color(NamedTextColor.GRAY),
-                                Component.text("World").color(NamedTextColor.GRAY)
-                            )
-                            .build(),
-                        builder.formattedLore(sentence, i).build()
-                    )
-                }
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.BONE)
+                val item2 = mockItem(Material.IRON_SWORD)
+
+                val list = listOf(
+                    item1,
+                    mockItem(Material.AIR),
+                    mockItem(Material.AIR),
+                    item1,
+                    item2,
+                    mockItem(Material.AIR)
+                )
+
+                val map = list.itemsIndexed()
+                val expectedMap = mapOf(
+                    0 to item1,
+                    3 to item1,
+                    4 to item2
+                )
+
+                assertEquals(expectedMap, map)
+            }
+        }
+
+        @Nested
+        inner class IterableNullableItems {
+
+            @Test
+            fun `empty array returns empty map`() {
+                assertEquals(emptyMap(), emptyList<ItemStack?>().itemsIndexed())
             }
 
             @Test
-            fun `should create multiple components with long sentence`() {
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("This is a tool").color(NamedTextColor.GRAY),
-                            Component.text("to create a").color(NamedTextColor.GRAY),
-                            Component.text("game").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("This is a tool to create a game", 15).build()
+            fun `items not air is linked to the index`() {
+                val item1 = mockItem(Material.BONE)
+                val item2 = mockItem(Material.IRON_SWORD)
+
+                val list = listOf(
+                    item1,
+                    null,
+                    mockItem(Material.AIR),
+                    item1,
+                    item2,
+                    mockItem(Material.AIR)
                 )
 
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("This is a tool").color(NamedTextColor.GRAY),
-                            Component.text("to create a").color(NamedTextColor.GRAY),
-                            Component.text("game0123456789-").color(NamedTextColor.GRAY),
-                            Component.text("0123456789").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("This is a tool to create a game01234567890123456789", 15).build()
+                val map = list.itemsIndexed()
+                val expectedMap = mapOf(
+                    0 to item1,
+                    3 to item1,
+                    4 to item2
                 )
 
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                            Component.text("vos amis à travers le serveur").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Ajoutez, chattez et rejoignez vos amis à travers le serveur", 30).build()
-                )
-
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                            Component.text("v").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Ajoutez, chattez et rejoignez v", 30).build()
-                )
-
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                            Component.text(" ").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Ajoutez, chattez et rejoignez  ", 30).build()
-                )
-
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Add, chat and join your friends through").color(NamedTextColor.GRAY),
-                            Component.text("the server").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    builder.formattedLore("Add, chat and join your friends through the server", 40).build()
-                )
+                assertEquals(expectedMap, map)
             }
-
-            @Test
-            fun `should apply transformation for created components`() {
-                val expected = ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Hello").color(NamedTextColor.RED),
-                        Component.text("World").color(NamedTextColor.RED)
-                    )
-                    .build()
-                assertEquals(
-                    expected,
-                    builder.formattedLore("Hello World", 5) { color(NamedTextColor.RED) }.build()
-                )
-            }
-
         }
     }
 
-    @Nested
-    inner class FormattedLore {
-
-        private lateinit var item: ItemStack
-
-        @BeforeTest
-        fun onBefore() {
-            item = ItemStack.of(Material.DIAMOND_SWORD)
+    private fun mockItem(material: Material): ItemStack {
+        return mockk<ItemStack>(randomString()).apply {
+            every { type } returns material
         }
-
-        @Test
-        fun `should return an empty sequence if the string is empty`() {
-            val expected = ItemStack.builder(Material.DIAMOND_SWORD).lore().build()
-            assertEquals(expected, item.withFormattedLore(""))
-        }
-
-        @Test
-        fun `should cut sentence without space`() {
-            val expected = ItemStack.builder(Material.DIAMOND_SWORD).lore(
-                Component.text("0123-").color(NamedTextColor.GRAY),
-                Component.text("4567-").color(NamedTextColor.GRAY),
-                Component.text("89ab-").color(NamedTextColor.GRAY),
-                Component.text("cdef").color(NamedTextColor.GRAY)
-            ).build()
-            assertEquals(
-                expected,
-                item.withFormattedLore("0123456789abcdef", 5)
-            )
-        }
-
-        @Test
-        fun `should create only one component if line length is equals to the string size`() {
-            val sentence = "Hello World"
-            val expected = ItemStack.builder(Material.DIAMOND_SWORD)
-                .lore(Component.text(sentence).color(NamedTextColor.GRAY))
-                .build()
-            assertEquals(expected, item.withFormattedLore(sentence))
-        }
-
-        @Test
-        fun `should create multiple components by cut on the line length char adding a '-'`() {
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Hel-").color(NamedTextColor.GRAY),
-                        Component.text("lo").color(NamedTextColor.GRAY),
-                        Component.text("Wor-").color(NamedTextColor.GRAY),
-                        Component.text("ld").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Hello World", 4)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("He-").color(NamedTextColor.GRAY),
-                        Component.text("llo").color(NamedTextColor.GRAY),
-                        Component.text("Wo-").color(NamedTextColor.GRAY),
-                        Component.text("rld").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Hello World", 3)
-            )
-        }
-
-        @Test
-        fun `should create multiple element by cut on the previous space char`() {
-            val sentence = "Hello World"
-            // Indexes of "W" to "d" chars
-            for (i in 6..10) {
-                assertEquals(
-                    ItemStack.builder(Material.DIAMOND_SWORD)
-                        .lore(
-                            Component.text("Hello").color(NamedTextColor.GRAY),
-                            Component.text("World").color(NamedTextColor.GRAY)
-                        )
-                        .build(),
-                    item.withFormattedLore(sentence, i)
-                )
-            }
-        }
-
-        @Test
-        fun `should create multiple components with long sentence`() {
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("This is a tool").color(NamedTextColor.GRAY),
-                        Component.text("to create a").color(NamedTextColor.GRAY),
-                        Component.text("game").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("This is a tool to create a game", 15)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("This is a tool").color(NamedTextColor.GRAY),
-                        Component.text("to create a").color(NamedTextColor.GRAY),
-                        Component.text("game0123456789-").color(NamedTextColor.GRAY),
-                        Component.text("0123456789").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("This is a tool to create a game01234567890123456789", 15)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                        Component.text("vos amis à travers le serveur").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Ajoutez, chattez et rejoignez vos amis à travers le serveur", 30)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                        Component.text("v").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Ajoutez, chattez et rejoignez v", 30)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Ajoutez, chattez et rejoignez").color(NamedTextColor.GRAY),
-                        Component.text(" ").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Ajoutez, chattez et rejoignez  ", 30)
-            )
-
-            assertEquals(
-                ItemStack.builder(Material.DIAMOND_SWORD)
-                    .lore(
-                        Component.text("Add, chat and join your friends through").color(NamedTextColor.GRAY),
-                        Component.text("the server").color(NamedTextColor.GRAY)
-                    )
-                    .build(),
-                item.withFormattedLore("Add, chat and join your friends through the server", 40)
-            )
-        }
-
-        @Test
-        fun `should apply transformation for created components`() {
-            val expected = ItemStack.builder(Material.DIAMOND_SWORD)
-                .lore(
-                    Component.text("Hello").color(NamedTextColor.RED),
-                    Component.text("World").color(NamedTextColor.RED)
-                )
-                .build()
-            assertEquals(
-                expected,
-                item.withFormattedLore("Hello World", 5) { color(NamedTextColor.RED) }
-            )
-        }
-
-    }
-
-    @Nested
-    inner class WithLore {
-
-        @Test
-        fun `should set a single lore`() {
-            val item = ItemStack.of(Material.STONE).withLore(Component.text("Hello"))
-            assertEquals(
-                ItemStack.builder(Material.STONE).lore(Component.text("Hello")).build(),
-                item
-            )
-        }
-
     }
 }

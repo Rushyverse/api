@@ -1,0 +1,7 @@
+name: paper-api
+version: 1.0
+author: Distractic
+api-version: 1.19
+main: com.github.rushyverse.api.APIPlugin
+depend:
+  - CommandAPI

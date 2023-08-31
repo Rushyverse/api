@@ -1,25 +1,40 @@
 package com.github.rushyverse.api.utils
 
-import net.minestom.server.coordinate.Pos
-import java.net.ServerSocket
-import java.util.*
+import org.bukkit.Location
+import org.bukkit.World
 import kotlin.random.Random
 
-private val stringGenerator = generateSequence { UUID.randomUUID().toString() }.distinct().iterator()
+fun randomString(
+    allowedChar: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9'),
+    size: Int = 50
+): String {
+    return List(size) { allowedChar.random() }.joinToString("")
+}
 
-fun randomString() = stringGenerator.next()
+fun randomBoolean() = Random.nextBoolean()
 
-private val intGenerator = generateSequence { Random.nextInt() }.distinct().iterator()
+fun randomInt(from: Int = Int.MIN_VALUE, until: Int = Int.MAX_VALUE) = Random.nextInt(from, until)
 
-fun randomInt() = intGenerator.next()
+fun randomLong(from: Long = Long.MIN_VALUE, until: Long = Long.MAX_VALUE) = Random.nextLong(from, until)
 
-private val posGenerator =
-    generateSequence { Pos(Random.nextDouble(), Random.nextDouble(), Random.nextDouble()) }.distinct().iterator()
+fun randomFloat(from: Float = Float.MIN_VALUE, until: Float = Float.MAX_VALUE) =
+    randomDouble(from.toDouble(), until.toDouble()).toFloat()
 
-fun randomPos() = posGenerator.next()
+fun randomDouble(from: Double = Double.MIN_VALUE, until: Double = Double.MAX_VALUE) = Random.nextDouble(from, until)
 
-fun getAvailablePort(): Int {
-    return ServerSocket(0).use {
-        it.localPort
-    }
+inline fun <reified T : Enum<T>> randomEnum(): T {
+    return enumValues<T>().random()
+}
+
+const val LIMIT_RANDOM_COORDINATE = 1000.0
+
+fun randomLocation(world: World? = null): Location {
+    return Location(
+        world,
+        Random.nextDouble(LIMIT_RANDOM_COORDINATE),
+        Random.nextDouble(LIMIT_RANDOM_COORDINATE),
+        Random.nextDouble(LIMIT_RANDOM_COORDINATE),
+        Random.nextDouble(LIMIT_RANDOM_COORDINATE).toFloat(),
+        Random.nextDouble(LIMIT_RANDOM_COORDINATE).toFloat()
+    )
 }

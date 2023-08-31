@@ -1,340 +1,259 @@
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.utils.randomString
+import io.kotest.matchers.shouldBe
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import java.util.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class StringExtTest {
 
-    @Test
-    fun `default lore line length`() {
-        assertEquals(30, DEFAULT_LORE_LINE_LENGTH)
+    @Nested
+    @DisplayName("Base64")
+    inner class Base64Test {
+
+        @Test
+        fun `encode string`() {
+            assertEquals("SGVsbG8gd29ybGQ=", "Hello world".encodeBase64ToString())
+            assertEquals("w6LDr8O5LSo=", "âïù-*".encodeBase64ToString())
+            assertEquals("2LXYqNin2K0g2KfZhNiu2YrYsQ==", "صباح الخير".encodeBase64ToString())
+            assertEquals("44GT44KT44Gr44Gh44Gv", "こんにちは".encodeBase64ToString())
+        }
+
+        @Test
+        fun `decode string`() {
+            assertEquals("Hello world", "SGVsbG8gd29ybGQ=".decodeBase64ToString())
+            assertEquals("âïù-*", "w6LDr8O5LSo=".decodeBase64ToString())
+            assertEquals("صباح الخير", "2LXYqNin2K0g2KfZhNiu2YrYsQ==".decodeBase64ToString())
+            assertEquals("こんにちは", "44GT44KT44Gr44Gh44Gv".decodeBase64ToString())
+        }
     }
 
     @Nested
-    inner class SequenceToLore {
+    @DisplayName("Conversion UUID")
+    inner class ConversionUUID {
 
-        @Test
-        fun `should return empty component if sequence is empty`() {
-            assertEquals(emptyList(), emptySequence<String>().toLore())
+        @Nested
+        inner class Strict {
+
+            @Test
+            fun `can convert if the string is valid`() {
+                val uuid = UUID.randomUUID()
+                val string = uuid.toString()
+                assertEquals(uuid, string.toUUIDStrict())
+            }
+
+            @ParameterizedTest
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
+            fun `throws exception if invalid`(value: String) {
+                assertThrows<IllegalArgumentException> {
+                    value.toUUIDStrict()
+                }
+            }
+
+            @Test
+            fun `non null value when value can be converted`() {
+                val uuid = UUID.randomUUID()
+                val string = uuid.toString()
+                assertEquals(uuid, string.toUUIDStrictOrNull())
+            }
+
+            @ParameterizedTest
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
+            fun `nulls if invalid`(value: String) {
+                assertNull(value.toUUIDStrictOrNull())
+            }
+
         }
 
-        @Test
-        fun `should set color gray by default`() {
-            val components = sequenceOf("a", "b", "c").toLore()
-            assertEquals(
-                listOf(
-                    Component.text().content("a").color(NamedTextColor.GRAY).build(),
-                    Component.text().content("b").color(NamedTextColor.GRAY).build(),
-                    Component.text().content("c").color(NamedTextColor.GRAY).build()
-                ),
-                components
-            )
-        }
+        @Nested
+        inner class NoStrict {
 
-        @Test
-        fun `should return component with all strings`() {
-            val components = sequenceOf("Hello", "World").toLore() {}
-            assertEquals(
-                listOf(
-                    Component.text().content("Hello").build(),
-                    Component.text().content("World").build()
-                ),
-                components
+            @ParameterizedTest
+            @ValueSource(
+                strings = [
+                    "c7e4ca3236d942408e53de44bef8eeeb",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"
+                ]
             )
-        }
+            fun `can convert if the string is valid`(value: String) {
+                val uuid = UUID.fromString("c7e4ca32-36d9-4240-8e53-de44bef8eeeb")
+                assertEquals(uuid, value.toUUID())
+            }
 
-        @Test
-        fun `should return component with all strings and transform`() {
-            val components = sequenceOf("Hello", "World").toLore { color(NamedTextColor.RED) }
-            assertEquals(
-                listOf(
-                    Component.text().content("Hello").color(NamedTextColor.RED).build(),
-                    Component.text().content("World").color(NamedTextColor.RED).build()
-                ),
-                components
+            @ParameterizedTest
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeba",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
             )
+            fun `throws exception if invalid`(value: String) {
+                assertThrows<IllegalArgumentException> {
+                    value.toUUID()
+                }
+            }
+
+            @ParameterizedTest
+            @ValueSource(strings = ["c7e4ca3236d942408e53de44bef8eeeb", "c7e4ca32-36d9-4240-8e53-de44bef8eeeb"])
+            fun `non null value when value can be converted`(value: String) {
+                val uuid = UUID.fromString("c7e4ca32-36d9-4240-8e53-de44bef8eeeb")
+                assertEquals(uuid, value.toUUIDOrNull())
+            }
+
+            @ParameterizedTest
+            @ValueSource(
+                strings = [
+                    "",
+                    "a",
+                    "c7e4ca3236d942408e53de44bef8eeeba",
+                    "c7e4ca32-36d9-4240-8e53-de44bef8eeeba"
+                ]
+            )
+            fun `nulls if invalid`(value: String) {
+                assertNull(value.toUUIDStrictOrNull())
+            }
+
         }
 
     }
 
     @Nested
-    inner class CollectionToLore {
+    inner class WithColor {
 
-        @Test
-        fun `should return empty component if sequence is empty`() {
-            assertEquals(emptyList(), emptyList<String>().toLore())
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "",
+                " ",
+                "red"
+            ]
+        )
+        fun `should wrap non empty string`(value: String) {
+            val string = randomString()
+            string withColor value shouldBe "<$value>$string</$value>"
         }
 
-        @Test
-        fun `should set color gray by default`() {
-            val components = listOf("a", "b", "c").toLore()
-            assertEquals(
-                listOf(
-                    Component.text().content("a").color(NamedTextColor.GRAY).build(),
-                    Component.text().content("b").color(NamedTextColor.GRAY).build(),
-                    Component.text().content("c").color(NamedTextColor.GRAY).build()
-                ),
-                components
-            )
-        }
-
-        @Test
-        fun `should return component with all strings`() {
-            val components = listOf("Hello", "World").toLore() {}
-            assertEquals(
-                listOf(
-                    Component.text().content("Hello").build(),
-                    Component.text().content("World").build()
-                ),
-                components
-            )
-        }
-
-        @Test
-        fun `should return component with all strings and transform`() {
-            val components = listOf("Hello", "World").toLore { color(NamedTextColor.RED) }
-            assertEquals(
-                listOf(
-                    Component.text().content("Hello").color(NamedTextColor.RED).build(),
-                    Component.text().content("World").color(NamedTextColor.RED).build()
-                ),
-                components
-            )
+        @ParameterizedTest
+        @ValueSource(
+            strings = [
+                "",
+                " ",
+                "red"
+            ]
+        )
+        fun `should wrap empty string`(value: String) {
+            "" withColor value shouldBe "<$value></$value>"
         }
 
     }
 
     @Nested
-    inner class ToFormattedLore {
+    inner class AsComponent {
 
         @Test
-        fun `should return an empty sequence if the string is empty`() {
-            assertEquals(emptyList(), "".toFormattedLore(10))
+        fun `should transform non empty string`() {
+            val string = randomString()
+            string.asComponent() shouldBe Component.text(string)
         }
 
         @Test
-        fun `should cut sentence without space`() {
-            val sentence = "0123456789abcdef"
-            assertEquals(
-                listOf("0123-", "4567-", "89ab-", "cdef"),
-                sentence.toFormattedLore(5)
-            )
+        fun `should transform empty string`() {
+            "".asComponent() shouldBe Component.empty()
         }
 
         @Test
-        fun `should create only one element if line length is greater than string size`() {
-            for (i in 1..100) {
-                val string = "a".repeat(i)
-                val sequence = string.toFormattedLore(i + 1)
-                assert(sequence.count() == 1)
+        fun `should read mini message tag`() {
+            val string = "<red><bold>hello</red>"
+            string.asComponent() shouldBe Component.text("hello").color(NamedTextColor.RED)
+                .decorate(TextDecoration.BOLD)
+        }
+
+        @Test
+        fun `should use tag if defined`() {
+            val string = "<red><test>hello"
+            string.asComponent(
+                Placeholder.parsed("test", "myvalue")
+            ) shouldBe Component.text("myvaluehello").color(NamedTextColor.RED)
+        }
+
+        @Test
+        fun `should use custom instance of mini message`() {
+            val string = "<red><test>hello"
+
+            val miniMessage = MiniMessage.builder()
+                .tags(
+                    TagResolver.resolver(
+                        Placeholder.parsed("test", "myvalue")
+                    )
+                )
+                .build()
+
+            string.asComponent(miniMessage = miniMessage) shouldBe Component.text("<red>myvaluehello")
+        }
+
+    }
+
+    @Nested
+    inner class StringBuilderDeleteLast {
+
+        @Test
+        fun `should throw if size is under 0`() {
+            assertThrows<IllegalArgumentException> {
+                StringBuilder().deleteLast(-1)
             }
         }
 
         @Test
-        fun `should create only one element if line length is equals to the string size`() {
-            val sentence = "Hello World"
-            assertEquals(listOf(sentence), sentence.toFormattedLore(sentence.length))
+        fun `should return the same string builder if size is 0`() {
+            val builder = StringBuilder().append(randomString())
+            builder.deleteLast(0) shouldBe builder
         }
 
+
         @Test
-        fun `should create multiple elements by cut on the space char`() {
-            val sequence = "Hello World".toFormattedLore(5)
-            assertEquals(listOf("Hello", "World"), sequence)
+        fun `should return the same string builder if size is bigger than length`() {
+            val string = randomString()
+            val builder = StringBuilder().append(string)
+            builder.deleteLast(string.length)
+            builder.length shouldBe 0
         }
 
-        @Test
-        fun `should create multiple elements by cut on the line length char adding a '-'`() {
-            val sequence1 = "Hello World".toFormattedLore(4)
-            assertEquals(listOf("Hel-", "lo", "Wor-", "ld"), sequence1)
-
-            val sequence2 = "Hello World".toFormattedLore(3)
-            assertEquals(listOf("He-", "llo", "Wo-", "rld"), sequence2)
-        }
-
-        @Test
-        fun `should create multiple element by cut on the previous space char`() {
-            // Indexes of "W" to "d" chars
-            for (i in 6..10) {
-                assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLore(i))
-            }
-        }
-
-        @Test
-        fun `should create multiple element with long sentence`() {
-            assertEquals(
-                listOf("This is a tool", "to create a", "game"),
-                "This is a tool to create a game".toFormattedLore(15)
-            )
-
-            assertEquals(
-                listOf("This is a tool", "to create a", "game0123456789-", "0123456789"),
-                "This is a tool to create a game01234567890123456789".toFormattedLore(15)
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le serveur"),
-                "Ajoutez, chattez et rejoignez vos amis à travers le serveur".toFormattedLore(30),
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "v"),
-                "Ajoutez, chattez et rejoignez v".toFormattedLore(30),
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", " "),
-                "Ajoutez, chattez et rejoignez  ".toFormattedLore(30),
-            )
-
-            assertEquals(
-                listOf("Add, chat and join your friends through", "the server"),
-                "Add, chat and join your friends through the server".toFormattedLore(40),
-            )
-        }
-    }
-
-    @Nested
-    inner class ToFormattedLoreSequence {
-
-        @Test
-        fun `should return an empty sequence if the string is empty`() {
-            assertEquals(emptySequence(), "".toFormattedLoreSequence(10))
-        }
-
-        @Test
-        fun `should cut sentence without space`() {
-            val sentence = "0123456789abcdef"
-            assertEquals(
-                listOf("0123-", "4567-", "89ab-", "cdef"),
-                sentence.toFormattedLoreSequence(5).toList()
-            )
-        }
-
-        @Test
-        fun `should create only one element if line length is greater than string size`() {
-            for (i in 1..100) {
-                val string = "a".repeat(i)
-                val sequence = string.toFormattedLoreSequence(i + 1)
-                assert(sequence.count() == 1)
-            }
-        }
-
-        @Test
-        fun `should create only one element if line length is equals to the string size`() {
-            val sentence = "Hello World"
-            assertEquals(listOf(sentence), sentence.toFormattedLoreSequence(sentence.length).toList())
-        }
-
-        @Test
-        fun `should create multiple elements by cut on the space char`() {
-            val sequence = "Hello World".toFormattedLoreSequence(5).toList()
-            assertEquals(listOf("Hello", "World"), sequence)
-        }
-
-        @Test
-        fun `should create multiple elements by cut on the line length char adding a '-'`() {
-            val sequence1 = "Hello World".toFormattedLoreSequence(4).toList()
-            assertEquals(listOf("Hel-", "lo", "Wor-", "ld"), sequence1)
-
-            val sequence2 = "Hello World".toFormattedLoreSequence(3).toList()
-            assertEquals(listOf("He-", "llo", "Wo-", "rld"), sequence2)
-        }
-
-        @Test
-        fun `should create multiple element by cut on the previous space char`() {
-            // Indexes of "W" to "d" chars
-            for (i in 6..10) {
-                assertEquals(listOf("Hello", "World"), "Hello World".toFormattedLoreSequence(i).toList())
-            }
-        }
-
-        @Test
-        fun `should create multiple element with long sentence`() {
-            assertEquals(
-                listOf("This is a tool", "to create a", "game"),
-                "This is a tool to create a game".toFormattedLoreSequence(15).toList()
-            )
-
-            assertEquals(
-                listOf("This is a tool", "to create a", "game0123456789-", "0123456789"),
-                "This is a tool to create a game01234567890123456789".toFormattedLoreSequence(15).toList()
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "vos amis à travers le serveur"),
-                "Ajoutez, chattez et rejoignez vos amis à travers le serveur".toFormattedLoreSequence(30).toList(),
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", "v"),
-                "Ajoutez, chattez et rejoignez v".toFormattedLoreSequence(30).toList(),
-            )
-
-            assertEquals(
-                listOf("Ajoutez, chattez et rejoignez", " "),
-                "Ajoutez, chattez et rejoignez  ".toFormattedLoreSequence(30).toList(),
-            )
-
-            assertEquals(
-                listOf("Add, chat and join your friends through", "the server"),
-                "Add, chat and join your friends through the server".toFormattedLoreSequence(40).toList(),
-            )
-        }
-    }
-
-    @Nested
-    inner class AsMiniComponent {
-
-        @Test
-        fun `should return simple component text with simple string`() {
-            val string = "Hello World!"
-            val component = string.asMiniComponent()
-            component as TextComponent
-            assertEquals("Hello World!", component.content())
-        }
-
-        @Test
-        fun `should return component text with color`() {
-            val string = "<red>Hello World!</red>"
-            val component = string.asMiniComponent()
-            component as TextComponent
-
-            assertEquals("Hello World!", component.content())
-
-            val color = component.color()
-            assertNotNull(color)
-            assertEquals("#ff5555", color.asHexString())
-        }
-
-        @Test
-        fun `should return component with click event`() {
-            val string = "<click:run_command:/test>Click me!</click>"
-            val component = string.asMiniComponent()
-            component as TextComponent
-
-            assertEquals("Click me!", component.content())
-
-            val clickEvent = component.clickEvent()
-            assertNotNull(clickEvent)
-            assertEquals(ClickEvent.Action.RUN_COMMAND, clickEvent.action())
-            assertEquals("/test", clickEvent.value())
-        }
-
-        @Test
-        fun `should return component with custom tag`() {
-            val string = "Hello <test>!"
-            val component = string.asMiniComponent(
-                Placeholder.unparsed("test", "my test")
-            )
-            component as TextComponent
-            assertEquals("Hello my test!", component.content())
+        @ParameterizedTest
+        @ValueSource(ints = [1, 2, 3, 4, 5, 6, 7, 8, 9])
+        fun `should delete last char`(size: Int) {
+            val string = randomString()
+            val builder = StringBuilder().append(string)
+            builder.deleteLast(size)
+            builder.toString() shouldBe string.dropLast(size)
         }
 
     }
