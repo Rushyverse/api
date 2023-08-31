@@ -144,6 +144,8 @@ tasks {
     }
 
     dokkaHtml.configure {
+        // CompileJava should be executed to build library in Jitpack
+        dependsOn(deleteDokkaOutputDir, compileJava.get())
         outputDirectory.set(file(dokkaOutputDir))
     }
 
@@ -161,6 +163,7 @@ tasks {
 }
 
 val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
+    group = "documentation"
     delete(dokkaOutputDir)
 }
 
