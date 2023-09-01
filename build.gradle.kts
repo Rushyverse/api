@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     embeddedKotlin("jvm")
     embeddedKotlin("plugin.serialization")
-    id("org.jetbrains.dokka") version "1.8.20"
+    id("org.jetbrains.dokka") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.1"
     `maven-publish`
@@ -33,40 +33,39 @@ repositories {
 }
 
 dependencies {
-    val kotlinSerializableVersion = "1.5.1"
-    val kamlVersion = "0.53.0"
+    val kotlinSerializableVersion = "1.6.0"
+    val kamlVersion = "0.55.0"
     val coroutineVersion = "1.6.4"
-    val loggingVersion = "2.1.23"
-    val koinVersion = "3.2.0"
-    val mccoroutineVersion = "2.4.0"
+    val loggingVersion = "3.0.5"
+    val koinVersion = "3.4.3"
+    val mccoroutineVersion = "2.13.0"
     val paperVersion = "1.20.1-R0.1-SNAPSHOT"
     val mockBukkitVersion = "3.18.0"
-    val junitVersion = "5.9.0"
+    val junitVersion = "5.10.0"
     val mockkVersion = "1.12.5"
-    val slf4jVersion = "2.0.0-alpha6"
     val fastboardVersion = "2.0.0"
     val kotestVersion = "5.6.2"
     val icu4jVersion = "73.2"
 
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializableVersion")
-    implementation("com.charleskorn.kaml:kaml:$kamlVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutineVersion")
-    implementation("io.github.microutils:kotlin-logging:$loggingVersion")
+    api(kotlin("stdlib"))
+    api(kotlin("stdlib-jdk8"))
+    api(kotlin("reflect"))
+    api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinSerializableVersion")
+    api("com.charleskorn.kaml:kaml:$kamlVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutineVersion")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutineVersion")
+    api("io.github.microutils:kotlin-logging:$loggingVersion")
 
     // Plural translation
-    implementation("com.ibm.icu:icu4j:$icu4jVersion")
+    api("com.ibm.icu:icu4j:$icu4jVersion")
 
     // Injection framework
-    implementation("io.insert-koin:koin-core:$koinVersion")
-    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
+    api("io.insert-koin:koin-core:$koinVersion")
+    api("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
     // MC coroutine framework
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
-    implementation("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
+    api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-api:$mccoroutineVersion")
+    api("com.github.shynixn.mccoroutine:mccoroutine-bukkit-core:$mccoroutineVersion")
 
     // Minecraft server framework
     "io.papermc.paper:paper-api:$paperVersion".let {
@@ -75,7 +74,7 @@ dependencies {
     }
 
     // Scoreboard framework
-    implementation("fr.mrmicky:fastboard:$fastboardVersion")
+    api("fr.mrmicky:fastboard:$fastboardVersion")
 
     api("com.github.Rushyverse:core:6ae31a9250")
 
@@ -135,20 +134,14 @@ tasks {
         useJUnitPlatform()
     }
 
-    build {
-        dependsOn(shadowJar)
-    }
-
     clean {
         delete(dokkaOutputDir)
     }
 
     dokkaHtml.configure {
+        // CompileJava should be executed to build library in Jitpack
+        dependsOn(deleteDokkaOutputDir, compileJava.get())
         outputDirectory.set(file(dokkaOutputDir))
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
     }
 
     jacocoTestReport {
@@ -161,32 +154,38 @@ tasks {
 }
 
 val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
+    group = "documentation"
     delete(dokkaOutputDir)
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
+    group = "build"
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {
+    group = "documentation"
+    dependsOn(tasks.dokkaHtml)
     dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
     archiveClassifier.set("javadoc")
     from(dokkaOutputDir)
 }
 
 publishing {
+    val projectName = project.name
+
     publications {
-        val projectOrganizationPath = "Rushyverse/${project.name}"
+        val projectOrganizationPath = "Rushyverse/$projectName"
         val projectGitUrl = "https://github.com/$projectOrganizationPath"
 
-        create<MavenPublication>(project.name) {
-            shadow.component(this)
+        create<MavenPublication>(projectName) {
+            from(components["kotlin"])
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
             pom {
-                name.set(project.name)
+                name.set(projectName)
                 description.set(project.description)
                 url.set(projectGitUrl)
 
