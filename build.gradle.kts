@@ -41,7 +41,7 @@ dependencies {
     val mccoroutineVersion = "2.4.0"
     val paperVersion = "1.19-R0.1-SNAPSHOT"
     val mockBukkitVersion = "3.18.0"
-    val junitVersion = "5.9.0"
+    val junitVersion = "5.10.0"
     val mockkVersion = "1.12.5"
     val slf4jVersion = "2.0.0-alpha6"
     val fastboardVersion = "2.0.0"
