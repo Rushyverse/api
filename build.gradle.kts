@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
     val kotlinSerializableVersion = "1.5.1"
-    val kamlVersion = "0.53.0"
+    val kamlVersion = "0.55.0"
     val coroutineVersion = "1.6.4"
     val loggingVersion = "2.1.23"
     val koinVersion = "3.2.0"
