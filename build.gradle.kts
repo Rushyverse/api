@@ -36,7 +36,7 @@ dependencies {
     val kotlinSerializableVersion = "1.5.1"
     val kamlVersion = "0.53.0"
     val coroutineVersion = "1.6.4"
-    val loggingVersion = "2.1.23"
+    val loggingVersion = "3.0.5"
     val koinVersion = "3.2.0"
     val mccoroutineVersion = "2.4.0"
     val paperVersion = "1.19-R0.1-SNAPSHOT"
