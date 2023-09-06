@@ -44,7 +44,7 @@ dependencies {
     val junitVersion = "5.10.0"
     val mockkVersion = "1.12.5"
     val fastboardVersion = "2.0.0"
-    val kotestVersion = "5.6.2"
+    val kotestVersion = "5.7.2"
     val icu4jVersion = "73.2"
 
     api(kotlin("stdlib"))
