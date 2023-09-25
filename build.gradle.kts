@@ -42,7 +42,7 @@ dependencies {
     val paperVersion = "1.20-R0.1-SNAPSHOT"
     val mockBukkitVersion = "3.19.1"
     val junitVersion = "5.10.0"
-    val mockkVersion = "1.12.5"
+    val mockkVersion = "1.13.8"
     val fastboardVersion = "2.0.0"
     val kotestVersion = "5.6.2"
     val icu4jVersion = "73.2"
