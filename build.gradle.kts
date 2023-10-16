@@ -43,7 +43,7 @@ dependencies {
     val mockBukkitVersion = "3.19.1"
     val junitVersion = "5.10.0"
     val mockkVersion = "1.12.5"
-    val fastboardVersion = "2.0.0"
+    val fastboardVersion = "2.0.1"
     val kotestVersion = "5.6.2"
     val icu4jVersion = "73.2"
 
