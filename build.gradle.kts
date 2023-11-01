@@ -5,7 +5,7 @@ plugins {
     embeddedKotlin("plugin.serialization")
     id("org.jetbrains.dokka") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.gitlab.arturbosch.detekt") version "1.23.1"
+    id("io.gitlab.arturbosch.detekt") version "1.23.3"
     `maven-publish`
     `java-library`
     jacoco
