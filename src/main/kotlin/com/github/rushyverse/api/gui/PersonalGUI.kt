@@ -18,7 +18,7 @@ import org.bukkit.inventory.InventoryHolder
  */
 public abstract class PersonalGUI(public val title: String) : GUI() {
 
-    private val translator: Translator by inject()
+    protected val translator: Translator by inject()
 
     private var inventories: MutableMap<Client, Inventory> = mutableMapOf()
 
