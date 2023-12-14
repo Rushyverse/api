@@ -3,6 +3,8 @@
 
 package com.github.rushyverse.api.extension
 
+import com.github.rushyverse.api.translation.Translator
+import com.github.rushyverse.api.translation.getComponent
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
@@ -262,4 +264,17 @@ public fun StringBuilder.deleteLast(size: Int): StringBuilder {
         size >= length -> clear()
         else -> delete(length - size, length)
     }
+}
+
+/**
+ * If the string contains a dot, it will be considered as a translation path, and will be translated.
+ * However, if the string doesn't contain a dot, it will be considered as a component.
+ * @receiver String to translate or to convert to a component.
+ * @param translator Translator.
+ * @param locale Locale to use for translation.
+ * @return The translated component or the component created from the string.
+ */
+public fun String.toTranslatedComponent(translator: Translator, locale: Locale): Component {
+    return if (this.contains('.')) translator.getComponent(this, locale)
+    else this.asComponent()
 }
