@@ -28,7 +28,6 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
 
     override suspend fun open(client: Client) {
         requireOpen()
-
         val inventory = createInventory(client)
 
         mutex.withLock {

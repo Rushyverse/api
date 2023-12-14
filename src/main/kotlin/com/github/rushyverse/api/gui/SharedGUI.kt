@@ -29,8 +29,7 @@ public abstract class SharedGUI : GUI() {
      * @return The inventory of the GUI.
      */
     private suspend fun getOrCreateInventory(client: Client): Inventory {
-        require(!isClosed) { "The GUI is closed" }
-
+        requireOpen()
         return inventory ?: createInventory(client).also {
             inventory = it
         }
