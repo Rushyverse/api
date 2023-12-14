@@ -18,7 +18,7 @@ import org.bukkit.inventory.Inventory
 public abstract class SharedGUI(
     public val inventoryType: InventoryType,
     public val title: Component
-): GUI() {
+) : GUI() {
 
     private var inventory: Inventory? = null
 
@@ -43,13 +43,12 @@ public abstract class SharedGUI(
 
         return inventory ?: createInventory(client).also {
             inventory = it
-            register()
         }
     }
 
-    override suspend fun close(client: Client): Boolean {
+    override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
         val player = client.requirePlayer()
-        if(player.openInventory.topInventory == inventory) {
+        if (closeInventory && player.openInventory.topInventory == inventory) {
             player.closeInventory()
             return true
         }

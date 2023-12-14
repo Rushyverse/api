@@ -2,7 +2,6 @@ package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
-import com.github.rushyverse.api.player.gui.GUIManager
 import java.io.Closeable
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
@@ -15,15 +14,19 @@ import org.bukkit.inventory.ItemStack
  * Only one inventory is created for all the viewers.
  * @property server Server.
  * @property manager Manager to register or unregister the GUI.
- * @property viewers List of viewers.
+ * @property isClosed If true, the GUI is closed; otherwise it is open.
  */
-public abstract class GUI: Closeable {
+public abstract class GUI : Closeable {
 
     protected val server: Server by inject()
 
     private val manager: GUIManager by inject()
 
     public var isClosed: Boolean = false
+
+    init {
+        register()
+    }
 
     /**
      * Create the inventory of the GUI.
@@ -46,11 +49,12 @@ public abstract class GUI: Closeable {
     public abstract suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent)
 
     /**
-     * Close the inventory for the player.
-     * @param client Client to close the inventory for.
+     * Remove the client has a viewer of the GUI.
+     * @param client Client to close the GUI for.
+     * @param closeInventory If true, the interface will be closed, otherwise it will be kept open.
      * @return True if the inventory was closed, false otherwise.
      */
-    public abstract suspend fun close(client: Client): Boolean
+    public abstract suspend fun close(client: Client, closeInventory: Boolean = true): Boolean
 
     /**
      * Close the inventory.

@@ -1,3 +1,4 @@
+import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -128,6 +129,16 @@ tasks {
     withType<JavaCompile> {
         sourceCompatibility = javaVersionString
         targetCompatibility = javaVersionString
+    }
+
+    withType<Detekt>().configureEach {
+        reports {
+            html.required.set(true)
+            xml.required.set(true)
+            txt.required.set(false)
+            sarif.required.set(false)
+            md.required.set(false)
+        }
     }
 
     test {

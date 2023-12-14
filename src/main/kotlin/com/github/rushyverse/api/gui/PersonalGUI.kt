@@ -57,8 +57,13 @@ public abstract class PersonalGUI(
      */
     protected abstract suspend fun fill(client: Client, inventory: Inventory)
 
-    override suspend fun close(client: Client): Boolean {
-        return mutex.withLock { inventories.remove(client) }?.close() == 1
+    override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
+        return mutex.withLock { inventories.remove(client) }?.run {
+            if (closeInventory) {
+                close()
+            }
+            true
+        } == true
     }
 
     override suspend fun viewers(): List<HumanEntity> {

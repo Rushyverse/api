@@ -10,7 +10,8 @@ import org.bukkit.entity.HumanEntity
  * @param player Player.
  * @return The client linked to a player.
  */
-public suspend inline fun <reified T : Client> ClientManager.getTypedClient(player: HumanEntity): T = getClient(player) as T
+public suspend inline fun <reified T : Client> ClientManager.getTypedClient(player: HumanEntity): T =
+    getClient(player) as T
 
 /**
  * Get a client from the key linked to a player.

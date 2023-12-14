@@ -3,18 +3,18 @@ package com.github.rushyverse.api.player
 import com.github.rushyverse.api.delegate.DelegatePlayer
 import com.github.rushyverse.api.extension.asComponent
 import com.github.rushyverse.api.gui.GUI
+import com.github.rushyverse.api.gui.GUIManager
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
-import com.github.rushyverse.api.player.gui.GUIManager
 import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.SupportedLanguage
 import fr.mrmicky.fastboard.adventure.FastBoard
+import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import org.bukkit.entity.Player
-import java.util.*
 
 /**
  * Client to store and manage data about player.

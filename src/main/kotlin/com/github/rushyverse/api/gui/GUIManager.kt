@@ -1,6 +1,5 @@
-package com.github.rushyverse.api.player.gui
+package com.github.rushyverse.api.gui
 
-import com.github.rushyverse.api.gui.GUI
 import com.github.rushyverse.api.player.Client
 
 /**
@@ -47,6 +46,4 @@ public class GUIManager {
     public fun remove(gui: GUI): Boolean {
         return _guis.remove(gui)
     }
-
-
 }

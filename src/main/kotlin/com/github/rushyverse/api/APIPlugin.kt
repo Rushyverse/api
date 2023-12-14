@@ -2,6 +2,7 @@ package com.github.rushyverse.api
 
 import com.github.rushyverse.api.extension.registerListener
 import com.github.rushyverse.api.game.SharedGameData
+import com.github.rushyverse.api.gui.GUIManager
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.listener.api.LanguageListener
@@ -37,6 +38,7 @@ public class APIPlugin : JavaPlugin() {
             single { ScoreboardManager() }
             single { LanguageManager() }
             single { SharedGameData() }
+            single { GUIManager() }
         }
 
         registerListener { LanguageListener() }
