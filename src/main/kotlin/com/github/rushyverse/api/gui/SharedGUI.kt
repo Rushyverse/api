@@ -1,11 +1,8 @@
 package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.player.Client
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.HumanEntity
-import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.InventoryHolder
 
 /**
  * GUI that can be shared by multiple players.
