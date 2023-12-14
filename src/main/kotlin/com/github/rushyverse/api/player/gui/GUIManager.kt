@@ -2,18 +2,12 @@ package com.github.rushyverse.api.player.gui
 
 import com.github.rushyverse.api.gui.GUI
 import com.github.rushyverse.api.player.Client
-import kotlinx.coroutines.sync.Mutex
 
 /**
  * Manages the GUIs for players within the game.
  * This class ensures thread-safe operations on the GUIs by using mutex locks.
  */
 public class GUIManager {
-
-    /**
-     * Mutex used to ensure thread-safe operations.
-     */
-    private val mutex = Mutex()
 
     /**
      * Private mutable set storing GUIs.

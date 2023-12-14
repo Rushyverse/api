@@ -12,7 +12,6 @@ import org.bukkit.inventory.Inventory
  * @property inventoryType Type of the inventory.
  * @property title Title of the inventory.
  * @property server Server
- * @property listener Listener to listen to the clicks on the inventory.
  * @property viewers List of viewers.
  * @property inventory Inventory shared by all the viewers.
  */
