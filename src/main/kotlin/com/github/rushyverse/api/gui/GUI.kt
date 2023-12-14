@@ -23,6 +23,7 @@ public abstract class GUI : Closeable {
     private val manager: GUIManager by inject()
 
     public var isClosed: Boolean = false
+        protected set
 
     init {
         register()
