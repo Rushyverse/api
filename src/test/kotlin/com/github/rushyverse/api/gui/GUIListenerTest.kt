@@ -27,6 +27,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
 
@@ -68,7 +69,7 @@ class GUIListenerTest : AbstractKoinTest() {
                 coEvery { contains(client) } returns true
             }
 
-            callEvent(true, player, ItemStack { type = Material.DIRT })
+            callEvent(true, player, ItemStack { type = Material.DIRT }, player.inventory)
             coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
         }
 
@@ -80,7 +81,7 @@ class GUIListenerTest : AbstractKoinTest() {
             }
 
             suspend fun callEvent(item: ItemStack?) {
-                val event = callEvent(false, player, item)
+                val event = callEvent(false, player, item, player.inventory)
                 coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
                 verify(exactly = 0) { event.cancel() }
             }
@@ -96,20 +97,22 @@ class GUIListenerTest : AbstractKoinTest() {
                 coEvery { contains(client) } returns false
             }
 
-            callEvent(false, player, ItemStack { type = Material.DIRT })
+            callEvent(false, player, ItemStack { type = Material.DIRT }, player.inventory)
             coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
         }
 
         @Test
         fun `should call GUI onClick if client has opened one`() = runTest {
             val (player, client) = registerPlayer()
+            val inventory = mockk<Inventory>()
             val gui = registerGUI {
                 coEvery { contains(client) } returns true
                 coEvery { onClick(client, any(), any()) } returns Unit
+                coEvery { hasInventory(inventory) } returns true
             }
 
             val item = ItemStack { type = Material.DIRT }
-            val event = callEvent(false, player, item)
+            val event = callEvent(false, player, item, inventory)
             coVerify(exactly = 1) { gui.onClick(client, item, event) }
             verify(exactly = 1) { event.cancel() }
         }
@@ -117,13 +120,15 @@ class GUIListenerTest : AbstractKoinTest() {
         private suspend fun callEvent(
             cancel: Boolean,
             player: Player,
-            item: ItemStack?
+            item: ItemStack?,
+            inventory: Inventory?
         ): InventoryClickEvent {
             val event = mockk<InventoryClickEvent> {
                 every { isCancelled } returns cancel
                 every { whoClicked } returns player
                 every { currentItem } returns item
                 every { cancel() } returns Unit
+                every { clickedInventory } returns inventory
             }
 
             listener.onInventoryClick(event)

@@ -79,6 +79,18 @@ public abstract class PersonalGUI : GUI() {
         }
     }
 
+    override suspend fun hasInventory(inventory: Inventory): Boolean {
+        return mutex.withLock {
+            inventories.values.contains(inventory)
+        }
+    }
+
+    override suspend fun getInventory(client: Client): Inventory? {
+        return mutex.withLock {
+            inventories[client]
+        }
+    }
+
     override fun close() {
         super.close()
         inventories.values.forEach(Inventory::close)

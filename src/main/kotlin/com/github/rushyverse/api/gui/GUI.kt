@@ -7,6 +7,7 @@ import mu.KotlinLogging
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 private val logger = KotlinLogging.logger {}
@@ -80,6 +81,20 @@ public abstract class GUI : Closeable {
      * @return True if the inventory was closed, false otherwise.
      */
     public abstract suspend fun close(client: Client, closeInventory: Boolean = true): Boolean
+
+    /**
+     * Check if the GUI contains the inventory.
+     * @param inventory Inventory to check.
+     * @return True if the GUI contains the inventory, false otherwise.
+     */
+    public abstract suspend fun hasInventory(inventory: Inventory): Boolean
+
+    /**
+     * Get the inventory of the GUI for the client.
+     * @param client Client to get the inventory for.
+     * @return The inventory of the GUI for the client.
+     */
+    public abstract suspend fun getInventory(client: Client): Inventory?
 
     /**
      * Close the inventory.

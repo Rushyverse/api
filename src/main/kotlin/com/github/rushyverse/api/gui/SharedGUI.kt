@@ -43,11 +43,10 @@ public abstract class SharedGUI : GUI() {
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
         val player = client.requirePlayer()
-        if (closeInventory && player.openInventory.topInventory == inventory) {
+        return if (closeInventory && player.openInventory.topInventory == inventory) {
             player.closeInventory()
-            return true
-        }
-        return false
+            true
+        } else false
     }
 
     override suspend fun viewers(): List<HumanEntity> {
@@ -56,6 +55,17 @@ public abstract class SharedGUI : GUI() {
 
     override suspend fun contains(client: Client): Boolean {
         return client.player?.let { it in viewers() } == true
+    }
+
+    override suspend fun hasInventory(inventory: Inventory): Boolean {
+        return this.inventory == inventory
+    }
+
+    override suspend fun getInventory(client: Client): Inventory? {
+        val player = client.player
+        return if (player != null && player in viewers()) {
+            inventory
+        } else null
     }
 
     override fun close() {

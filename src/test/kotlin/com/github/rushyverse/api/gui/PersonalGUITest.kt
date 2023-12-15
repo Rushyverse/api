@@ -78,6 +78,7 @@ class PersonalGUITest: AbstractKoinTest() {
         @Test
         fun `should close all inventories and remove all viewers`() = runTest(timeout = 1.minutes) {
             val type = InventoryType.HOPPER
+            val initType = InventoryType.CRAFTING
             val gui = object : PersonalGUI() {
                 override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
                     return serverMock.createInventory(owner, type)
@@ -92,6 +93,7 @@ class PersonalGUITest: AbstractKoinTest() {
 
             val playerClients = List(5) { registerPlayer() }
             playerClients.forEach { (player, client) ->
+                player.assertInventoryView(initType)
                 gui.open(client) shouldBe true
                 player.assertInventoryView(type)
                 client.gui() shouldBe gui
@@ -99,7 +101,7 @@ class PersonalGUITest: AbstractKoinTest() {
 
             gui.close()
             playerClients.forEach { (player, client) ->
-                player.assertInventoryView(InventoryType.CRAFTING)
+                player.assertInventoryView(initType)
                 client.gui() shouldBe null
             }
         }

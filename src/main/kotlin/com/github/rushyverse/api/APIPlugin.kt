@@ -15,7 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin
 /**
  * Plugin to enable the API in server.
  */
-public class APIPlugin : JavaPlugin() {
+public open class APIPlugin : JavaPlugin() {
 
     public companion object {
         /**
