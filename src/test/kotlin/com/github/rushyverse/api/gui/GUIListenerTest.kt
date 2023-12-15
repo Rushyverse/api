@@ -192,10 +192,7 @@ class GUIListenerTest : AbstractKoinTest() {
     }
 
     private suspend fun registerPlayer(): Pair<Player, Client> {
-        val player = mockk<Player> {
-            every { name } returns randomString()
-            every { uniqueId } returns UUID.randomUUID()
-        }
+        val player = serverMock.addPlayer()
         val client = Client(player.uniqueId, CoroutineScope(EmptyCoroutineContext))
         clientManager.put(player, client)
         return player to client
