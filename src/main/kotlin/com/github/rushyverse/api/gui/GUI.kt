@@ -19,7 +19,7 @@ private val logger = KotlinLogging.logger {}
  * @property manager Manager to register or unregister the GUI.
  * @property isClosed If true, the GUI is closed; otherwise it is open.
  */
-public abstract class GUI : Closeable {
+public abstract class GUI {
 
     protected val server: Server by inject()
 
@@ -101,7 +101,7 @@ public abstract class GUI : Closeable {
      * The inventory will be closed for all the viewers.
      * The GUI will be removed from the listener and the [onClick] function will not be called anymore.
      */
-    public override fun close() {
+    public open suspend fun close() {
         isClosed = true
         unregister()
     }
@@ -110,7 +110,7 @@ public abstract class GUI : Closeable {
      * Verify that the GUI is open.
      * If the GUI is closed, throw an exception.
      */
-    protected fun requireOpen() {
+    private fun requireOpen() {
         require(!isClosed) { "Cannot use a closed GUI" }
     }
 

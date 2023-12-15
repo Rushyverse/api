@@ -8,6 +8,7 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
@@ -57,15 +58,86 @@ class PersonalGUITest : AbstractKoinTest() {
     @Nested
     inner class Viewers {
 
+        @Test
+        fun `should return empty list if no client is viewing the GUI`() = runTest {
+            val gui = TestGUI(serverMock)
+            gui.viewers() shouldBe emptyList()
+        }
+
+        @Test
+        fun `should return the list of clients viewing the GUI`() = runTest {
+            val gui = TestGUI(serverMock)
+            val playerClients = List(5) { registerPlayer() }
+
+            playerClients.forEach { (_, client) ->
+                gui.open(client) shouldBe true
+            }
+
+            gui.viewers() shouldContainExactlyInAnyOrder playerClients.map { it.first }
+        }
+
     }
 
     @Nested
     inner class Contains {
 
+        @Test
+        fun `should return false if the client is not viewing the GUI`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (_, client) = registerPlayer()
+            gui.contains(client) shouldBe false
+        }
+
+        @Test
+        fun `should return true if the client is viewing the GUI`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (_, client) = registerPlayer()
+            gui.open(client) shouldBe true
+            gui.contains(client) shouldBe true
+        }
+
     }
 
     @Nested
     inner class CloseForClient {
+
+        @Test
+        fun `should return false if the client is not viewing the GUI`() = runTest(timeout = 1.minutes) {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            val initialInventoryViewType = player.openInventory.type
+
+            player.assertInventoryView(initialInventoryViewType)
+            gui.close(client, true) shouldBe false
+            player.assertInventoryView(initialInventoryViewType)
+        }
+
+        @Test
+        fun `should close the inventory if the client is viewing the GUI`() = runTest(timeout = 1.minutes) {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            val initialInventoryViewType = player.openInventory.type
+
+            gui.open(client) shouldBe true
+            player.assertInventoryView(gui.type)
+            gui.close(client, true) shouldBe true
+            player.assertInventoryView(initialInventoryViewType)
+        }
+
+        @Test
+        fun `should remove client inventory without closing it if closeInventory is false`() =
+            runTest(timeout = 1.minutes) {
+                val gui = TestGUI(serverMock)
+                val (player, client) = registerPlayer()
+
+                gui.open(client) shouldBe true
+                player.assertInventoryView(gui.type)
+                gui.close(client, false) shouldBe true
+                player.assertInventoryView(gui.type)
+                gui.contains(client) shouldBe false
+            }
 
     }
 
@@ -74,65 +146,39 @@ class PersonalGUITest : AbstractKoinTest() {
 
         @Test
         fun `should close all inventories and remove all viewers`() = runTest(timeout = 1.minutes) {
-            val type = InventoryType.HOPPER
-            val initType = InventoryType.CRAFTING
-            val gui = object : PersonalGUI() {
-                override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
-                    return serverMock.createInventory(owner, type)
-                }
-
-                override suspend fun fill(client: Client, inventory: Inventory) {}
-
-                override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
-                    error("Should not be called")
-                }
-            }
+            val gui = TestGUI(serverMock, InventoryType.BREWING)
 
             val playerClients = List(5) { registerPlayer() }
+            val initialInventoryViewType = playerClients.first().first.openInventory.type
+
             playerClients.forEach { (player, client) ->
-                player.assertInventoryView(initType)
+                player.assertInventoryView(initialInventoryViewType)
                 gui.open(client) shouldBe true
-                player.assertInventoryView(type)
+                player.assertInventoryView(gui.type)
                 client.gui() shouldBe gui
             }
 
             gui.close()
             playerClients.forEach { (player, client) ->
-                player.assertInventoryView(initType)
+                player.assertInventoryView(initialInventoryViewType)
                 client.gui() shouldBe null
             }
         }
 
         @Test
-        fun `should set isClosed to true`() {
-            val gui = createGUI()
+        fun `should set isClosed to true`() = runTest {
+            val gui = TestGUI(serverMock)
             gui.isClosed shouldBe false
             gui.close()
             gui.isClosed shouldBe true
         }
 
         @Test
-        fun `should unregister the GUI`() {
-            val gui = createGUI()
+        fun `should unregister the GUI`() = runTest {
+            val gui = TestGUI(serverMock)
             guiManager.guis shouldContainAll listOf(gui)
             gui.close()
             guiManager.guis shouldContainAll listOf()
-        }
-
-        private fun createGUI(): PersonalGUI {
-            return object : PersonalGUI() {
-                override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
-                    error("Should not be called")
-                }
-
-                override suspend fun fill(client: Client, inventory: Inventory) {
-                    error("Should not be called")
-                }
-
-                override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
-                    error("Should not be called")
-                }
-            }
         }
 
     }
@@ -142,5 +188,18 @@ class PersonalGUITest : AbstractKoinTest() {
         val client = Client(player.uniqueId, CoroutineScope(EmptyCoroutineContext))
         clientManager.put(player, client)
         return player to client
+    }
+}
+
+private class TestGUI(val serverMock: ServerMock, val type: InventoryType = InventoryType.HOPPER) : PersonalGUI() {
+    override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
+        return serverMock.createInventory(owner, type)
+    }
+
+    override suspend fun fill(client: Client, inventory: Inventory) {
+    }
+
+    override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
+        error("Should not be called")
     }
 }

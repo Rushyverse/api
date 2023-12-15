@@ -58,15 +58,6 @@ public abstract class PersonalGUI : GUI() {
      */
     protected abstract suspend fun fill(client: Client, inventory: Inventory)
 
-    override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
-        return mutex.withLock { inventories.remove(client) }?.run {
-            if (closeInventory) {
-                close()
-            }
-            true
-        } == true
-    }
-
     override suspend fun viewers(): List<HumanEntity> {
         return mutex.withLock {
             inventories.values.flatMap(Inventory::getViewers)
@@ -91,9 +82,20 @@ public abstract class PersonalGUI : GUI() {
         }
     }
 
-    override fun close() {
+    override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
+        return mutex.withLock { inventories.remove(client) }?.run {
+            if (closeInventory) {
+                client.player?.closeInventory()
+            }
+            true
+        } == true
+    }
+
+    override suspend fun close() {
         super.close()
-        inventories.values.forEach(Inventory::close)
-        inventories.clear()
+        mutex.withLock {
+            inventories.values.forEach(Inventory::close)
+            inventories.clear()
+        }
     }
 }
