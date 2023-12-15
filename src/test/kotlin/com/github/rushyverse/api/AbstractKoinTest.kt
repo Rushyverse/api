@@ -5,14 +5,17 @@ import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
-import org.koin.core.module.Module
-import org.koin.dsl.ModuleDeclaration
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
+import org.bukkit.Server
+import org.koin.core.module.Module
+import org.koin.dsl.ModuleDeclaration
 
 open class AbstractKoinTest {
 
     lateinit var plugin: Plugin
+
+    lateinit var server: Server
 
     private lateinit var pluginId: String
 
@@ -22,12 +25,21 @@ open class AbstractKoinTest {
         CraftContext.startKoin(pluginId) { }
         CraftContext.startKoin(APIPlugin.ID_API) { }
 
+        server = mockk {
+            every { pluginManager } returns mockk()
+        }
+
         loadTestModule {
             plugin = mockk {
                 every { id } returns pluginId
                 every { name } returns randomString()
+                every { server } returns this@AbstractKoinTest.server
             }
             single { plugin }
+        }
+
+        loadApiTestModule {
+            single { server }
         }
     }
 

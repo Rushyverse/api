@@ -7,7 +7,6 @@ import com.github.rushyverse.api.AbstractKoinTest
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
-import com.github.rushyverse.api.translation.Translator
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import kotlin.coroutines.EmptyCoroutineContext
@@ -24,11 +23,10 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
 
-class PersonalGUITest: AbstractKoinTest() {
+class PersonalGUITest : AbstractKoinTest() {
 
     private lateinit var guiManager: GUIManager
     private lateinit var clientManager: ClientManager
-    private lateinit var translator: Translator
     private lateinit var serverMock: ServerMock
 
     @BeforeTest
@@ -36,7 +34,6 @@ class PersonalGUITest: AbstractKoinTest() {
         super.onBefore()
         guiManager = GUIManager()
         clientManager = ClientManagerImpl()
-
 
         loadApiTestModule {
             single { guiManager }

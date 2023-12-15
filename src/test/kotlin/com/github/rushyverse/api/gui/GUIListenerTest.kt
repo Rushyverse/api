@@ -8,13 +8,13 @@ import com.github.rushyverse.api.extension.event.cancel
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
-import com.github.rushyverse.api.utils.randomString
+import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.verify
-import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -96,6 +96,11 @@ class GUIListenerTest : AbstractKoinTest() {
             val gui = registerGUI {
                 coEvery { contains(client) } returns false
             }
+
+            val pluginManager = server.pluginManager
+
+            mockkStatic("com.github.shynixn.mccoroutine.bukkit.MCCoroutineKt")
+            every { pluginManager.callSuspendingEvent(any(), plugin) } returns emptyList()
 
             callEvent(false, player, ItemStack { type = Material.DIRT }, player.inventory)
             coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
