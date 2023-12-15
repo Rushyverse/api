@@ -36,32 +36,34 @@ public abstract class GUI : Closeable {
      * If the client has another GUI opened, close it.
      * If the client has the same GUI opened, do nothing.
      * @param client Client to open the GUI for.
+     * @return True if the GUI was opened, false otherwise.
      */
-    public suspend fun open(client: Client) {
+    public suspend fun open(client: Client): Boolean {
         requireOpen()
 
         val gui = client.gui()
-        if (gui == this) return
+        if (gui == this) return false
         // If the client has another GUI opened, close it.
         gui?.close(client, true)
 
         val player = client.player
         if (player == null) {
             logger.warn { "Cannot open inventory for player ${client.playerUUID}: player is null" }
-            return
+            return false
         }
         // If the player is dead, do not open the GUI because the interface cannot be shown to the player.
-        if (player.isDead) return
+        if (player.isDead) return false
 
-        openGUI(client)
+        return openGUI(client)
     }
 
     /**
      * Open the GUI for the client.
      * Called by [open] after all the checks.
      * @param client Client to open the GUI for.
+     * @return True if the GUI was opened, false otherwise.
      */
-    protected abstract suspend fun openGUI(client: Client)
+    protected abstract suspend fun openGUI(client: Client): Boolean
 
     /**
      * Action to do when the client clicks on an item in the inventory.

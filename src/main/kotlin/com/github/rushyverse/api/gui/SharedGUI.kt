@@ -15,10 +15,11 @@ public abstract class SharedGUI : GUI() {
 
     private var inventory: Inventory? = null
 
-    override suspend fun openGUI(client: Client) {
+    override suspend fun openGUI(client: Client): Boolean {
         val player = client.requirePlayer()
         val inventory = getOrCreateInventory()
         player.openInventory(inventory)
+        return true
     }
 
     /**

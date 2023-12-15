@@ -24,7 +24,7 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
 
     private val mutex = Mutex()
 
-    override suspend fun openGUI(client: Client) {
+    override suspend fun openGUI(client: Client): Boolean {
         val inventory = createInventory(client)
 
         mutex.withLock { inventories[client] }?.close()
@@ -33,6 +33,7 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
         player.openInventory(inventory)
 
         mutex.withLock { inventories[client] = inventory }
+        return true
     }
 
     /**
