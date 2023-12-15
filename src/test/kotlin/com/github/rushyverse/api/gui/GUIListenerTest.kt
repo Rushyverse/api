@@ -1,6 +1,10 @@
 package com.github.rushyverse.api.gui
 
+import be.seeseemelk.mockbukkit.MockBukkit
+import be.seeseemelk.mockbukkit.ServerMock
 import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.extension.ItemStack
+import com.github.rushyverse.api.extension.event.cancel
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
@@ -9,16 +13,21 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import net.kyori.adventure.text.Component
+import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
 
 class GUIListenerTest : AbstractKoinTest() {
@@ -26,6 +35,7 @@ class GUIListenerTest : AbstractKoinTest() {
     private lateinit var guiManager: GUIManager
     private lateinit var clientManager: ClientManager
     private lateinit var listener: GUIListener
+    private lateinit var serverMock: ServerMock
 
     @BeforeTest
     override fun onBefore() {
@@ -38,11 +48,87 @@ class GUIListenerTest : AbstractKoinTest() {
             single { guiManager }
             single { clientManager }
         }
+
+        serverMock = MockBukkit.mock()
+    }
+
+    @AfterTest
+    override fun onAfter() {
+        super.onAfter()
+        MockBukkit.unmock()
     }
 
     @Nested
     inner class OnInventoryClick {
 
+        @Test
+        fun `should do nothing if event is cancelled`() = runTest {
+            val (player, client) = registerPlayer()
+            val gui = registerGUI {
+                coEvery { contains(client) } returns true
+            }
+
+            callEvent(true, player, ItemStack { type = Material.DIRT })
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should do nothing if item is null or air`() = runTest {
+            val (player, client) = registerPlayer()
+            val gui = registerGUI {
+                coEvery { contains(client) } returns true
+            }
+
+            suspend fun callEvent(item: ItemStack?) {
+                val event = callEvent(false, player, item)
+                coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+                verify(exactly = 0) { event.cancel() }
+            }
+
+            callEvent(null)
+            callEvent(ItemStack { type = Material.AIR })
+        }
+
+        @Test
+        fun `should do nothing if client doesn't have a GUI opened`() = runTest {
+            val (player, client) = registerPlayer()
+            val gui = registerGUI {
+                coEvery { contains(client) } returns false
+            }
+
+            callEvent(false, player, ItemStack { type = Material.DIRT })
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+        }
+
+        @Test
+        fun `should call GUI onClick if client has opened one`() = runTest {
+            val (player, client) = registerPlayer()
+            val gui = registerGUI {
+                coEvery { contains(client) } returns true
+                coEvery { onClick(client, any(), any()) } returns Unit
+            }
+
+            val item = ItemStack { type = Material.DIRT }
+            val event = callEvent(false, player, item)
+            coVerify(exactly = 1) { gui.onClick(client, item, event) }
+            verify(exactly = 1) { event.cancel() }
+        }
+
+        private suspend fun callEvent(
+            cancel: Boolean,
+            player: Player,
+            item: ItemStack?
+        ): InventoryClickEvent {
+            val event = mockk<InventoryClickEvent> {
+                every { isCancelled } returns cancel
+                every { whoClicked } returns player
+                every { currentItem } returns item
+                every { cancel() } returns Unit
+            }
+
+            listener.onInventoryClick(event)
+            return event
+        }
 
     }
 

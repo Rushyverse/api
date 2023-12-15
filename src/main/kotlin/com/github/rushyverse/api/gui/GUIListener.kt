@@ -4,6 +4,7 @@ import com.github.rushyverse.api.Plugin
 import com.github.rushyverse.api.extension.event.cancel
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.ClientManager
+import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -27,9 +28,11 @@ public class GUIListener(plugin: Plugin) : Listener {
     @EventHandler
     public suspend fun onInventoryClick(event: InventoryClickEvent) {
         if (event.isCancelled) return
-        val item = event.currentItem ?: return
-        val player = event.whoClicked
 
+        val item = event.currentItem
+        if (item == null || item.type == Material.AIR) return
+
+        val player = event.whoClicked
         val client = clients.getClient(player)
         val gui = client.gui() ?: return
 
