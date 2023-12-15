@@ -13,8 +13,8 @@ import org.bukkit.inventory.InventoryHolder
 
 /**
  * GUI where a new inventory is created for each viewer.
- * @property title String
- * @property translator Translator
+ * @property title Title that can be translated.
+ * @property translator Translator to translate the title.
  */
 public abstract class PersonalGUI(public val title: String) : GUI() {
 
@@ -24,20 +24,24 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
 
     private val mutex = Mutex()
 
-    override suspend fun open(client: Client) {
-        requireOpen()
+    override suspend fun openGUI(client: Client) {
         val inventory = createInventory(client)
 
-        mutex.withLock {
-            val oldInventory = inventories[client]
-            inventories[client] = inventory
-            oldInventory
-        }?.close()
+        mutex.withLock { inventories[client] }?.close()
 
-        client.requirePlayer().openInventory(inventory)
+        val player = client.requirePlayer()
+        player.openInventory(inventory)
+
+        mutex.withLock { inventories[client] = inventory }
     }
 
-    override suspend fun createInventory(client: Client): Inventory {
+    /**
+     * Create the inventory for the client.
+     * Will translate the title and fill the inventory.
+     * @param client The client to create the inventory for.
+     * @return The inventory for the client.
+     */
+    private suspend fun createInventory(client: Client): Inventory {
         val player = client.requirePlayer()
         val translatedTitle = title.toTranslatedComponent(translator, client.lang().locale)
         return createInventory(player, translatedTitle).also {

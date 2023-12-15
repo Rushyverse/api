@@ -3,11 +3,13 @@ package com.github.rushyverse.api.gui
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
 import java.io.Closeable
+import mu.KotlinLogging
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+
+private val logger = KotlinLogging.logger {}
 
 /**
  * GUI that can be shared by multiple players.
@@ -30,16 +32,36 @@ public abstract class GUI : Closeable {
     }
 
     /**
-     * Create the inventory of the GUI.
-     * @return The inventory of the GUI.
+     * Open the GUI for the client only if the GUI is not closed.
+     * If the client has another GUI opened, close it.
+     * If the client has the same GUI opened, do nothing.
+     * @param client Client to open the GUI for.
      */
-    protected abstract suspend fun createInventory(client: Client): Inventory
+    public suspend fun open(client: Client) {
+        requireOpen()
+
+        val gui = client.gui()
+        if (gui == this) return
+        // If the client has another GUI opened, close it.
+        gui?.close(client, true)
+
+        val player = client.player
+        if (player == null) {
+            logger.warn { "Cannot open inventory for player ${client.playerUUID}: player is null" }
+            return
+        }
+        // If the player is dead, do not open the GUI because the interface cannot be shown to the player.
+        if (player.isDead) return
+
+        openGUI(client)
+    }
 
     /**
-     * Open the inventory for the player.
-     * @param client Client to open the inventory for.
+     * Open the GUI for the client.
+     * Called by [open] after all the checks.
+     * @param client Client to open the GUI for.
      */
-    public abstract suspend fun open(client: Client)
+    protected abstract suspend fun openGUI(client: Client)
 
     /**
      * Action to do when the client clicks on an item in the inventory.

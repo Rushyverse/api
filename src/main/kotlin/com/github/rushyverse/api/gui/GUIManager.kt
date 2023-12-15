@@ -16,7 +16,7 @@ public class GUIManager {
     /**
      * Immutable view of the GUIs set.
      */
-    public val guis: Set<GUI> = _guis
+    public val guis: Collection<GUI> get() = _guis
 
     /**
      * Retrieves the GUI for the specified player.
