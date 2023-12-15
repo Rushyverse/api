@@ -2,7 +2,6 @@ package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
-import java.io.Closeable
 import mu.KotlinLogging
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
