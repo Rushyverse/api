@@ -9,23 +9,31 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.shynixn.mccoroutine.bukkit.callSuspendingEvent
+import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.unmockkAll
 import io.mockk.verify
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -51,12 +59,14 @@ class GUIListenerTest : AbstractKoinTest() {
         }
 
         serverMock = MockBukkit.mock()
+        mockkStatic("com.github.shynixn.mccoroutine.bukkit.MCCoroutineKt")
     }
 
     @AfterTest
     override fun onAfter() {
         super.onAfter()
         MockBukkit.unmock()
+        unmockkAll()
     }
 
     @Nested
@@ -93,17 +103,48 @@ class GUIListenerTest : AbstractKoinTest() {
         @Test
         fun `should do nothing if client doesn't have a GUI opened`() = runTest {
             val (player, client) = registerPlayer()
+
+            val gui = registerGUI {
+                coEvery { contains(client) } returns false
+                coEvery { hasInventory(any()) } returns false
+            }
+
+            val pluginManager = server.pluginManager
+
+            val item = ItemStack { type = Material.DIRT }
+            callEvent(false, player, item, mockk())
+
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            verify(exactly = 0) { pluginManager.callSuspendingEvent(any(), plugin) }
+        }
+
+        @Test
+        fun `should trigger right click event if player select his own inventory`() = runTest {
+            val (player, client) = registerPlayer()
             val gui = registerGUI {
                 coEvery { contains(client) } returns false
             }
 
             val pluginManager = server.pluginManager
 
-            mockkStatic("com.github.shynixn.mccoroutine.bukkit.MCCoroutineKt")
-            every { pluginManager.callSuspendingEvent(any(), plugin) } returns emptyList()
+            val slot = slot<PlayerInteractEvent>()
+            val jobs = List(5) {
+                async { delay(1.seconds) }
+            }
+            every { pluginManager.callSuspendingEvent(capture(slot), plugin) } returns jobs
 
-            callEvent(false, player, ItemStack { type = Material.DIRT }, player.inventory)
+            val item = ItemStack { type = Material.DIRT }
+
+            callEvent(false, player, item, player.inventory)
             coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            verify(exactly = 1) { pluginManager.callSuspendingEvent(any(), plugin) }
+            jobs.forEach { it.isCompleted shouldBe true }
+
+            val event = slot.captured
+            event.player shouldBe player
+            event.action shouldBe Action.RIGHT_CLICK_AIR
+            event.item shouldBe item
+            event.clickedBlock shouldBe null
         }
 
         @Test
