@@ -12,6 +12,16 @@ import org.bukkit.inventory.ItemStack
 private val logger = KotlinLogging.logger {}
 
 /**
+ * Exception concerning the GUI.
+ */
+public open class GUIException(message: String) : RuntimeException(message)
+
+/**
+ * Exception thrown when the GUI is closed.
+ */
+public class GUIClosedException(message: String) : GUIException(message)
+
+/**
  * GUI that can be shared by multiple players.
  * Only one inventory is created for all the viewers.
  * @property server Server.
@@ -42,12 +52,12 @@ public abstract class GUI {
         requireOpen()
 
         val gui = client.gui()
-        if (gui == this) return false
+        if (gui === this) return false
         // If the client has another GUI opened, close it.
         gui?.close(client, true)
 
         val player = client.player
-        if (player == null) {
+        if (player === null) {
             logger.warn { "Cannot open inventory for player ${client.playerUUID}: player is null" }
             return false
         }
@@ -110,7 +120,7 @@ public abstract class GUI {
      * If the GUI is closed, throw an exception.
      */
     private fun requireOpen() {
-        require(!isClosed) { "Cannot use a closed GUI" }
+        if (isClosed) throw GUIClosedException("Cannot use a closed GUI")
     }
 
     /**

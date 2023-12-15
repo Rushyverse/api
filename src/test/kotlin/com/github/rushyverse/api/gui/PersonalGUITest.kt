@@ -4,12 +4,15 @@ import be.seeseemelk.mockbukkit.MockBukkit
 import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.entity.PlayerMock
 import com.github.rushyverse.api.AbstractKoinTest
+import com.github.rushyverse.api.extension.ItemStack
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -17,6 +20,7 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
+import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
@@ -52,6 +56,90 @@ class PersonalGUITest : AbstractKoinTest() {
 
     @Nested
     inner class Open {
+
+        @Test
+        fun `should throw exception if GUI is closed`() = runTest {
+            val gui = TestGUI(serverMock)
+            gui.close()
+            val (player, client) = registerPlayer()
+
+            val initialInventoryViewType = player.openInventory.type
+            shouldThrow<GUIClosedException> { gui.open(client) }
+            player.assertInventoryView(initialInventoryViewType)
+        }
+
+        @Test
+        fun `should do nothing if the client has the same GUI opened`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            player.assertInventoryView(gui.type)
+
+            gui.open(client) shouldBe false
+            player.assertInventoryView(gui.type)
+        }
+
+        @Test
+        fun `should close the previous GUI if the client has one opened`() = runTest {
+            val gui = TestGUI(serverMock, InventoryType.ENDER_CHEST)
+            val (player, client) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            player.assertInventoryView(gui.type)
+
+            val gui2 = TestGUI(serverMock, InventoryType.CHEST)
+            gui2.open(client) shouldBe true
+            player.assertInventoryView(gui2.type)
+            gui.contains(client) shouldBe false
+            gui2.contains(client) shouldBe true
+        }
+
+        @Test
+        fun `should do nothing if the player is dead`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            val initialInventoryViewType = player.openInventory.type
+
+            player.damage(Double.MAX_VALUE)
+            gui.open(client) shouldBe false
+            player.assertInventoryView(initialInventoryViewType)
+        }
+
+        @Test
+        fun `should create a new inventory for the client`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+            val (player2, client2) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            gui.open(client2) shouldBe true
+
+            player.assertInventoryView(gui.type)
+            player2.assertInventoryView(gui.type)
+
+            player.openInventory.topInventory shouldNotBe player2.openInventory.topInventory
+        }
+
+        @Test
+        fun `should fill the inventory`() = runTest {
+            val gui = TestFilledGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            player.assertInventoryView(InventoryType.CHEST)
+
+            val inventory = player.openInventory.topInventory
+            val content = inventory.contents
+            println(content.contentToString())
+            content[0]!!.type shouldBe Material.DIAMOND_ORE
+            content[1]!!.type shouldBe Material.STICK
+
+            for (i in 2 until content.size) {
+                content[i] shouldBe null
+            }
+        }
 
     }
 
@@ -197,6 +285,22 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
     }
 
     override suspend fun fill(client: Client, inventory: Inventory) {
+        // Do nothing
+    }
+
+    override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
+        error("Should not be called")
+    }
+}
+
+private class TestFilledGUI(val serverMock: ServerMock) : PersonalGUI() {
+    override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
+        return serverMock.createInventory(owner, InventoryType.CHEST)
+    }
+
+    override suspend fun fill(client: Client, inventory: Inventory) {
+        inventory.setItem(0, ItemStack { type = Material.DIAMOND_ORE })
+        inventory.setItem(1, ItemStack { type = Material.STICK })
     }
 
     override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
