@@ -1,24 +1,16 @@
 package com.github.rushyverse.api.gui
 
-import com.github.rushyverse.api.extension.toTranslatedComponent
-import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
-import com.github.rushyverse.api.translation.Translator
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.kyori.adventure.text.Component
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 
 /**
  * GUI where a new inventory is created for each viewer.
- * @property title Title that can be translated.
- * @property translator Translator to translate the title.
  */
-public abstract class PersonalGUI(public val title: String) : GUI() {
-
-    protected val translator: Translator by inject()
+public abstract class PersonalGUI : GUI() {
 
     private var inventories: MutableMap<Client, Inventory> = mutableMapOf()
 
@@ -44,8 +36,7 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
      */
     private suspend fun createInventory(client: Client): Inventory {
         val player = client.requirePlayer()
-        val translatedTitle = title.toTranslatedComponent(translator, client.lang().locale)
-        return createInventory(player, translatedTitle).also {
+        return createInventory(player, client).also {
             fill(client, it)
         }
     }
@@ -54,10 +45,10 @@ public abstract class PersonalGUI(public val title: String) : GUI() {
      * Create the inventory for the client.
      * This function is called when the [owner] wants to open the inventory.
      * @param owner Player who wants to open the inventory.
-     * @param title Translated title of the inventory.
+     * @param client The client to create the inventory for.
      * @return The inventory for the client.
      */
-    protected abstract fun createInventory(owner: InventoryHolder, title: Component): Inventory
+    protected abstract fun createInventory(owner: InventoryHolder, client: Client): Inventory
 
     /**
      * Fill the inventory with items for the client.
