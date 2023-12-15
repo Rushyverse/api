@@ -1,6 +1,8 @@
 package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.player.Client
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.Inventory
 
@@ -15,6 +17,8 @@ public abstract class SharedGUI : GUI() {
 
     private var inventory: Inventory? = null
 
+    private val mutex = Mutex()
+
     override suspend fun openGUI(client: Client): Boolean {
         val player = client.requirePlayer()
         val inventory = getOrCreateInventory()
@@ -28,9 +32,11 @@ public abstract class SharedGUI : GUI() {
      * @return The inventory of the GUI.
      */
     private suspend fun getOrCreateInventory(): Inventory {
-        return inventory ?: createInventory().also {
-            inventory = it
-            fill(it)
+        return mutex.withLock {
+            inventory ?: createInventory().also {
+                inventory = it
+                fill(it)
+            }
         }
     }
 
@@ -42,15 +48,14 @@ public abstract class SharedGUI : GUI() {
     protected abstract fun createInventory(): Inventory
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
-        val player = client.requirePlayer()
-        return if (closeInventory && player.openInventory.topInventory == inventory) {
-            player.closeInventory()
+        return if (closeInventory && contains(client)) {
+            client.player?.closeInventory()
             true
         } else false
     }
 
     override suspend fun viewers(): List<HumanEntity> {
-        return inventory?.viewers ?: emptyList()
+        return mutex.withLock { inventory?.viewers } ?: emptyList()
     }
 
     override suspend fun contains(client: Client): Boolean {
@@ -58,20 +63,22 @@ public abstract class SharedGUI : GUI() {
     }
 
     override suspend fun hasInventory(inventory: Inventory): Boolean {
-        return this.inventory == inventory
+        return mutex.withLock { this.inventory } == inventory
     }
 
     override suspend fun getInventory(client: Client): Inventory? {
-        val player = client.player
-        return if (player != null && player in viewers()) {
-            inventory
-        } else null
+        return if (contains(client)) mutex.withLock { inventory } else null
     }
 
-    override fun close() {
+    override suspend fun close() {
         super.close()
-        inventory?.close()
-        inventory = null
+        mutex.withLock {
+            val inventory = inventory
+            if(inventory != null) {
+                inventory.close()
+                this.inventory = null
+            }
+        }
     }
 
     /**
