@@ -13,7 +13,7 @@ import org.bukkit.inventory.Inventory
  * @property viewers List of viewers.
  * @property inventory Inventory shared by all the viewers.
  */
-public abstract class SharedGUI : GUI() {
+public abstract class SingleGUI : GUI() {
 
     private var inventory: Inventory? = null
 

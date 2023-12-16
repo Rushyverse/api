@@ -28,7 +28,7 @@ import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
 
-class ClientGUITest : AbstractKoinTest() {
+class PlayerGUITest : AbstractKoinTest() {
 
     private lateinit var guiManager: GUIManager
     private lateinit var clientManager: ClientManager
@@ -279,7 +279,7 @@ class ClientGUITest : AbstractKoinTest() {
     }
 }
 
-private class TestGUI(val serverMock: ServerMock, val type: InventoryType = InventoryType.HOPPER) : ClientGUI() {
+private class TestGUI(val serverMock: ServerMock, val type: InventoryType = InventoryType.HOPPER) : PlayerGUI() {
     override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
         return serverMock.createInventory(owner, type)
     }
@@ -293,7 +293,7 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
     }
 }
 
-private class TestFilledGUI(val serverMock: ServerMock) : ClientGUI() {
+private class TestFilledGUI(val serverMock: ServerMock) : PlayerGUI() {
     override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
         return serverMock.createInventory(owner, InventoryType.CHEST)
     }

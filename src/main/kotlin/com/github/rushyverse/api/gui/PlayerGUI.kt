@@ -10,7 +10,7 @@ import org.bukkit.inventory.InventoryHolder
  * GUI where a new inventory is created for each player.
  * An inventory is created when the player opens the GUI and he is not sharing the GUI with another player.
  */
-public abstract class ClientGUI : DedicatedGUI<Client>() {
+public abstract class PlayerGUI : DedicatedGUI<Client>() {
 
     override suspend fun getKey(client: Client): Client {
         return client
