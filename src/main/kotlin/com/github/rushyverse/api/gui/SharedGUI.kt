@@ -66,15 +66,11 @@ public abstract class SharedGUI : GUI() {
         return mutex.withLock { this.inventory } == inventory
     }
 
-    override suspend fun getInventory(client: Client): Inventory? {
-        return if (contains(client)) mutex.withLock { inventory } else null
-    }
-
     override suspend fun close() {
         super.close()
         mutex.withLock {
             val inventory = inventory
-            if(inventory != null) {
+            if (inventory != null) {
                 inventory.close()
                 this.inventory = null
             }

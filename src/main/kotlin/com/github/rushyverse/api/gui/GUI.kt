@@ -99,13 +99,6 @@ public abstract class GUI {
     public abstract suspend fun hasInventory(inventory: Inventory): Boolean
 
     /**
-     * Get the inventory of the GUI for the client.
-     * @param client Client to get the inventory for.
-     * @return The inventory of the GUI for the client.
-     */
-    public abstract suspend fun getInventory(client: Client): Inventory?
-
-    /**
      * Close the inventory.
      * The inventory will be closed for all the viewers.
      * The GUI will be removed from the listener and the [onClick] function will not be called anymore.
