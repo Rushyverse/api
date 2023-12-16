@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.player.Client
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.withLock
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
@@ -39,6 +40,10 @@ public abstract class PlayerGUI : DedicatedGUI<Client>() {
     override fun unsafeContains(client: Client): Boolean {
         // Little optimization to avoid searching in the map from values.
         return inventories.containsKey(client)
+    }
+
+    override suspend fun coroutineScopeFill(key: Client): CoroutineScope {
+        return key
     }
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
