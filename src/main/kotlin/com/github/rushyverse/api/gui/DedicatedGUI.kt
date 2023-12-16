@@ -142,9 +142,9 @@ public abstract class DedicatedGUI<T> : GUI() {
 
             val contentList = contents.toMutableList()
             while (isActive) {
+                inventory.contents = contentList.toTypedArray()
                 delay(100)
                 Collections.rotate(contentList, 1)
-                inventory.contents = contentList.toTypedArray()
             }
         }
     }
