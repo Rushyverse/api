@@ -1,19 +1,27 @@
 package com.github.rushyverse.api.gui
 
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
-import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.bukkit.Material
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+
+/**
+ * Data class to store the inventory and the loading job.
+ * Can be used to cancel the loading job if the inventory is closed.
+ * @property inventory Inventory created.
+ * @property job Loading job to fill & animate the loading of the inventory.
+ */
+public data class InventoryData(
+    val inventory: Inventory,
+    val job: Job,
+)
 
 /**
  * GUI where a new inventory is created for each key used.
@@ -21,9 +29,11 @@ import org.bukkit.inventory.ItemStack
  * @property inventories Map of inventories for each key.
  * @property mutex Mutex to process thread-safe operations.
  */
-public abstract class DedicatedGUI<T> : GUI() {
+public abstract class DedicatedGUI<T>(
+    private val loadingAnimation: InventoryLoadingAnimation<T>? = null,
+) : GUI() {
 
-    protected var inventories: MutableMap<T, Inventory> = mutableMapOf()
+    protected var inventories: MutableMap<T, InventoryData> = mutableMapOf()
 
     protected val mutex: Mutex = Mutex()
 
@@ -31,8 +41,15 @@ public abstract class DedicatedGUI<T> : GUI() {
         val key = getKey(client)
         val inventory = getOrCreateInventory(key)
 
-        val player = client.requirePlayer()
-        player.openInventory(inventory)
+        val player = client.player
+        // We open the inventory out of the mutex to avoid blocking operation from registered Listener.
+        if (player?.openInventory(inventory) == null) {
+            // If the opening was cancelled (null returned),
+            // We need to unregister the client from the GUI
+            // and maybe close the inventory if it is individual.
+            close(client, true)
+            return false
+        }
 
         return true
     }
@@ -45,29 +62,44 @@ public abstract class DedicatedGUI<T> : GUI() {
      */
     private suspend fun getOrCreateInventory(key: T): Inventory {
         return mutex.withLock {
-            inventories[key] ?: createInventory(key).also {
-                inventories[key] = it
+            val loadedInventory = inventories[key]
+            if (loadedInventory != null) {
+                return@withLock loadedInventory.inventory
+            }
 
-                val coroutineScopeLoading = coroutineScopeFill(key)
-                coroutineScopeLoading.launch {
-                    val fillJob = coroutineScopeLoading.async {
-                        createInventoryContents(key, it)
-                    }
+            val inventory = createInventory(key)
+            // Start the fill asynchronously to avoid blocking the other inventory creation with the mutex.
+            val loadingJob = startLoadingInventory(key, inventory)
+            inventories[key] = InventoryData(inventory, loadingJob)
 
-                    val loadingAnimationJob = loadingAnimation(key, it)
-                    // Set the inventory contents only when the fill is done.
-                    // This will erase the loading animation.
-                    it.contents = fillJob.await().also {
-                        loadingAnimationJob.cancel()
-                    }
-                }
+            inventory
+        }
+    }
+
+    /**
+     * Start the asynchronous loading animation and fill the inventory.
+     * @param key Key to create the inventory for.
+     * @param inventory Inventory to fill and animate.
+     * @return The job that can be cancelled to stop the loading animation.
+     */
+    private suspend fun startLoadingInventory(key: T, inventory: Inventory): Job {
+        return loadingScope(key).launch {
+            val fillJob = async {
+                createInventoryContents(key, inventory)
+            }
+
+            val loadingAnimationJob = loadingAnimation?.loading(this, key, inventory)
+            // Set the inventory contents only when the fill is done.
+            // This will erase the loading animation.
+            inventory.contents = fillJob.await().also {
+                loadingAnimationJob?.cancel()
             }
         }
     }
 
     override suspend fun hasInventory(inventory: Inventory): Boolean {
         return mutex.withLock {
-            inventories.values.contains(inventory)
+            inventories.values.any { it.inventory == inventory }
         }
     }
 
@@ -83,7 +115,7 @@ public abstract class DedicatedGUI<T> : GUI() {
      * @return The viewers of the inventory.
      */
     protected open fun unsafeViewers(): List<HumanEntity> {
-        return inventories.values.flatMap(Inventory::getViewers)
+        return inventories.values.asSequence().map { it.inventory }.flatMap(Inventory::getViewers).toList()
     }
 
     override suspend fun contains(client: Client): Boolean {
@@ -100,52 +132,18 @@ public abstract class DedicatedGUI<T> : GUI() {
      */
     protected open fun unsafeContains(client: Client): Boolean {
         val player = client.player ?: return false
-        return inventories.values.any { it.viewers.contains(player) }
+        return inventories.values.any { it.inventory.viewers.contains(player) }
     }
 
     override suspend fun close() {
         super.close()
         mutex.withLock {
-            inventories.values.forEach(Inventory::close)
+            inventories.values.asSequence()
+                .forEach {
+                    it.job.cancel(GUIClosedException("The GUI is closing"))
+                    it.inventory.close()
+                }
             inventories.clear()
-        }
-    }
-
-    /**
-     * Get the items to use for the loading animation.
-     * @return Sequence of ItemStack to use for the loading animation.
-     */
-    protected open fun loadingItems(key: T): Sequence<ItemStack> {
-        return sequence {
-            yield(ItemStack(Material.LIGHT_BLUE_STAINED_GLASS_PANE))
-            yield(ItemStack(Material.BLUE_STAINED_GLASS_PANE))
-            yield(ItemStack(Material.PURPLE_STAINED_GLASS_PANE))
-
-            val blackGlassPaneItem = ItemStack(Material.BLACK_STAINED_GLASS_PANE)
-            yieldAll(generateSequence { blackGlassPaneItem })
-        }
-    }
-
-    /**
-     * Animate the inventory while it is being filled by another coroutine.
-     * @receiver Scope to launch the animation in.
-     * @param inventory Inventory to animate.
-     * @return Job of the animation.
-     */
-    protected open fun CoroutineScope.loadingAnimation(key: T, inventory: Inventory): Job {
-        return launch {
-            val size = inventory.size
-            val contents = arrayOfNulls<ItemStack>(size)
-            loadingItems(key).take(size).forEachIndexed { index, item ->
-                contents[index] = item
-            }
-
-            val contentList = contents.toMutableList()
-            while (isActive) {
-                inventory.contents = contentList.toTypedArray()
-                delay(100)
-                Collections.rotate(contentList, 1)
-            }
         }
     }
 
@@ -186,5 +184,5 @@ public abstract class DedicatedGUI<T> : GUI() {
      * @param key Key to get the coroutine scope for.
      * @return The coroutine scope.
      */
-    protected abstract suspend fun coroutineScopeFill(key: T): CoroutineScope
+    protected abstract suspend fun loadingScope(key: T): CoroutineScope
 }

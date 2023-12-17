@@ -2,6 +2,7 @@ package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
+import kotlinx.coroutines.CancellationException
 import mu.KotlinLogging
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
@@ -14,12 +15,18 @@ private val logger = KotlinLogging.logger {}
 /**
  * Exception concerning the GUI.
  */
-public open class GUIException(message: String) : RuntimeException(message)
+public open class GUIException(message: String) : CancellationException(message)
 
 /**
  * Exception thrown when the GUI is closed.
  */
 public class GUIClosedException(message: String) : GUIException(message)
+
+/**
+ * Exception thrown when the GUI is closed for a specific client.
+ */
+public class GUIClosedForClientException(public val client: Client) :
+    GUIException("GUI closed for client ${client.playerUUID}")
 
 /**
  * GUI that can be shared by multiple players.
