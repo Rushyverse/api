@@ -116,7 +116,7 @@ public abstract class DedicatedGUI<T>(
                         loadingAnimationJob.cancelAndJoin()
 
                         // If the flow was completed successfully, we fill the inventory with the temporary inventory.
-                        if (exception != null) {
+                        if (exception == null) {
                             inventory.contents = temporaryInventory
                         }
                     }.collect { (index, item) -> temporaryInventory[index] = item }
