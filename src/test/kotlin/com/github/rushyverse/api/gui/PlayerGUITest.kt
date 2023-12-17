@@ -284,11 +284,16 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
         return serverMock.createInventory(owner, type)
     }
 
-    override suspend fun fill(client: Client, inventory: Inventory) {
+    override suspend fun fill(key: Client, inventory: Array<ItemStack?>) {
         // Do nothing
     }
 
-    override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
+    override suspend fun onClick(
+        client: Client,
+        clickedInventory: Inventory,
+        clickedItem: ItemStack,
+        event: InventoryClickEvent
+    ) {
         error("Should not be called")
     }
 }
@@ -298,12 +303,17 @@ private class TestFilledGUI(val serverMock: ServerMock) : PlayerGUI() {
         return serverMock.createInventory(owner, InventoryType.CHEST)
     }
 
-    override suspend fun fill(client: Client, inventory: Inventory) {
-        inventory.setItem(0, ItemStack { type = Material.DIAMOND_ORE })
-        inventory.setItem(1, ItemStack { type = Material.STICK })
+    override suspend fun fill(key: Client, inventory: Array<ItemStack?>) {
+        inventory[0] = ItemStack { type = Material.DIAMOND_ORE }
+        inventory[1] = ItemStack { type = Material.STICK }
     }
 
-    override suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent) {
+    override suspend fun onClick(
+        client: Client,
+        clickedInventory: Inventory,
+        clickedItem: ItemStack,
+        event: InventoryClickEvent
+    ) {
         error("Should not be called")
     }
 }

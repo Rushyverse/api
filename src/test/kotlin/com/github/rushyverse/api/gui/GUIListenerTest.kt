@@ -80,7 +80,7 @@ class GUIListenerTest : AbstractKoinTest() {
             }
 
             callEvent(true, player, ItemStack { type = Material.DIRT }, player.inventory)
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
         }
 
         @Test
@@ -92,7 +92,7 @@ class GUIListenerTest : AbstractKoinTest() {
 
             suspend fun callEvent(item: ItemStack?) {
                 val event = callEvent(false, player, item, player.inventory)
-                coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+                coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
                 verify(exactly = 0) { event.cancel() }
             }
 
@@ -114,7 +114,7 @@ class GUIListenerTest : AbstractKoinTest() {
             val item = ItemStack { type = Material.DIRT }
             callEvent(false, player, item, mockk())
 
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
             verify(exactly = 0) { pluginManager.callSuspendingEvent(any(), plugin) }
         }
 
@@ -136,7 +136,7 @@ class GUIListenerTest : AbstractKoinTest() {
             val item = ItemStack { type = Material.DIRT }
 
             callEvent(false, player, item, player.inventory)
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
             verify(exactly = 1) { pluginManager.callSuspendingEvent(any(), plugin) }
             jobs.forEach { it.isCompleted shouldBe true }
 
@@ -153,13 +153,13 @@ class GUIListenerTest : AbstractKoinTest() {
             val inventory = mockk<Inventory>()
             val gui = registerGUI {
                 coEvery { contains(client) } returns true
-                coEvery { onClick(client, any(), any()) } returns Unit
+                coEvery { onClick(client, any(), any(), any()) } returns Unit
                 coEvery { hasInventory(inventory) } returns true
             }
 
             val item = ItemStack { type = Material.DIRT }
             val event = callEvent(false, player, item, inventory)
-            coVerify(exactly = 1) { gui.onClick(client, item, event) }
+            coVerify(exactly = 1) { gui.onClick(client, inventory, item, event) }
             verify(exactly = 1) { event.cancel() }
         }
 
