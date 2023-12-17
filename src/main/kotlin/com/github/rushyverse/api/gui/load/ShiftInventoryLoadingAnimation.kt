@@ -3,11 +3,9 @@ package com.github.rushyverse.api.gui.load
 import java.util.*
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
@@ -28,8 +26,8 @@ public class ShiftInventoryLoadingAnimation<T>(
     private val delay: Duration = 100.milliseconds,
 ) : InventoryLoadingAnimation<T> {
 
-    override fun loading(scope: CoroutineScope, key: T, inventory: Inventory): Job {
-        return scope.launch {
+    override suspend fun loading(key: T, inventory: Inventory) {
+        coroutineScope {
             val size = inventory.size
             val contents = arrayOfNulls<ItemStack>(size)
             // Fill the inventory with the initial items.

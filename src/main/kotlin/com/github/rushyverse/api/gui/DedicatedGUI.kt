@@ -4,13 +4,21 @@ import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.bukkit.entity.HumanEntity
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+
+/**
+ * Pair of an index and an ItemStack.
+ */
+public typealias ItemStackIndex = Pair<Int, ItemStack?>
 
 /**
  * Data class to store the inventory and the loading job.
@@ -35,7 +43,7 @@ public data class InventoryData(
  * @property mutex Mutex to process thread-safe operations.
  */
 public abstract class DedicatedGUI<T>(
-    private val loadingAnimation: InventoryLoadingAnimation<T>? = null,
+    private val inventoryLoadingAnimation: InventoryLoadingAnimation<T>? = null,
 ) : GUI() {
 
     protected var inventories: MutableMap<T, InventoryData> = mutableMapOf()
@@ -89,15 +97,29 @@ public abstract class DedicatedGUI<T>(
      */
     private suspend fun startLoadingInventory(key: T, inventory: Inventory): Job {
         return loadingScope(key).launch {
-            val fillJob = async {
-                createInventoryContents(key, inventory)
-            }
+            val size = inventory.size
+            val inventoryFlowItems = getItemStacks(key, size).cancellable()
 
-            val loadingAnimationJob = loadingAnimation?.loading(this, key, inventory)
-            // Set the inventory contents only when the fill is done.
-            // This will erase the loading animation.
-            inventory.contents = fillJob.await().also {
-                loadingAnimationJob?.cancel()
+            if (inventoryLoadingAnimation == null) {
+                // Will fill the inventory bit by bit.
+                inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }
+            } else {
+                val loadingAnimationJob = launch { inventoryLoadingAnimation.loading(key, inventory) }
+
+                // To avoid conflicts with the loading animation,
+                // we need to store the items in a temporary inventory
+                val temporaryInventory = arrayOfNulls<ItemStack>(size)
+
+                inventoryFlowItems
+                    .onCompletion { exception ->
+                        // When the flow is finished, we cancel the loading animation.
+                        loadingAnimationJob.cancelAndJoin()
+
+                        // If the flow was completed successfully, we fill the inventory with the temporary inventory.
+                        if (exception != null) {
+                            inventory.contents = temporaryInventory
+                        }
+                    }.collect { (index, item) -> temporaryInventory[index] = item }
             }
         }
     }
@@ -163,17 +185,6 @@ public abstract class DedicatedGUI<T>(
     }
 
     /**
-     * Create a new array of ItemStack to fill the inventory later.
-     * This function is used to avoid conflicts when filling the inventory and the loading animation.
-     * @param inventory Inventory to fill.
-     * @param key Key to fill the inventory for.
-     * @return New created array of ItemStack that will be set to the inventory.
-     */
-    private suspend fun createInventoryContents(key: T, inventory: Inventory): Array<ItemStack?> {
-        return arrayOfNulls<ItemStack>(inventory.size).apply { fill(key, this) }
-    }
-
-    /**
      * Get the key linked to the client to interact with the GUI.
      * @param client Client to get the key for.
      * @return The key.
@@ -190,9 +201,10 @@ public abstract class DedicatedGUI<T>(
     /**
      * Fill the inventory for the key.
      * @param key Key to fill the inventory for.
-     * @param inventory Inventory to fill.
+     * @param size Size of the inventory.
+     * @return Flow of ItemStack to fill the inventory with.
      */
-    protected abstract suspend fun fill(key: T, inventory: Array<ItemStack?>)
+    protected abstract fun getItemStacks(key: T, size: Int): Flow<ItemStackIndex>
 
     /**
      * Get the coroutine scope to fill the inventory and the loading animation.
