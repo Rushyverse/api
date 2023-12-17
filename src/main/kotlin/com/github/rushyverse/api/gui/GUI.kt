@@ -25,6 +25,7 @@ public class GUIClosedException(message: String) : GUIException(message)
 
 /**
  * Exception thrown when the GUI is closed for a specific client.
+ * @property client Client for which the GUI is closed.
  */
 public class GUIClosedForClientException(public val client: Client) :
     GUIException("GUI closed for client ${client.playerUUID}")
