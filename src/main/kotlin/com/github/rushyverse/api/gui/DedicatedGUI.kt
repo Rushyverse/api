@@ -17,11 +17,16 @@ import org.bukkit.inventory.ItemStack
  * Can be used to cancel the loading job if the inventory is closed.
  * @property inventory Inventory created.
  * @property job Loading job to fill & animate the loading of the inventory.
+ * @property isLoading If true, the inventory is loading; otherwise it is filled or cancelled.
  */
 public data class InventoryData(
     val inventory: Inventory,
     val job: Job,
-)
+) {
+
+    val isLoading: Boolean get() = job.isActive
+
+}
 
 /**
  * GUI where a new inventory is created for each key used.
@@ -103,6 +108,17 @@ public abstract class DedicatedGUI<T>(
         }
     }
 
+    /**
+     * Check if the inventory is loading.
+     * @param inventory Inventory to check.
+     * @return True if the inventory is loading, false otherwise.
+     */
+    protected suspend fun isInventoryLoading(inventory: Inventory): Boolean {
+        return mutex.withLock {
+            inventories.values.firstOrNull { it.inventory == inventory }?.isLoading == true
+        }
+    }
+
     override suspend fun viewers(): List<HumanEntity> {
         return mutex.withLock {
             unsafeViewers()
@@ -138,11 +154,10 @@ public abstract class DedicatedGUI<T>(
     override suspend fun close() {
         super.close()
         mutex.withLock {
-            inventories.values.asSequence()
-                .forEach {
-                    it.job.cancel(GUIClosedException("The GUI is closing"))
-                    it.inventory.close()
-                }
+            inventories.values.forEach {
+                it.job.cancel(GUIClosedException("The GUI is closing"))
+                it.inventory.close()
+            }
             inventories.clear()
         }
     }

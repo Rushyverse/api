@@ -4,6 +4,7 @@ import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
 import kotlinx.coroutines.CancellationException
 import mu.KotlinLogging
+import org.bukkit.Material
 import org.bukkit.Server
 import org.bukkit.entity.HumanEntity
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -85,10 +86,16 @@ public abstract class GUI {
     /**
      * Action to do when the client clicks on an item in the inventory.
      * @param client Client who clicked.
-     * @param clickedItem Item clicked by the client.
+     * @param clickedItem Item clicked by the client cannot be null or [AIR][Material.AIR]
+     * @param clickedInventory Inventory where the click was detected.
      * @param event Event of the click.
      */
-    public abstract suspend fun onClick(client: Client, clickedItem: ItemStack, event: InventoryClickEvent)
+    public abstract suspend fun onClick(
+        client: Client,
+        clickedInventory: Inventory,
+        clickedItem: ItemStack,
+        event: InventoryClickEvent
+    )
 
     /**
      * Remove the client has a viewer of the GUI.
@@ -104,6 +111,19 @@ public abstract class GUI {
      * @return True if the GUI contains the inventory, false otherwise.
      */
     public abstract suspend fun hasInventory(inventory: Inventory): Boolean
+
+    /**
+     * Get the viewers of the GUI.
+     * @return List of viewers.
+     */
+    public abstract suspend fun viewers(): List<HumanEntity>
+
+    /**
+     * Check if the GUI contains the player.
+     * @param client Client to check.
+     * @return True if the GUI contains the player, false otherwise.
+     */
+    public abstract suspend fun contains(client: Client): Boolean
 
     /**
      * Close the inventory.
@@ -122,19 +142,6 @@ public abstract class GUI {
     private fun requireOpen() {
         if (isClosed) throw GUIClosedException("Cannot use a closed GUI")
     }
-
-    /**
-     * Get the viewers of the GUI.
-     * @return List of viewers.
-     */
-    public abstract suspend fun viewers(): List<HumanEntity>
-
-    /**
-     * Check if the GUI contains the player.
-     * @param client Client to check.
-     * @return True if the GUI contains the player, false otherwise.
-     */
-    public abstract suspend fun contains(client: Client): Boolean
 
     /**
      * Register the GUI to the listener.

@@ -42,8 +42,10 @@ public class GUIListener(private val plugin: Plugin) : Listener {
         if (event.isCancelled) return
 
         val item = event.currentItem
+        // If the item is null or air, we should ignore the click
         if (item == null || item.type == Material.AIR) return
 
+        // If the click is not in an inventory, this is not a GUI click
         val clickedInventory = event.clickedInventory ?: return
 
         val player = event.whoClicked
@@ -75,7 +77,7 @@ public class GUIListener(private val plugin: Plugin) : Listener {
 
         // The item in a GUI is not supposed to be moved
         event.cancel()
-        gui.onClick(client, item, event)
+        gui.onClick(client, clickedInventory, item, event)
     }
 
     /**
@@ -137,6 +139,7 @@ public class GUIListener(private val plugin: Plugin) : Listener {
         val client = clients.getClientOrNull(player)
         val gui = client?.gui() ?: return
         // We don't close the inventory because it is closing due to event.
+        // That avoid a infinite loop of events and consequently a stack overflow.
         gui.close(client, false)
     }
 
