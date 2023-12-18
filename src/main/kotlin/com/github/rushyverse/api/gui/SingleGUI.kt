@@ -20,12 +20,16 @@ import org.bukkit.plugin.Plugin
 public abstract class SingleGUI(
     protected val plugin: Plugin,
     loadingAnimation: InventoryLoadingAnimation<Any>? = null
-) : GUI<Any>(loadingAnimation) {
+) : GUI<Any>(
+    loadingAnimation = loadingAnimation,
+    initialNumberInventories = 1
+) {
 
     public companion object {
         /**
          * Unique key for the GUI.
          * This GUI is shared by all the players, so the key is the same for all of them.
+         * That allows creating a unique inventory.
          */
         private val KEY = Any()
     }

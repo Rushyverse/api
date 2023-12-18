@@ -2,6 +2,7 @@ package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
+import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.shynixn.mccoroutine.bukkit.scope
 import java.util.*
 import kotlinx.coroutines.CoroutineScope
@@ -21,8 +22,12 @@ import org.bukkit.plugin.Plugin
  */
 public abstract class LocaleGUI(
     protected val plugin: Plugin,
-    loadingAnimation: InventoryLoadingAnimation<Locale>? = null
-) : GUI<Locale>(loadingAnimation) {
+    loadingAnimation: InventoryLoadingAnimation<Locale>? = null,
+    initialNumberInventories: Int = SupportedLanguage.entries.size
+) : GUI<Locale>(
+    loadingAnimation = loadingAnimation,
+    initialNumberInventories = initialNumberInventories
+) {
 
     override suspend fun getKey(client: Client): Locale {
         return client.lang().locale

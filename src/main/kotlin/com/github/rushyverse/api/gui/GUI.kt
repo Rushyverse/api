@@ -70,7 +70,8 @@ public class GUIClosedForClientException(public val client: Client) :
  * @property isClosed If true, the GUI is closed; otherwise it is open.
  */
 public abstract class GUI<T>(
-    private val inventoryLoadingAnimation: InventoryLoadingAnimation<T>? = null,
+    private val loadingAnimation: InventoryLoadingAnimation<T>? = null,
+    initialNumberInventories: Int = 16,
 ) {
 
     protected val server: Server by inject()
@@ -80,7 +81,7 @@ public abstract class GUI<T>(
     public var isClosed: Boolean = false
         protected set
 
-    protected var inventories: MutableMap<T, InventoryData> = mutableMapOf()
+    protected var inventories: MutableMap<T, InventoryData> = HashMap(initialNumberInventories)
 
     protected val mutex: Mutex = Mutex()
 
@@ -173,11 +174,11 @@ public abstract class GUI<T>(
             val size = inventory.size
             val inventoryFlowItems = getItemStacks(key, size).cancellable()
 
-            if (inventoryLoadingAnimation == null) {
+            if (loadingAnimation == null) {
                 // Will fill the inventory bit by bit.
                 inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }
             } else {
-                val loadingAnimationJob = launch { inventoryLoadingAnimation.loading(key, inventory) }
+                val loadingAnimationJob = launch { loadingAnimation.loading(key, inventory) }
 
                 // To avoid conflicts with the loading animation,
                 // we need to store the items in a temporary inventory
@@ -239,7 +240,7 @@ public abstract class GUI<T>(
      * Get the viewers of the GUI.
      * @return List of viewers.
      */
-    public open suspend fun viewers(): List<HumanEntity> {
+    public open suspend fun viewers(): Sequence<HumanEntity> {
         return mutex.withLock {
             unsafeViewers()
         }
@@ -250,8 +251,8 @@ public abstract class GUI<T>(
      * This function is not thread-safe.
      * @return The viewers of the inventory.
      */
-    protected open fun unsafeViewers(): List<HumanEntity> {
-        return inventories.values.asSequence().map { it.inventory }.flatMap(Inventory::getViewers).toList()
+    protected open fun unsafeViewers(): Sequence<HumanEntity> {
+        return inventories.values.asSequence().map { it.inventory }.flatMap(Inventory::getViewers)
     }
 
     /**
@@ -273,7 +274,7 @@ public abstract class GUI<T>(
      */
     protected open fun unsafeContains(client: Client): Boolean {
         val player = client.player ?: return false
-        return inventories.values.any { it.inventory.viewers.contains(player) }
+        return unsafeViewers().any { it == player }
     }
 
     /**

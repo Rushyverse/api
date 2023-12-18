@@ -16,7 +16,7 @@ import org.bukkit.inventory.InventoryHolder
  */
 public abstract class PlayerGUI(
     loadingAnimation: InventoryLoadingAnimation<Client>? = null
-) : GUI<Client>(loadingAnimation) {
+) : GUI<Client>(loadingAnimation = loadingAnimation) {
 
     override suspend fun getKey(client: Client): Client {
         return client
