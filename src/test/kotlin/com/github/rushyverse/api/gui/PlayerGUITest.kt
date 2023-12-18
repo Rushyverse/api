@@ -169,7 +169,6 @@ class PlayerGUITest : AbstractKoinTest() {
             }
 
             val content = inventory.contents
-            println(content.contentToString())
             content[0]!!.type shouldBe Material.DIAMOND_ORE
             content[1]!!.type shouldBe Material.STICK
 
