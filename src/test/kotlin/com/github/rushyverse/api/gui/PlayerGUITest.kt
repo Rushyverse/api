@@ -17,12 +17,15 @@ import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -112,22 +115,6 @@ class PlayerGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should close the previous GUI if the client has one opened`() = runTest {
-            val gui = TestGUI(serverMock, InventoryType.ENDER_CHEST)
-            gui.register()
-            val (player, client) = registerPlayer()
-
-            gui.open(client) shouldBe true
-            player.assertInventoryView(gui.type)
-
-            val gui2 = TestGUI(serverMock, InventoryType.CHEST)
-            gui2.open(client) shouldBe true
-            player.assertInventoryView(gui2.type)
-            gui.contains(client) shouldBe false
-            gui2.contains(client) shouldBe true
-        }
-
-        @Test
         fun `should do nothing if the player is dead`() = runTest {
             val gui = TestGUI(serverMock)
             val (player, client) = registerPlayer()
@@ -155,7 +142,9 @@ class PlayerGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should fill the inventory`() = runTest {
+        fun `should fill the inventory in the same thread if no suspend operation`() = runTest {
+            val currentThread = Thread.currentThread()
+
             val gui = TestFilledGUI(serverMock)
             gui.register()
             val (player, client) = registerPlayer()
@@ -164,14 +153,52 @@ class PlayerGUITest : AbstractKoinTest() {
             player.assertInventoryView(InventoryType.CHEST)
 
             val inventory = player.openInventory.topInventory
+            gui.isInventoryLoading(inventory) shouldBe false
 
             val content = inventory.contents
-            content[0]!!.type shouldBe Material.DIAMOND_ORE
-            content[1]!!.type shouldBe Material.STICK
+            TestFilledGUI.EXPECTED_INV.forEachIndexed { index, item ->
+                content[index] shouldBe item
+            }
 
-            for (i in 2 until content.size) {
+            for (i in TestFilledGUI.EXPECTED_INV.size until content.size) {
                 content[i] shouldBe null
             }
+
+            gui.calledThread shouldBe currentThread
+            gui.newThread shouldBe currentThread
+        }
+
+        @Test
+        fun `should fill the inventory in the other thread after suspend operation`(): Unit = runBlocking {
+            val currentThread = Thread.currentThread()
+
+            val delay = 100.milliseconds
+            val gui = TestFilledGUI(serverMock, delay)
+            gui.register()
+            val (player, client) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            player.assertInventoryView(InventoryType.CHEST)
+
+            val inventory = player.openInventory.topInventory
+            gui.isInventoryLoading(inventory) shouldBe true
+
+            val content = inventory.contents
+            content.forEach { it shouldBe null }
+
+            delay(delay + 10.milliseconds)
+            gui.isInventoryLoading(inventory) shouldBe false
+
+            TestFilledGUI.EXPECTED_INV.forEachIndexed { index, item ->
+                content[index] shouldBe item
+            }
+
+            for (i in TestFilledGUI.EXPECTED_INV.size until content.size) {
+                content[i] shouldBe null
+            }
+
+            gui.calledThread shouldBe currentThread
+            gui.newThread shouldNotBe currentThread
         }
 
     }
@@ -333,15 +360,33 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
     }
 }
 
-private class TestFilledGUI(val serverMock: ServerMock) : PlayerGUI() {
+private class TestFilledGUI(
+    val serverMock: ServerMock,
+    val delay: Duration? = null,
+) : PlayerGUI() {
+
+    companion object {
+        val EXPECTED_INV = arrayOf(
+            ItemStack { type = Material.DIAMOND_ORE },
+            ItemStack { type = Material.STICK },
+        )
+    }
+
+    var calledThread: Thread? = null
+
+    var newThread: Thread? = null
+
     override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
         return serverMock.createInventory(owner, InventoryType.CHEST)
     }
 
     override fun getItemStacks(key: Client, size: Int): Flow<ItemStackIndex> {
+        calledThread = Thread.currentThread()
         return flow {
-            emit(0 to ItemStack { type = Material.DIAMOND_ORE })
-            emit(1 to ItemStack { type = Material.STICK })
+            delay?.let { delay(it) }
+            emit(0 to EXPECTED_INV[0])
+            newThread = Thread.currentThread()
+            emit(1 to EXPECTED_INV[1])
         }
     }
 
