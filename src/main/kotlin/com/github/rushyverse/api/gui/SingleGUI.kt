@@ -5,9 +5,11 @@ import com.github.rushyverse.api.player.Client
 import com.github.shynixn.mccoroutine.bukkit.scope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.Plugin
 
 /**
@@ -33,10 +35,23 @@ public abstract class SingleGUI(
         private val KEY = Any()
     }
 
+    override suspend fun getKey(client: Client): Any {
+        return KEY
+    }
+
     override suspend fun fillScope(key: Any): CoroutineScope {
         val scope = plugin.scope
         return scope + SupervisorJob(scope.coroutineContext.job)
     }
+
+    override fun createInventory(key: Any): Inventory {
+        return createInventory()
+    }
+
+    /**
+     * @see createInventory(key)
+     */
+    protected abstract fun createInventory(): Inventory
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
         return if (closeInventory && contains(client)) {
@@ -45,7 +60,12 @@ public abstract class SingleGUI(
         } else false
     }
 
-    override suspend fun getKey(client: Client): Any {
-        return KEY
+    override fun getItems(key: Any, size: Int): Flow<ItemStackIndex> {
+        return getItems(size)
     }
+
+    /**
+     * @see getItems(key, size)
+     */
+    protected abstract fun getItems(size: Int): Flow<ItemStackIndex>
 }

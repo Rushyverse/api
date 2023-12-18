@@ -32,7 +32,7 @@ public abstract class PlayerGUI(
      * @param key The client to create the inventory for.
      * @return The inventory for the client.
      */
-    override suspend fun createInventory(key: Client): Inventory {
+    override fun createInventory(key: Client): Inventory {
         val player = key.requirePlayer()
         return createInventory(player, key)
     }
