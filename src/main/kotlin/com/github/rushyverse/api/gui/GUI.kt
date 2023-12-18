@@ -1,8 +1,18 @@
 package com.github.rushyverse.api.gui
 
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.cancellable
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import mu.KotlinLogging
 import org.bukkit.Material
 import org.bukkit.Server
@@ -10,6 +20,27 @@ import org.bukkit.entity.HumanEntity
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+
+/**
+ * Pair of an index and an ItemStack.
+ */
+public typealias ItemStackIndex = Pair<Int, ItemStack?>
+
+/**
+ * Data class to store the inventory and the loading job.
+ * Can be used to cancel the loading job if the inventory is closed.
+ * @property inventory Inventory created.
+ * @property job Loading job to fill & animate the loading of the inventory.
+ * @property isLoading If true, the inventory is loading; otherwise it is filled or cancelled.
+ */
+public data class InventoryData(
+    val inventory: Inventory,
+    val job: Job,
+) {
+
+    val isLoading: Boolean get() = job.isActive
+
+}
 
 private val logger = KotlinLogging.logger {}
 
@@ -37,14 +68,34 @@ public class GUIClosedForClientException(public val client: Client) :
  * @property manager Manager to register or unregister the GUI.
  * @property isClosed If true, the GUI is closed; otherwise it is open.
  */
-public abstract class GUI {
+public abstract class GUI<T>(
+    private val inventoryLoadingAnimation: InventoryLoadingAnimation<T>? = null,
+) {
 
     protected val server: Server by inject()
 
-    private val manager: GUIManager by inject()
+    protected val manager: GUIManager by inject()
 
     public var isClosed: Boolean = false
         protected set
+
+    protected var inventories: MutableMap<T, InventoryData> = mutableMapOf()
+
+    protected val mutex: Mutex = Mutex()
+
+    /**
+     * Get the key linked to the client to interact with the GUI.
+     * @param client Client to get the key for.
+     * @return The key.
+     */
+    protected abstract suspend fun getKey(client: Client): T
+
+    /**
+     * Get the coroutine scope to fill the inventory and the loading animation.
+     * @param key Key to get the coroutine scope for.
+     * @return The coroutine scope.
+     */
+    protected abstract suspend fun loadingScope(key: T): CoroutineScope
 
     /**
      * Open the GUI for the client only if the GUI is not closed.
@@ -56,11 +107,6 @@ public abstract class GUI {
     public suspend fun open(client: Client): Boolean {
         requireOpen()
 
-        val gui = client.gui()
-        if (gui === this) return false
-        // If the client has another GUI opened, close it.
-        gui?.close(client, true)
-
         val player = client.player
         if (player === null) {
             logger.warn { "Cannot open inventory for player ${client.playerUUID}: player is null" }
@@ -69,16 +115,219 @@ public abstract class GUI {
         // If the player is dead, do not open the GUI because the interface cannot be shown to the player.
         if (player.isDead) return false
 
-        return openGUI(client)
+        val gui = client.gui()
+        if (gui === this) return false
+
+        // Here we don't need
+        // to force to close the GUI because the GUI is closed when the player opens another inventory
+        // (if not cancelled).
+
+        val key = getKey(client)
+        val inventory = getOrCreateInventory(key)
+
+        // We open the inventory out of the mutex to avoid blocking operation from registered Listener.
+        if (player.openInventory(inventory) == null) {
+            // If the opening was cancelled (null returned),
+            // We need to unregister the client from the GUI
+            // and maybe close the inventory if it is individual.
+            close(client, false)
+            return false
+        }
+
+        return true
     }
 
     /**
-     * Open the GUI for the client.
-     * Called by [open] after all the checks.
-     * @param client Client to open the GUI for.
-     * @return True if the GUI was opened, false otherwise.
+     * Get the inventory for the key.
+     * If the inventory does not exist, create it.
+     * @param key Key to get the inventory for.
+     * @return The inventory for the key.
      */
-    protected abstract suspend fun openGUI(client: Client): Boolean
+    private suspend fun getOrCreateInventory(key: T): Inventory {
+        return mutex.withLock {
+            val loadedInventory = inventories[key]
+            if (loadedInventory != null) {
+                return@withLock loadedInventory.inventory
+            }
+
+            val inventory = createInventory(key)
+            // Start the fill asynchronously to avoid blocking the other inventory creation with the mutex.
+            val loadingJob = startLoadingInventory(key, inventory)
+            inventories[key] = InventoryData(inventory, loadingJob)
+
+            inventory
+        }
+    }
+
+    /**
+     * Start the asynchronous loading animation and fill the inventory.
+     * @param key Key to create the inventory for.
+     * @param inventory Inventory to fill and animate.
+     * @return The job that can be cancelled to stop the loading animation.
+     */
+    private suspend fun startLoadingInventory(key: T, inventory: Inventory): Job {
+        return loadingScope(key).launch {
+            val size = inventory.size
+            val inventoryFlowItems = getItemStacks(key, size).cancellable()
+
+            // If no suspend operation is used in the flow, the fill will be done in the same tick.
+            if (inventoryLoadingAnimation == null) {
+                // Will fill the inventory bit by bit.
+                inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }
+            } else {
+                val loadingAnimationJob = launch { inventoryLoadingAnimation.loading(key, inventory) }
+
+                // To avoid conflicts with the loading animation,
+                // we need to store the items in a temporary inventory
+                val temporaryInventory = arrayOfNulls<ItemStack>(size)
+
+                inventoryFlowItems
+                    .onCompletion { exception ->
+                        // When the flow is finished, we cancel the loading animation.
+                        loadingAnimationJob.cancelAndJoin()
+
+                        // If the flow was completed successfully, we fill the inventory with the temporary inventory.
+                        if (exception == null) {
+                            inventory.contents = temporaryInventory
+                        }
+                    }.collect { (index, item) -> temporaryInventory[index] = item }
+            }
+        }
+    }
+
+    /**
+     * Create the inventory for the key.
+     * @param key Key to create the inventory for.
+     * @return New created inventory.
+     */
+    protected abstract suspend fun createInventory(key: T): Inventory
+
+    /**
+     * Fill the inventory for the key.
+     * @param key Key to fill the inventory for.
+     * @param size Size of the inventory.
+     * @return Flow of ItemStack to fill the inventory with.
+     */
+    protected abstract fun getItemStacks(key: T, size: Int): Flow<ItemStackIndex>
+
+    /**
+     * Check if the GUI contains the inventory.
+     * @param inventory Inventory to check.
+     * @return True if the GUI contains the inventory, false otherwise.
+     */
+    public open suspend fun hasInventory(inventory: Inventory): Boolean {
+        return mutex.withLock {
+            inventories.values.any { it.inventory == inventory }
+        }
+    }
+
+    /**
+     * Check if the inventory is loading.
+     * @param inventory Inventory to check.
+     * @return True if the inventory is loading (all the items are not loaded),
+     * false if the inventory is loaded or not present in the GUI.
+     */
+    public open suspend fun isInventoryLoading(inventory: Inventory): Boolean {
+        return mutex.withLock {
+            inventories.values.firstOrNull { it.inventory == inventory }?.isLoading == true
+        }
+    }
+
+    /**
+     * Get the viewers of the GUI.
+     * @return List of viewers.
+     */
+    public open suspend fun viewers(): List<HumanEntity> {
+        return mutex.withLock {
+            unsafeViewers()
+        }
+    }
+
+    /**
+     * Get the viewers of the inventory.
+     * This function is not thread-safe.
+     * @return The viewers of the inventory.
+     */
+    protected open fun unsafeViewers(): List<HumanEntity> {
+        return inventories.values.asSequence().map { it.inventory }.flatMap(Inventory::getViewers).toList()
+    }
+
+    /**
+     * Check if the GUI contains the player.
+     * @param client Client to check.
+     * @return True if the GUI contains the player, false otherwise.
+     */
+    public open suspend fun contains(client: Client): Boolean {
+        return mutex.withLock {
+            unsafeContains(client)
+        }
+    }
+
+    /**
+     * Check if the GUI contains the client.
+     * This function is not thread-safe.
+     * @param client Client to check.
+     * @return True if the GUI contains the client, false otherwise.
+     */
+    protected open fun unsafeContains(client: Client): Boolean {
+        val player = client.player ?: return false
+        return inventories.values.any { it.inventory.viewers.contains(player) }
+    }
+
+    /**
+     * Close the inventory.
+     * The inventory will be closed for all the viewers.
+     * The GUI will be removed from the listener and the [onClick] function will not be called anymore.
+     */
+    public open suspend fun close() {
+        isClosed = true
+        unregister()
+
+        mutex.withLock {
+            inventories.values.forEach {
+                it.job.apply {
+                    cancel(GUIClosedException("The GUI is closing"))
+                    join()
+                }
+                it.inventory.close()
+            }
+            inventories.clear()
+        }
+    }
+
+    /**
+     * Remove the client has a viewer of the GUI.
+     * @param client Client to close the GUI for.
+     * @param closeInventory If true, the interface will be closed, otherwise it will be kept open.
+     * @return True if the inventory was closed, false otherwise.
+     */
+    public abstract suspend fun close(client: Client, closeInventory: Boolean = true): Boolean
+
+    /**
+     * Verify that the GUI is open.
+     * If the GUI is closed, throw an exception.
+     */
+    private fun requireOpen() {
+        if (isClosed) throw GUIClosedException("Cannot use a closed GUI")
+    }
+
+    /**
+     * Register the GUI to the listener.
+     * @return True if the GUI was registered, false otherwise.
+     */
+    public open suspend fun register(): Boolean {
+        requireOpen()
+        return manager.add(this)
+    }
+
+    /**
+     * Unregister the GUI from the listener.
+     * Should be called when the GUI is closed with [close].
+     * @return True if the GUI was unregistered, false otherwise.
+     */
+    protected open suspend fun unregister(): Boolean {
+        return manager.remove(this)
+    }
 
     /**
      * Action to do when the client clicks on an item in the inventory.
@@ -93,76 +342,4 @@ public abstract class GUI {
         clickedItem: ItemStack,
         event: InventoryClickEvent
     )
-
-    /**
-     * Remove the client has a viewer of the GUI.
-     * @param client Client to close the GUI for.
-     * @param closeInventory If true, the interface will be closed, otherwise it will be kept open.
-     * @return True if the inventory was closed, false otherwise.
-     */
-    public abstract suspend fun close(client: Client, closeInventory: Boolean = true): Boolean
-
-    /**
-     * Check if the GUI contains the inventory.
-     * @param inventory Inventory to check.
-     * @return True if the GUI contains the inventory, false otherwise.
-     */
-    public abstract suspend fun hasInventory(inventory: Inventory): Boolean
-
-    /**
-     * Check if the inventory is loading.
-     * @param inventory Inventory to check.
-     * @return True if the inventory is loading, false otherwise.
-     */
-    public abstract suspend fun isInventoryLoading(inventory: Inventory): Boolean
-
-    /**
-     * Get the viewers of the GUI.
-     * @return List of viewers.
-     */
-    public abstract suspend fun viewers(): List<HumanEntity>
-
-    /**
-     * Check if the GUI contains the player.
-     * @param client Client to check.
-     * @return True if the GUI contains the player, false otherwise.
-     */
-    public abstract suspend fun contains(client: Client): Boolean
-
-    /**
-     * Close the inventory.
-     * The inventory will be closed for all the viewers.
-     * The GUI will be removed from the listener and the [onClick] function will not be called anymore.
-     */
-    public open suspend fun close() {
-        isClosed = true
-        unregister()
-    }
-
-    /**
-     * Verify that the GUI is open.
-     * If the GUI is closed, throw an exception.
-     */
-    private fun requireOpen() {
-        if (isClosed) throw GUIClosedException("Cannot use a closed GUI")
-    }
-
-    /**
-     * Register the GUI to the listener.
-     * @return True if the GUI was registered, false otherwise.
-     */
-    public suspend fun register(): Boolean {
-        requireOpen()
-        return manager.add(this)
-    }
-
-    /**
-     * Unregister the GUI from the listener.
-     * Should be called when the GUI is closed with [close].
-     * @return True if the GUI was unregistered, false otherwise.
-     */
-    protected suspend fun unregister(): Boolean {
-        return manager.remove(this)
-    }
-
 }

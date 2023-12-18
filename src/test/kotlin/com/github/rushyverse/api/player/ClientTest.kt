@@ -10,13 +10,17 @@ import com.github.rushyverse.api.player.exception.PlayerNotFoundException
 import io.kotest.matchers.shouldBe
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.coroutines.CoroutineScope
-import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.assertThrows
 
 class ClientTest : AbstractKoinTest() {
 
@@ -75,7 +79,7 @@ class ClientTest : AbstractKoinTest() {
     }
 
     @Nested
-    inner class GetGUI  {
+    inner class GetGUI {
 
         @Test
         fun `get GUI returns null if no GUI is registered`() = runTest {
@@ -86,7 +90,7 @@ class ClientTest : AbstractKoinTest() {
         @Test
         fun `get GUI returns null if no GUI contains the client`() = runTest {
             val client = Client(player.uniqueId, CoroutineScope(EmptyCoroutineContext))
-            val gui = mockk<GUI> {
+            val gui = mockk<GUI<*>> {
                 coEvery { contains(client) } returns false
             }
             guiManager.add(gui)
@@ -96,7 +100,7 @@ class ClientTest : AbstractKoinTest() {
         @Test
         fun `get GUI returns GUI if contains the client`() = runTest {
             val client = Client(player.uniqueId, CoroutineScope(EmptyCoroutineContext))
-            val gui = mockk<GUI> {
+            val gui = mockk<GUI<*>> {
                 coEvery { contains(client) } returns true
             }
             guiManager.add(gui)

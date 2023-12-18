@@ -81,6 +81,6 @@ public open class Client(
      * Get the opened GUI of the player.
      * @return The opened GUI of the player.
      */
-    public suspend fun gui(): GUI? = guiManager.get(this)
+    public suspend fun gui(): GUI<*>? = guiManager.get(this)
 
 }

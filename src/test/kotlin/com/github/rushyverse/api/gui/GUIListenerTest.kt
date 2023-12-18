@@ -228,8 +228,8 @@ class GUIListenerTest : AbstractKoinTest() {
         return player to client
     }
 
-    private suspend inline fun registerGUI(block: GUI.() -> Unit): GUI {
-        val gui = mockk<GUI>(block = block)
+    private suspend inline fun registerGUI(block: GUI<*>.() -> Unit): GUI<*> {
+        val gui = mockk<GUI<*>>(block = block)
         guiManager.add(gui)
         return gui
     }

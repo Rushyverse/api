@@ -20,9 +20,9 @@ import org.bukkit.plugin.Plugin
  * If one of them changes their language, he will have another inventory dedicated to his new language.
  */
 public abstract class LocaleGUI(
-    private val plugin: Plugin,
+    protected val plugin: Plugin,
     loadingAnimation: InventoryLoadingAnimation<Locale>? = null
-) : DedicatedGUI<Locale>(loadingAnimation) {
+) : GUI<Locale>(loadingAnimation) {
 
     override suspend fun getKey(client: Client): Locale {
         return client.lang().locale

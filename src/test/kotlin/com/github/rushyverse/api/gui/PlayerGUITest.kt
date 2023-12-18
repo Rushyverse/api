@@ -23,7 +23,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -166,7 +165,7 @@ class PlayerGUITest : AbstractKoinTest() {
 
             val inventory = player.openInventory.topInventory
             while (gui.isInventoryLoading(inventory)) {
-                delay(100)
+                delay(10)
             }
 
             val content = inventory.contents

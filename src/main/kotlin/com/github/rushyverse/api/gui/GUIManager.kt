@@ -18,12 +18,12 @@ public class GUIManager {
     /**
      * Private mutable set storing GUIs.
      */
-    private val _guis = mutableSetOf<GUI>()
+    private val _guis = mutableSetOf<GUI<*>>()
 
     /**
      * Immutable view of the GUIs set.
      */
-    public val guis: Collection<GUI> get() = _guis
+    public val guis: Collection<GUI<*>> get() = _guis
 
     /**
      * Retrieves the GUI for the specified player.
@@ -32,9 +32,9 @@ public class GUIManager {
      * @param client The player for whom the GUI is to be retrieved or created.
      * @return The language associated with the player.
      */
-    public suspend fun get(client: Client): GUI? {
+    public suspend fun get(client: Client): GUI<*>? {
         return mutex.withLock {
-            _guis.firstOrNull { it.contains(client) }
+            guis.firstOrNull { it.contains(client) }
         }
     }
 
@@ -43,7 +43,7 @@ public class GUIManager {
      * @param gui GUI to add.
      * @return True if the GUI was added, false otherwise.
      */
-    public suspend fun add(gui: GUI): Boolean {
+    public suspend fun add(gui: GUI<*>): Boolean {
         return mutex.withLock { _guis.add(gui) }
     }
 
@@ -52,7 +52,7 @@ public class GUIManager {
      * @param gui GUI to remove.
      * @return True if the GUI was removed, false otherwise.
      */
-    public suspend fun remove(gui: GUI): Boolean {
+    public suspend fun remove(gui: GUI<*>): Boolean {
         return mutex.withLock { _guis.remove(gui) }
     }
 }
