@@ -9,7 +9,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
-import kotlinx.coroutines.sync.withLock
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.plugin.Plugin
 
@@ -39,15 +38,9 @@ public abstract class LocaleGUI(
     }
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
-        if (!closeInventory) {
-            return false
-        }
-
-        return mutex.withLock {
-            if (unsafeContains(client)) {
-                client.player?.closeInventory(InventoryCloseEvent.Reason.PLUGIN)
-                true
-            } else false
-        }
+        return if (closeInventory && contains(client)) {
+            client.player?.closeInventory(InventoryCloseEvent.Reason.PLUGIN)
+            true
+        } else false
     }
 }

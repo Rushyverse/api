@@ -52,13 +52,16 @@ public abstract class PlayerGUI(
     }
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
-        return mutex.withLock { inventories.remove(client) }?.run {
-            job.cancel(GUIClosedForClientException(client))
-            job.join()
-            if (closeInventory) {
-                inventory.close()
-            }
-            true
-        } == true
+        val (inventory, job) = mutex.withLock { inventories.remove(client) } ?: return false
+
+        job.cancel(GUIClosedForClientException(client))
+        job.join()
+
+        if (closeInventory) {
+            // Call out of the lock to avoid slowing down the mutex.
+            inventory.close()
+        }
+
+        return true
     }
 }
