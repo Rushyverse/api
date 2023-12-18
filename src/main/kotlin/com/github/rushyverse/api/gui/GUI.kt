@@ -206,7 +206,7 @@ public abstract class GUI<T>(
     protected abstract suspend fun createInventory(key: T): Inventory
 
     /**
-     * Create a new flow of ItemStack to fill the inventory with.
+     * Create a new flow of [Item][ItemStack] to fill the inventory with.
      * ```kotlin
      * flow {
      *   emit(0 to ItemStack(Material.STONE))
