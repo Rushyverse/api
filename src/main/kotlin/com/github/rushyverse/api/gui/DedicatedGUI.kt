@@ -131,12 +131,7 @@ public abstract class DedicatedGUI<T>(
         }
     }
 
-    /**
-     * Check if the inventory is loading.
-     * @param inventory Inventory to check.
-     * @return True if the inventory is loading, false otherwise.
-     */
-    protected suspend fun isInventoryLoading(inventory: Inventory): Boolean {
+    public override suspend fun isInventoryLoading(inventory: Inventory): Boolean {
         return mutex.withLock {
             inventories.values.firstOrNull { it.inventory == inventory }?.isLoading == true
         }

@@ -66,6 +66,11 @@ public abstract class SingleGUI : GUI() {
         return mutex.withLock { this.inventory } == inventory
     }
 
+    override suspend fun isInventoryLoading(inventory: Inventory): Boolean {
+        // TODO
+        return false
+    }
+
     override suspend fun close() {
         super.close()
         mutex.withLock {

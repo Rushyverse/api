@@ -110,6 +110,13 @@ public abstract class GUI {
     public abstract suspend fun hasInventory(inventory: Inventory): Boolean
 
     /**
+     * Check if the inventory is loading.
+     * @param inventory Inventory to check.
+     * @return True if the inventory is loading, false otherwise.
+     */
+    public abstract suspend fun isInventoryLoading(inventory: Inventory): Boolean
+
+    /**
      * Get the viewers of the GUI.
      * @return List of viewers.
      */

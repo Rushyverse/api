@@ -156,7 +156,7 @@ class PlayerGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should fill the inventory`() = runBlocking {
+        fun `should fill the inventory`() = runTest {
             val gui = TestFilledGUI(serverMock)
             gui.register()
             val (player, client) = registerPlayer()
@@ -165,6 +165,10 @@ class PlayerGUITest : AbstractKoinTest() {
             player.assertInventoryView(InventoryType.CHEST)
 
             val inventory = player.openInventory.topInventory
+            while (gui.isInventoryLoading(inventory)) {
+                delay(100)
+            }
+
             val content = inventory.contents
             println(content.contentToString())
             content[0]!!.type shouldBe Material.DIAMOND_ORE
