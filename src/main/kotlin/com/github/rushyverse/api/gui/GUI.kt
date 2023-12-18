@@ -172,7 +172,7 @@ public abstract class GUI<T>(
         // That's why we start with unconfined dispatcher.
         return fillScope(key).launch(Dispatchers.Unconfined) {
             val size = inventory.size
-            val inventoryFlowItems = getItemStacks(key, size).cancellable()
+            val inventoryFlowItems = getItems(key, size).cancellable()
 
             if (loadingAnimation == null) {
                 // Will fill the inventory bit by bit.
@@ -206,12 +206,21 @@ public abstract class GUI<T>(
     protected abstract suspend fun createInventory(key: T): Inventory
 
     /**
-     * Fill the inventory for the key.
+     * Create a new flow of ItemStack to fill the inventory with.
+     * ```kotlin
+     * flow {
+     *   emit(0 to ItemStack(Material.STONE))
+     *   delay(1.seconds) // simulate a suspend operation
+     *   emit(1 to ItemStack(Material.DIRT))
+     * }
+     * ```
+     * If the flow doesn't suspend the coroutine,
+     * the inventory will be filled in the same tick & thread than during the creation of the inventory.
      * @param key Key to fill the inventory for.
      * @param size Size of the inventory.
-     * @return Flow of ItemStack to fill the inventory with.
+     * @return Flow of [Item][ItemStack] with index.
      */
-    protected abstract fun getItemStacks(key: T, size: Int): Flow<ItemStackIndex>
+    protected abstract fun getItems(key: T, size: Int): Flow<ItemStackIndex>
 
     /**
      * Check if the GUI contains the inventory.

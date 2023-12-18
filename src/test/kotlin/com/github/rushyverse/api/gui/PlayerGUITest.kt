@@ -435,7 +435,7 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
         return serverMock.createInventory(owner, type)
     }
 
-    override fun getItemStacks(key: Client, size: Int): Flow<ItemStackIndex> {
+    override fun getItems(key: Client, size: Int): Flow<ItemStackIndex> {
         return emptyFlow()
     }
 
@@ -470,7 +470,7 @@ private class TestFilledGUI(
         return serverMock.createInventory(owner, type)
     }
 
-    override fun getItemStacks(key: Client, size: Int): Flow<ItemStackIndex> {
+    override fun getItems(key: Client, size: Int): Flow<ItemStackIndex> {
         calledThread = Thread.currentThread()
         return flow {
             delay?.let { delay(it) }
