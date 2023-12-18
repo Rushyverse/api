@@ -46,10 +46,6 @@ public abstract class GUI {
     public var isClosed: Boolean = false
         protected set
 
-    init {
-        register()
-    }
-
     /**
      * Open the GUI for the client only if the GUI is not closed.
      * If the client has another GUI opened, close it.
@@ -148,15 +144,17 @@ public abstract class GUI {
      * Register the GUI to the listener.
      * @return True if the GUI was registered, false otherwise.
      */
-    protected fun register(): Boolean {
+    public suspend fun register(): Boolean {
+        requireOpen()
         return manager.add(this)
     }
 
     /**
      * Unregister the GUI from the listener.
+     * Should be called when the GUI is closed with [close].
      * @return True if the GUI was unregistered, false otherwise.
      */
-    protected fun unregister(): Boolean {
+    protected suspend fun unregister(): Boolean {
         return manager.remove(this)
     }
 

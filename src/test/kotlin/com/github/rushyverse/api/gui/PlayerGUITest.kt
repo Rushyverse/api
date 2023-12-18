@@ -19,6 +19,11 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -55,6 +60,32 @@ class PlayerGUITest : AbstractKoinTest() {
     }
 
     @Nested
+    inner class Register {
+
+        @Test
+        fun `should register if not already registered`() = runTest {
+            val gui = TestGUI(serverMock)
+            gui.register() shouldBe true
+            guiManager.guis shouldContainAll listOf(gui)
+        }
+
+        @Test
+        fun `should not register if already registered`() = runTest {
+            val gui = TestGUI(serverMock)
+            gui.register() shouldBe true
+            gui.register() shouldBe false
+            guiManager.guis shouldContainAll listOf(gui)
+        }
+
+        @Test
+        fun `should throw exception if GUI is closed`() = runTest {
+            val gui = TestGUI(serverMock)
+            gui.close()
+            shouldThrow<GUIClosedException> { gui.register() }
+        }
+    }
+
+    @Nested
     inner class Open {
 
         @Test
@@ -71,6 +102,7 @@ class PlayerGUITest : AbstractKoinTest() {
         @Test
         fun `should do nothing if the client has the same GUI opened`() = runTest {
             val gui = TestGUI(serverMock)
+            gui.register()
             val (player, client) = registerPlayer()
 
             gui.open(client) shouldBe true
@@ -83,6 +115,7 @@ class PlayerGUITest : AbstractKoinTest() {
         @Test
         fun `should close the previous GUI if the client has one opened`() = runTest {
             val gui = TestGUI(serverMock, InventoryType.ENDER_CHEST)
+            gui.register()
             val (player, client) = registerPlayer()
 
             gui.open(client) shouldBe true
@@ -123,8 +156,9 @@ class PlayerGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should fill the inventory`() = runTest {
+        fun `should fill the inventory`() = runBlocking {
             val gui = TestFilledGUI(serverMock)
+            gui.register()
             val (player, client) = registerPlayer()
 
             gui.open(client) shouldBe true
@@ -235,6 +269,7 @@ class PlayerGUITest : AbstractKoinTest() {
         @Test
         fun `should close all inventories and remove all viewers`() = runTest(timeout = 1.minutes) {
             val gui = TestGUI(serverMock, InventoryType.BREWING)
+            gui.register()
 
             val playerClients = List(5) { registerPlayer() }
             val initialInventoryViewType = playerClients.first().first.openInventory.type
@@ -264,6 +299,7 @@ class PlayerGUITest : AbstractKoinTest() {
         @Test
         fun `should unregister the GUI`() = runTest {
             val gui = TestGUI(serverMock)
+            gui.register()
             guiManager.guis shouldContainAll listOf(gui)
             gui.close()
             guiManager.guis shouldContainAll listOf()
@@ -284,8 +320,8 @@ private class TestGUI(val serverMock: ServerMock, val type: InventoryType = Inve
         return serverMock.createInventory(owner, type)
     }
 
-    override suspend fun fill(key: Client, inventory: Array<ItemStack?>) {
-        // Do nothing
+    override fun getItemStacks(key: Client, size: Int): Flow<ItemStackIndex> {
+        return emptyFlow()
     }
 
     override suspend fun onClick(
@@ -303,9 +339,11 @@ private class TestFilledGUI(val serverMock: ServerMock) : PlayerGUI() {
         return serverMock.createInventory(owner, InventoryType.CHEST)
     }
 
-    override suspend fun fill(key: Client, inventory: Array<ItemStack?>) {
-        inventory[0] = ItemStack { type = Material.DIAMOND_ORE }
-        inventory[1] = ItemStack { type = Material.STICK }
+    override fun getItemStacks(key: Client, size: Int): Flow<ItemStackIndex> {
+        return flow {
+            emit(0 to ItemStack { type = Material.DIAMOND_ORE })
+            emit(1 to ItemStack { type = Material.STICK })
+        }
     }
 
     override suspend fun onClick(

@@ -27,14 +27,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
@@ -183,7 +181,8 @@ class GUIListenerTest : AbstractKoinTest() {
 
     }
 
-    abstract inner class CloseGUIDuringEvent {
+    @Nested
+    inner class OnInventoryClose {
 
         @Test
         fun `should do nothing if client doesn't have a GUI opened`() = runTest {
@@ -192,9 +191,7 @@ class GUIListenerTest : AbstractKoinTest() {
                 coEvery { contains(client) } returns false
             }
 
-            val event = PlayerQuitEvent(player, Component.empty(), PlayerQuitEvent.QuitReason.DISCONNECTED)
-            listener.onPlayerQuit(event)
-
+            callEvent(player)
             coVerify(exactly = 0) { gui.close(client, any()) }
         }
 
@@ -216,29 +213,11 @@ class GUIListenerTest : AbstractKoinTest() {
             coVerify(exactly = 0) { gui2.close(client, any()) }
         }
 
-        protected abstract suspend fun callEvent(player: Player)
-
-    }
-
-    @Nested
-    inner class OnInventoryClose : CloseGUIDuringEvent() {
-
-        override suspend fun callEvent(player: Player) {
+        private suspend fun callEvent(player: Player) {
             val event = mockk<InventoryCloseEvent> {
                 every { getPlayer() } returns player
             }
             listener.onInventoryClose(event)
-        }
-    }
-
-    @Nested
-    inner class OnPlayerQuit : CloseGUIDuringEvent() {
-
-        override suspend fun callEvent(player: Player) {
-            val event = mockk<PlayerQuitEvent> {
-                every { getPlayer() } returns player
-            }
-            listener.onPlayerQuit(event)
         }
     }
 
@@ -249,7 +228,7 @@ class GUIListenerTest : AbstractKoinTest() {
         return player to client
     }
 
-    private inline fun registerGUI(block: GUI.() -> Unit): GUI {
+    private suspend inline fun registerGUI(block: GUI.() -> Unit): GUI {
         val gui = mockk<GUI>(block = block)
         guiManager.add(gui)
         return gui

@@ -66,7 +66,7 @@ class GUIManagerTest {
     inner class Add {
 
         @Test
-        fun `should add non registered GUI`() {
+        fun `should add non registered GUI`() = runTest {
             val gui = mockk<GUI>()
             manager.add(gui) shouldBe true
             manager.guis.contains(gui) shouldBe true
@@ -74,7 +74,7 @@ class GUIManagerTest {
         }
 
         @Test
-        fun `should not add registered GUI`() {
+        fun `should not add registered GUI`() = runTest {
             val gui = mockk<GUI>()
             manager.add(gui) shouldBe true
             manager.add(gui) shouldBe false
@@ -83,7 +83,7 @@ class GUIManagerTest {
         }
 
         @Test
-        fun `should add multiple GUIs`() {
+        fun `should add multiple GUIs`() = runTest {
             val gui1 = mockk<GUI>()
             val gui2 = mockk<GUI>()
             manager.add(gui1) shouldBe true
@@ -99,7 +99,7 @@ class GUIManagerTest {
     inner class Remove {
 
         @Test
-        fun `should remove registered GUI`() {
+        fun `should remove registered GUI`() = runTest {
             val gui = mockk<GUI>()
             manager.add(gui) shouldBe true
             manager.remove(gui) shouldBe true
@@ -108,7 +108,7 @@ class GUIManagerTest {
         }
 
         @Test
-        fun `should not remove non registered GUI`() {
+        fun `should not remove non registered GUI`() = runTest {
             val gui = mockk<GUI>()
             manager.remove(gui) shouldBe false
             manager.guis.contains(gui) shouldBe false
@@ -116,7 +116,7 @@ class GUIManagerTest {
         }
 
         @Test
-        fun `should remove one GUI`() {
+        fun `should remove one GUI`() = runTest {
             val gui1 = mockk<GUI>()
             val gui2 = mockk<GUI>()
             manager.add(gui1) shouldBe true

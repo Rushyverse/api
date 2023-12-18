@@ -100,6 +100,7 @@ public abstract class DedicatedGUI<T>(
             val size = inventory.size
             val inventoryFlowItems = getItemStacks(key, size).cancellable()
 
+            // If no suspend operation is used in the flow, the fill will be done in the same tick.
             if (inventoryLoadingAnimation == null) {
                 // Will fill the inventory bit by bit.
                 inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }
@@ -177,7 +178,10 @@ public abstract class DedicatedGUI<T>(
         super.close()
         mutex.withLock {
             inventories.values.forEach {
-                it.job.cancel(GUIClosedException("The GUI is closing"))
+                it.job.apply {
+                    cancel(GUIClosedException("The GUI is closing"))
+                    join()
+                }
                 it.inventory.close()
             }
             inventories.clear()

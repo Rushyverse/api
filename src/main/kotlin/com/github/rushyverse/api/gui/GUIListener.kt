@@ -17,7 +17,6 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
@@ -118,28 +117,10 @@ public class GUIListener(private val plugin: Plugin) : Listener {
      */
     @EventHandler
     public suspend fun onInventoryClose(event: InventoryCloseEvent) {
-        quitOpenedGUI(event.player)
-    }
-
-    /**
-     * Called when a player quits the server.
-     * If the player has a GUI opened, the GUI is notified that it is closed for this player.
-     * @param event Event of the quit.
-     */
-    @EventHandler
-    public suspend fun onPlayerQuit(event: PlayerQuitEvent) {
-        quitOpenedGUI(event.player)
-    }
-
-    /**
-     * Quit the opened GUI for the player.
-     * @param player Player to quit the GUI for.
-     */
-    private suspend fun quitOpenedGUI(player: HumanEntity) {
-        val client = clients.getClientOrNull(player)
+        val client = clients.getClientOrNull(event.player)
         val gui = client?.gui() ?: return
         // We don't close the inventory because it is closing due to event.
-        // That avoid a infinite loop of events and consequently a stack overflow.
+        // That avoid an infinite loop of events and consequently a stack overflow.
         gui.close(client, false)
     }
 

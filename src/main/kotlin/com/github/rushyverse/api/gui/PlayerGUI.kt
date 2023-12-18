@@ -54,6 +54,7 @@ public abstract class PlayerGUI(
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
         return mutex.withLock { inventories.remove(client) }?.run {
             job.cancel(GUIClosedForClientException(client))
+            job.join()
             if (closeInventory) {
                 inventory.close()
             }

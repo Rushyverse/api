@@ -1,12 +1,19 @@
 package com.github.rushyverse.api.gui
 
 import com.github.rushyverse.api.player.Client
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 /**
  * Manages the GUIs for players within the game.
  * This class ensures thread-safe operations on the GUIs by using mutex locks.
  */
 public class GUIManager {
+
+    /**
+     * Mutex used to ensure thread-safe operations.
+     */
+    private val mutex = Mutex()
 
     /**
      * Private mutable set storing GUIs.
@@ -26,7 +33,9 @@ public class GUIManager {
      * @return The language associated with the player.
      */
     public suspend fun get(client: Client): GUI? {
-        return _guis.firstOrNull { it.contains(client) }
+        return mutex.withLock {
+            _guis.firstOrNull { it.contains(client) }
+        }
     }
 
     /**
@@ -34,8 +43,8 @@ public class GUIManager {
      * @param gui GUI to add.
      * @return True if the GUI was added, false otherwise.
      */
-    public fun add(gui: GUI): Boolean {
-        return _guis.add(gui)
+    public suspend fun add(gui: GUI): Boolean {
+        return mutex.withLock { _guis.add(gui) }
     }
 
     /**
@@ -43,7 +52,7 @@ public class GUIManager {
      * @param gui GUI to remove.
      * @return True if the GUI was removed, false otherwise.
      */
-    public fun remove(gui: GUI): Boolean {
-        return _guis.remove(gui)
+    public suspend fun remove(gui: GUI): Boolean {
+        return mutex.withLock { _guis.remove(gui) }
     }
 }

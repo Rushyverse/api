@@ -1,6 +1,5 @@
 package com.github.rushyverse.api.gui
 
-import com.github.rushyverse.api.Plugin
 import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import com.github.shynixn.mccoroutine.bukkit.scope
@@ -11,6 +10,7 @@ import kotlinx.coroutines.job
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.withLock
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.plugin.Plugin
 
 /**
  * GUI where a new inventory is created for each [locale][Locale].
