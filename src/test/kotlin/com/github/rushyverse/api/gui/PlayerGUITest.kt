@@ -187,6 +187,22 @@ class PlayerGUITest : AbstractKoinTest() {
         }
 
         @Test
+        fun `should create a new inventory for the same client if previous is closed before`() = runTest {
+            val gui = TestGUI(serverMock)
+            val (player, client) = registerPlayer()
+
+            gui.open(client) shouldBe true
+            val firstInventory = player.openInventory.topInventory
+
+            gui.close(client, true) shouldBe true
+
+            gui.open(client) shouldBe true
+            player.openInventory.topInventory shouldNotBe firstInventory
+
+            player.assertInventoryView(gui.type)
+        }
+
+        @Test
         fun `should fill the inventory in the same thread if no suspend operation`() {
             runBlocking {
                 val currentThread = Thread.currentThread()
