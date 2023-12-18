@@ -28,7 +28,7 @@ public abstract class LocaleGUI(
         return client.lang().locale
     }
 
-    override suspend fun loadingScope(key: Locale): CoroutineScope {
+    override suspend fun fillScope(key: Locale): CoroutineScope {
         val scope = plugin.scope
         return scope + SupervisorJob(scope.coroutineContext.job)
     }

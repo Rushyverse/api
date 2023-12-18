@@ -22,7 +22,7 @@ public abstract class PlayerGUI(
         return client
     }
 
-    override suspend fun loadingScope(key: Client): CoroutineScope {
+    override suspend fun fillScope(key: Client): CoroutineScope {
         return key + SupervisorJob(key.coroutineContext.job)
     }
 

@@ -5,6 +5,7 @@ import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.Client
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
@@ -95,7 +96,7 @@ public abstract class GUI<T>(
      * @param key Key to get the coroutine scope for.
      * @return The coroutine scope.
      */
-    protected abstract suspend fun loadingScope(key: T): CoroutineScope
+    protected abstract suspend fun fillScope(key: T): CoroutineScope
 
     /**
      * Open the GUI for the client only if the GUI is not closed.
@@ -166,11 +167,12 @@ public abstract class GUI<T>(
      * @return The job that can be cancelled to stop the loading animation.
      */
     private suspend fun startLoadingInventory(key: T, inventory: Inventory): Job {
-        return loadingScope(key).launch {
+        // If no suspend operation is used in the flow, the fill will be done in the same thread & tick.
+        // That's why we start with unconfined dispatcher.
+        return fillScope(key).launch(Dispatchers.Unconfined) {
             val size = inventory.size
             val inventoryFlowItems = getItemStacks(key, size).cancellable()
 
-            // If no suspend operation is used in the flow, the fill will be done in the same tick.
             if (inventoryLoadingAnimation == null) {
                 // Will fill the inventory bit by bit.
                 inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }

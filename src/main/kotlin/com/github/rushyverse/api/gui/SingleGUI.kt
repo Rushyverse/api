@@ -30,7 +30,7 @@ public abstract class SingleGUI(
         private val KEY = Any()
     }
 
-    override suspend fun loadingScope(key: Any): CoroutineScope {
+    override suspend fun fillScope(key: Any): CoroutineScope {
         val scope = plugin.scope
         return scope + SupervisorJob(scope.coroutineContext.job)
     }

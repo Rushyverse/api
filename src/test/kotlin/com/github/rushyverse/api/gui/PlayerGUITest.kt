@@ -164,9 +164,6 @@ class PlayerGUITest : AbstractKoinTest() {
             player.assertInventoryView(InventoryType.CHEST)
 
             val inventory = player.openInventory.topInventory
-            while (gui.isInventoryLoading(inventory)) {
-                delay(10)
-            }
 
             val content = inventory.contents
             content[0]!!.type shouldBe Material.DIAMOND_ORE
