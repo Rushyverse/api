@@ -57,6 +57,7 @@ public class GUIClosedException(message: String) : GUIException(message)
 
 /**
  * Exception thrown when the GUI is updating.
+ * @property client Client for which the GUI is updating.
  */
 public class GUIUpdatedException(public val client: Client) :
     GUIException("GUI updating for client ${client.playerUUID}")
