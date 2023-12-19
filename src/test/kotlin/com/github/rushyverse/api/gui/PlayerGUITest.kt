@@ -71,6 +71,9 @@ class PlayerGUITest : AbstractGUITest() {
     }
 
     @Nested
+    inner class Update : AbstractGUITest.Update()
+
+    @Nested
     inner class Close : AbstractGUITest.Close()
 
     @Nested

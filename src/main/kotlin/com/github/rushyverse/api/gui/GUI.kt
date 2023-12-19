@@ -58,7 +58,8 @@ public class GUIClosedException(message: String) : GUIException(message)
 /**
  * Exception thrown when the GUI is updating.
  */
-public class GUIUpdatedException(message: String) : GUIException(message)
+public class GUIUpdatedException(public val client: Client) :
+    GUIException("GUI updating for client ${client.playerUUID}")
 
 /**
  * Exception thrown when the GUI is closed for a specific client.
@@ -72,7 +73,6 @@ public class GUIClosedForClientException(public val client: Client) :
  * Only one inventory is created for all the viewers.
  * @property server Server.
  * @property manager Manager to register or unregister the GUI.
- * @property isClosed If true, the GUI is closed; otherwise it is open.
  */
 public abstract class GUI<T>(
     private val loadingAnimation: InventoryLoadingAnimation<T>? = null,
@@ -82,9 +82,6 @@ public abstract class GUI<T>(
     protected val server: Server by inject()
 
     protected val manager: GUIManager by inject()
-
-    public var isClosed: Boolean = false
-        protected set
 
     protected var inventories: MutableMap<T, InventoryData> = HashMap(initialNumberInventories)
 
@@ -112,8 +109,6 @@ public abstract class GUI<T>(
      * @return True if the GUI was opened, false otherwise.
      */
     public open suspend fun open(client: Client): Boolean {
-        requireOpen()
-
         val player = client.player
         if (player === null) {
             logger.warn { "Cannot open inventory for player ${client.playerUUID}: player is null" }
@@ -158,8 +153,9 @@ public abstract class GUI<T>(
      * @see [getItems]
      */
     public open suspend fun update(client: Client, interruptLoading: Boolean = false): Boolean {
+        val key = getKey(client)
+
         return mutex.withLock {
-            val key = getKey(client)
             val inventoryData = inventories[key] ?: return@withLock false
 
             // If the client doesn't have the GUI opened, do nothing.
@@ -172,7 +168,7 @@ public abstract class GUI<T>(
                     // If we want to interrupt the loading, we cancel the loading job.
                     // We need to wait for the job to be cancelled to avoid conflicts with the new loading animation.
                     inventoryData.job.apply {
-                        cancel(GUIUpdatedException("The GUI is updating"))
+                        cancel(GUIUpdatedException(client))
                         join()
                     }
                 }
@@ -219,6 +215,10 @@ public abstract class GUI<T>(
         // That's why we start with unconfined dispatcher.
         return fillScope(key).launch(Dispatchers.Unconfined) {
             val size = inventory.size
+            // Empty the inventory, there is no effect if the inventory is new
+            // But avoid conflicts with old items if the inventory is updated.
+            inventory.contents = arrayOfNulls(size)
+
             val inventoryFlowItems = getItems(key, size).cancellable()
 
             if (loadingAnimation == null) {
@@ -339,7 +339,6 @@ public abstract class GUI<T>(
      * The GUI will be removed from the listener and the [onClick] function will not be called anymore.
      */
     public open suspend fun close() {
-        isClosed = true
         unregister()
 
         mutex.withLock {
@@ -363,19 +362,12 @@ public abstract class GUI<T>(
     public abstract suspend fun close(client: Client, closeInventory: Boolean = true): Boolean
 
     /**
-     * Verify that the GUI is open.
-     * If the GUI is closed, throw an exception.
-     */
-    private fun requireOpen() {
-        if (isClosed) throw GUIClosedException("Cannot use a closed GUI")
-    }
-
-    /**
      * Register the GUI to the listener.
+     * If the GUI is already registered, do nothing.
+     * If the GUI is closed, he will be opened again.
      * @return True if the GUI was registered, false otherwise.
      */
     public open suspend fun register(): Boolean {
-        requireOpen()
         return manager.add(this)
     }
 

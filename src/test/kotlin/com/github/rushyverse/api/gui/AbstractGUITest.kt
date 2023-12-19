@@ -8,7 +8,6 @@ import com.github.rushyverse.api.extension.ItemStack
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
@@ -71,10 +70,10 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should throw exception if GUI is closed`() = runTest {
+        fun `should register GUI if was closed`() = runTest {
             val gui = createNonFillGUI()
             gui.close()
-            shouldThrow<GUIClosedException> { gui.register() }
+            gui.register() shouldBe true
         }
     }
 
@@ -122,14 +121,15 @@ abstract class AbstractGUITest : AbstractKoinTest() {
     abstract inner class Open {
 
         @Test
-        fun `should throw exception if GUI is closed`() = runTest {
-            val gui = createNonFillGUI()
+        fun `should open if GUI was closed`() = runTest {
+            val type = InventoryType.FURNACE
+            val gui = createNonFillGUI(type)
             gui.close()
             val (player, client) = registerPlayer()
 
             val initialInventoryViewType = player.openInventory.type
-            shouldThrow<GUIClosedException> { gui.open(client) }
-            player.assertInventoryView(initialInventoryViewType)
+            gui.open(client) shouldBe true
+            player.assertInventoryView(type)
         }
 
         @Test
@@ -238,6 +238,80 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
     }
 
+    abstract inner class Update {
+
+        @Test
+        fun `should return false if the client is not viewing the GUI`() = runTest {
+            val gui = createNonFillGUI()
+            val (player, client) = registerPlayer()
+            val initialInventoryViewType = player.openInventory.type
+            gui.update(client) shouldBe false
+
+            gui.viewers().toList() shouldBe emptyList()
+            gui.contains(client) shouldBe false
+
+            player.assertInventoryView(initialInventoryViewType)
+        }
+
+        @Test
+        fun `should return false if the client is viewing the GUI with a loading inventory`() {
+            runBlocking {
+                val type = InventoryType.DISPENSER
+                val delay = 100.milliseconds
+                val gui = createFillGUI(emptyArray(), inventoryType = type, delay = delay)
+                val (player, client) = registerPlayer()
+
+                gui.open(client) shouldBe true
+
+                val guiInventory = player.openInventory.topInventory
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                // We're waiting the half of the delay to be sure that the inventory is loading
+                delay(50.milliseconds)
+
+                gui.update(client) shouldBe false
+                player.assertInventoryView(type)
+                gui.viewers().toList() shouldContainExactlyInAnyOrder listOf(player)
+                gui.contains(client) shouldBe true
+
+                // if we interrupt the loading, the inventory should be loading from 0 to new delay
+                // but here, we didn't interrupt the loading, so the inventory should be loaded (50 + 80 = 130 > 100)
+                delay(80.milliseconds)
+
+                gui.isInventoryLoading(guiInventory) shouldBe false
+            }
+        }
+
+        @Test
+        fun `should return true if the client is viewing the GUI with a loaded inventory`() {
+            runBlocking {
+                val type = InventoryType.DISPENSER
+                val delay = 100.milliseconds
+                val gui = createFillGUI(emptyArray(), inventoryType = type, delay = delay)
+                val (player, client) = registerPlayer()
+
+                gui.open(client) shouldBe true
+                val guiInventory = player.openInventory.topInventory
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                // We're waiting the half of the delay to be sure that the inventory is loading
+                delay(70.milliseconds)
+
+                gui.update(client, true) shouldBe true
+                player.assertInventoryView(type)
+                gui.viewers().toList() shouldContainExactlyInAnyOrder listOf(player)
+                gui.contains(client) shouldBe true
+
+                // if we interrupt the loading, the inventory should be loading from 0 to new delay
+                delay(70.milliseconds)
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                delay(50.milliseconds)
+                gui.isInventoryLoading(guiInventory) shouldBe false
+            }
+        }
+    }
+
     abstract inner class Close {
 
         @Test
@@ -264,41 +338,12 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         }
 
         @Test
-        fun `should set isClosed to true`() = runTest {
-            val gui = createNonFillGUI()
-            gui.isClosed shouldBe false
-            gui.close()
-            gui.isClosed shouldBe true
-        }
-
-        @Test
         fun `should unregister the GUI`() = runTest {
             val gui = createNonFillGUI()
             gui.register()
             guiManager.guis shouldContainAll listOf(gui)
             gui.close()
             guiManager.guis shouldContainAll listOf()
-        }
-
-        @Test
-        fun `should not be able to open the GUI after closing it`() = runTest {
-            val gui = createNonFillGUI()
-            gui.register()
-            val (_, client) = registerPlayer()
-            gui.close()
-
-            shouldThrow<GUIClosedException> {
-                gui.open(client)
-            }
-        }
-
-        @Test
-        fun `should not be able to register the GUI after closing it`() = runTest {
-            val gui = createNonFillGUI()
-            gui.close()
-            shouldThrow<GUIClosedException> {
-                gui.register()
-            }
         }
     }
 
