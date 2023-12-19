@@ -192,7 +192,7 @@ class GUIListenerTest : AbstractKoinTest() {
             }
 
             callEvent(player)
-            coVerify(exactly = 0) { gui.close(client, any()) }
+            coVerify(exactly = 0) { gui.closeClient(client, any()) }
         }
 
         @Test
@@ -200,7 +200,7 @@ class GUIListenerTest : AbstractKoinTest() {
             val (player, client) = registerPlayer()
             val gui = registerGUI {
                 coEvery { contains(client) } returns true
-                coEvery { close(client, any()) } returns true
+                coEvery { closeClient(client, any()) } returns true
             }
 
             val gui2 = registerGUI {
@@ -209,8 +209,8 @@ class GUIListenerTest : AbstractKoinTest() {
 
             callEvent(player)
 
-            coVerify(exactly = 1) { gui.close(client, false) }
-            coVerify(exactly = 0) { gui2.close(client, any()) }
+            coVerify(exactly = 1) { gui.closeClient(client, false) }
+            coVerify(exactly = 0) { gui2.closeClient(client, any()) }
         }
 
         private suspend fun callEvent(player: Player) {

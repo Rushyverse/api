@@ -91,7 +91,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val playerClients = List(5) { registerPlayer() }
 
             playerClients.forEach { (_, client) ->
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
             }
 
             gui.viewers().toList() shouldContainExactlyInAnyOrder playerClients.map { it.first }
@@ -112,13 +112,13 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         fun `should return true if the client is viewing the GUI`() = runTest {
             val gui = createNonFillGUI()
             val (_, client) = registerPlayer()
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             gui.contains(client) shouldBe true
         }
 
     }
 
-    abstract inner class Open {
+    abstract inner class OpenClient {
 
         @Test
         fun `should open if GUI was closed`() = runTest {
@@ -128,7 +128,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val (player, client) = registerPlayer()
 
             val initialInventoryViewType = player.openInventory.type
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             player.assertInventoryView(type)
         }
 
@@ -139,10 +139,10 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             gui.register()
             val (player, client) = registerPlayer()
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             player.assertInventoryView(type)
 
-            gui.open(client) shouldBe false
+            gui.openClient(client) shouldBe false
             player.assertInventoryView(type)
         }
 
@@ -154,7 +154,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val initialInventoryViewType = player.openInventory.type
 
             player.health = 0.0
-            gui.open(client) shouldBe false
+            gui.openClient(client) shouldBe false
             player.assertInventoryView(initialInventoryViewType)
         }
 
@@ -174,7 +174,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
                 gui.register()
                 val (player, client) = registerPlayer()
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
 
                 val inventory = player.openInventory.topInventory
@@ -211,7 +211,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
                 gui.register()
                 val (player, client) = registerPlayer()
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
 
                 val inventory = player.openInventory.topInventory
@@ -238,14 +238,14 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
     }
 
-    abstract inner class Update {
+    abstract inner class UpdateClient {
 
         @Test
         fun `should return false if the client is not viewing the GUI`() = runTest {
             val gui = createNonFillGUI()
             val (player, client) = registerPlayer()
             val initialInventoryViewType = player.openInventory.type
-            gui.update(client) shouldBe false
+            gui.updateClient(client) shouldBe false
 
             gui.viewers().toList() shouldBe emptyList()
             gui.contains(client) shouldBe false
@@ -261,7 +261,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
                 val gui = createFillGUI(emptyArray(), inventoryType = type, delay = delay)
                 val (player, client) = registerPlayer()
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
 
                 val guiInventory = player.openInventory.topInventory
                 gui.isInventoryLoading(guiInventory) shouldBe true
@@ -269,7 +269,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
                 // We're waiting the half of the delay to be sure that the inventory is loading
                 delay(50.milliseconds)
 
-                gui.update(client) shouldBe false
+                gui.updateClient(client) shouldBe false
                 player.assertInventoryView(type)
                 gui.viewers().toList() shouldContainExactlyInAnyOrder listOf(player)
                 gui.contains(client) shouldBe true
@@ -290,14 +290,14 @@ abstract class AbstractGUITest : AbstractKoinTest() {
                 val gui = createFillGUI(emptyArray(), inventoryType = type, delay = delay)
                 val (player, client) = registerPlayer()
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 val guiInventory = player.openInventory.topInventory
                 gui.isInventoryLoading(guiInventory) shouldBe true
 
                 // We're waiting the half of the delay to be sure that the inventory is loading
                 delay(70.milliseconds)
 
-                gui.update(client, true) shouldBe true
+                gui.updateClient(client, true) shouldBe true
                 player.assertInventoryView(type)
                 gui.viewers().toList() shouldContainExactlyInAnyOrder listOf(player)
                 gui.contains(client) shouldBe true
@@ -325,7 +325,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
             playerClients.forEach { (player, client) ->
                 player.assertInventoryView(initialInventoryViewType)
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
                 client.gui() shouldBe gui
             }
@@ -347,7 +347,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         }
     }
 
-    abstract inner class CloseForClient {
+    abstract inner class CloseClient {
 
         @Test
         fun `should return false if the client is not viewing the GUI`() = runTest {
@@ -357,7 +357,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val initialInventoryViewType = player.openInventory.type
 
             player.assertInventoryView(initialInventoryViewType)
-            gui.close(client, true) shouldBe false
+            gui.closeClient(client, true) shouldBe false
             player.assertInventoryView(initialInventoryViewType)
         }
 
@@ -369,9 +369,9 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
             val initialInventoryViewType = player.openInventory.type
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             player.assertInventoryView(type)
-            gui.close(client, true) shouldBe true
+            gui.closeClient(client, true) shouldBe true
             player.assertInventoryView(initialInventoryViewType)
         }
 
@@ -383,13 +383,13 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val (player2, client2) = registerPlayer()
             val initialInventoryViewType = player2.openInventory.type
 
-            gui.open(client) shouldBe true
-            gui.open(client2) shouldBe true
+            gui.openClient(client) shouldBe true
+            gui.openClient(client2) shouldBe true
 
             player.assertInventoryView(type)
             player2.assertInventoryView(type)
 
-            gui.close(client2, true) shouldBe true
+            gui.closeClient(client2, true) shouldBe true
             player.assertInventoryView(type)
             player2.assertInventoryView(initialInventoryViewType)
         }

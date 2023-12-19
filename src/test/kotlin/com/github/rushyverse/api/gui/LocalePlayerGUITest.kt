@@ -74,7 +74,7 @@ class LocalePlayerGUITest : AbstractGUITest() {
     inner class Contains : AbstractGUITest.Contains()
 
     @Nested
-    inner class Open : AbstractGUITest.Open() {
+    inner class OpenClient : AbstractGUITest.OpenClient() {
 
         @Test
         fun `should create a new inventory according to the language client`() = runTest {
@@ -85,8 +85,8 @@ class LocalePlayerGUITest : AbstractGUITest() {
             languageManager.set(player, SupportedLanguage.ENGLISH)
             languageManager.set(player2, SupportedLanguage.FRENCH)
 
-            gui.open(client) shouldBe true
-            gui.open(client2) shouldBe true
+            gui.openClient(client) shouldBe true
+            gui.openClient(client2) shouldBe true
 
             player.assertInventoryView(type)
             player2.assertInventoryView(type)
@@ -103,8 +103,8 @@ class LocalePlayerGUITest : AbstractGUITest() {
             languageManager.set(player, SupportedLanguage.FRENCH)
             languageManager.set(player2, SupportedLanguage.FRENCH)
 
-            gui.open(client) shouldBe true
-            gui.open(client2) shouldBe true
+            gui.openClient(client) shouldBe true
+            gui.openClient(client2) shouldBe true
 
             player.assertInventoryView(type)
             player2.assertInventoryView(type)
@@ -118,12 +118,12 @@ class LocalePlayerGUITest : AbstractGUITest() {
             val gui = createNonFillGUI(type)
             val (player, client) = registerPlayer()
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             val firstInventory = player.openInventory.topInventory
 
-            gui.close(client, true) shouldBe true
+            gui.closeClient(client, true) shouldBe true
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             player.openInventory.topInventory shouldBe firstInventory
 
             player.assertInventoryView(type)
@@ -132,13 +132,13 @@ class LocalePlayerGUITest : AbstractGUITest() {
     }
 
     @Nested
-    inner class Update : AbstractGUITest.Update()
+    inner class UpdateClient : AbstractGUITest.UpdateClient()
 
     @Nested
     inner class Close : AbstractGUITest.Close()
 
     @Nested
-    inner class CloseForClient : AbstractGUITest.CloseForClient() {
+    inner class CloseClient : AbstractGUITest.CloseClient() {
 
         @ParameterizedTest
         @ValueSource(booleans = [true, false])
@@ -151,14 +151,14 @@ class LocalePlayerGUITest : AbstractGUITest() {
 
                 val initialInventoryViewType = player.openInventory.type
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
 
                 val openInventory = player.openInventory
                 val inventory = openInventory.topInventory
                 gui.isInventoryLoading(inventory) shouldBe true
 
-                gui.close(client, closeInventory) shouldBe closeInventory
+                gui.closeClient(client, closeInventory) shouldBe closeInventory
                 gui.isInventoryLoading(inventory) shouldBe true
 
                 if (closeInventory) {

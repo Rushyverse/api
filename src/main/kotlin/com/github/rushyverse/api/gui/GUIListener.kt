@@ -121,7 +121,7 @@ public class GUIListener(private val plugin: Plugin) : Listener {
         val gui = client?.gui() ?: return
         // We don't close the inventory because it is closing due to event.
         // That avoids an infinite loop of events and consequently a stack overflow.
-        gui.close(client, false)
+        gui.closeClient(client, false)
     }
 
 }

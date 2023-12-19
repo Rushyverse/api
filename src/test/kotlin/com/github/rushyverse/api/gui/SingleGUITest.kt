@@ -62,7 +62,7 @@ class SingleGUITest : AbstractGUITest() {
     inner class Contains : AbstractGUITest.Contains()
 
     @Nested
-    inner class Open : AbstractGUITest.Open() {
+    inner class OpenClient : AbstractGUITest.OpenClient() {
 
         @Test
         fun `should use the same inventory for all clients`() = runTest {
@@ -70,7 +70,7 @@ class SingleGUITest : AbstractGUITest() {
             val gui = createNonFillGUI(type)
             val inventories = List(5) {
                 val (player, client) = registerPlayer()
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
 
                 player.openInventory.topInventory
@@ -85,12 +85,12 @@ class SingleGUITest : AbstractGUITest() {
             val gui = createNonFillGUI(type)
             val (player, client) = registerPlayer()
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             val firstInventory = player.openInventory.topInventory
 
-            gui.close(client, true) shouldBe true
+            gui.closeClient(client, true) shouldBe true
 
-            gui.open(client) shouldBe true
+            gui.openClient(client) shouldBe true
             player.openInventory.topInventory shouldBe firstInventory
 
             player.assertInventoryView(type)
@@ -98,13 +98,13 @@ class SingleGUITest : AbstractGUITest() {
     }
 
     @Nested
-    inner class Update : AbstractGUITest.Update()
+    inner class UpdateClient : AbstractGUITest.UpdateClient()
 
     @Nested
     inner class Close : AbstractGUITest.Close()
 
     @Nested
-    inner class CloseForClient : AbstractGUITest.CloseForClient() {
+    inner class CloseClient : AbstractGUITest.CloseClient() {
 
         @ParameterizedTest
         @ValueSource(booleans = [true, false])
@@ -117,14 +117,14 @@ class SingleGUITest : AbstractGUITest() {
 
                 val initialInventoryViewType = player.openInventory.type
 
-                gui.open(client) shouldBe true
+                gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
 
                 val openInventory = player.openInventory
                 val inventory = openInventory.topInventory
                 gui.isInventoryLoading(inventory) shouldBe true
 
-                gui.close(client, closeInventory) shouldBe closeInventory
+                gui.closeClient(client, closeInventory) shouldBe closeInventory
                 gui.isInventoryLoading(inventory) shouldBe true
 
                 if (closeInventory) {

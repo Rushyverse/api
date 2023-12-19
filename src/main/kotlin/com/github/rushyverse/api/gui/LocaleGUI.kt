@@ -37,7 +37,7 @@ public abstract class LocaleGUI(
         return scope + SupervisorJob(scope.coroutineContext.job)
     }
 
-    override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
+    override suspend fun closeClient(client: Client, closeInventory: Boolean): Boolean {
         return if (closeInventory && contains(client)) {
             client.player?.closeInventory(InventoryCloseEvent.Reason.PLUGIN)
             true
