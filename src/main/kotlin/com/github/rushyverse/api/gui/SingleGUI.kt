@@ -20,8 +20,8 @@ import org.bukkit.plugin.Plugin
  */
 public abstract class SingleGUI(
     protected val plugin: Plugin,
-    loadingAnimation: InventoryLoadingAnimation<Any>? = null
-) : GUI<Any>(
+    loadingAnimation: InventoryLoadingAnimation<Unit>? = null
+) : GUI<Unit>(
     loadingAnimation = loadingAnimation,
     initialNumberInventories = 1
 ) {
@@ -32,19 +32,19 @@ public abstract class SingleGUI(
          * This GUI is shared by all the players, so the key is the same for all of them.
          * That allows creating a unique inventory.
          */
-        private val KEY = Any()
+        private val KEY = Unit
     }
 
-    override suspend fun getKey(client: Client): Any {
+    override suspend fun getKey(client: Client) {
         return KEY
     }
 
-    override suspend fun fillScope(key: Any): CoroutineScope {
+    override suspend fun fillScope(key: Unit): CoroutineScope {
         val scope = plugin.scope
         return scope + SupervisorJob(scope.coroutineContext.job)
     }
 
-    override fun createInventory(key: Any): Inventory {
+    override fun createInventory(key: Unit): Inventory {
         return createInventory()
     }
 
@@ -60,7 +60,7 @@ public abstract class SingleGUI(
         } else false
     }
 
-    override fun getItems(key: Any, size: Int): Flow<ItemStackIndex> {
+    override fun getItems(key: Unit, size: Int): Flow<ItemStackIndex> {
         return getItems(size)
     }
 
