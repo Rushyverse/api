@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.gui
 
 import be.seeseemelk.mockbukkit.MockBukkit
+import be.seeseemelk.mockbukkit.MockPlugin
 import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.entity.PlayerMock
 import com.github.rushyverse.api.AbstractKoinTest
@@ -12,6 +13,11 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.spyk
+import java.net.InetSocketAddress
+import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -24,6 +30,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.bukkit.Material
 import org.bukkit.event.inventory.InventoryType
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
 abstract class AbstractGUITest : AbstractKoinTest() {
@@ -31,6 +38,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
     protected lateinit var guiManager: GUIManager
     protected lateinit var clientManager: ClientManager
     protected lateinit var serverMock: ServerMock
+    protected lateinit var pluginMock: MockPlugin
 
     @BeforeTest
     override fun onBefore() {
@@ -44,6 +52,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         }
 
         serverMock = MockBukkit.mock()
+        pluginMock = MockBukkit.createMockPlugin()
     }
 
     @AfterTest
@@ -159,6 +168,24 @@ abstract class AbstractGUITest : AbstractKoinTest() {
         }
 
         @Test
+        fun `should do nothing if the player open inventory is cancelled`() = runTest {
+            val gui = createNonFillGUI()
+
+            val basePlayer = serverMock.addPlayer()
+            val uuid = UUID.randomUUID()
+            val player = spyk(basePlayer) {
+                every { uniqueId } returns uuid
+                every { address } returns InetSocketAddress(0)
+                every { openInventory(any<Inventory>()) } returns null
+            }
+            val (_, client) = registerPlayer(player)
+
+            gui.openClient(client) shouldBe false
+            gui.contains(client) shouldBe false
+            gui.viewers().toList() shouldBe emptyList()
+        }
+
+        @Test
         fun `should fill the inventory in the same thread if no suspend operation`() {
 
             val items: Array<ItemStack> = arrayOf(
@@ -236,6 +263,11 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             }
         }
 
+        @Test
+        fun `should use loading animation`() {
+            TODO()
+        }
+
     }
 
     abstract inner class UpdateClient {
@@ -308,6 +340,66 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
                 delay(50.milliseconds)
                 gui.isInventoryLoading(guiInventory) shouldBe false
+            }
+        }
+    }
+
+    abstract inner class HasInventory {
+
+        @Test
+        fun `should return false if the inventory doesn't come from GUI`() = runTest {
+            val gui = createNonFillGUI()
+            val (_, client) = registerPlayer()
+            gui.openClient(client) shouldBe true
+            gui.hasInventory(mockk()) shouldBe false
+        }
+
+        @Test
+        fun `should return true if the client is viewing the GUI`() = runTest {
+            val gui = createNonFillGUI()
+            val (player, client) = registerPlayer()
+            gui.openClient(client) shouldBe true
+
+            val inventory = player.openInventory.topInventory
+            gui.hasInventory(inventory) shouldBe true
+        }
+
+    }
+
+    abstract inner class IsInventoryLoading {
+
+        @Test
+        fun `should return false if the inventory doesn't come from GUI`() = runTest {
+            val gui = createNonFillGUI()
+            val (_, client) = registerPlayer()
+            gui.openClient(client) shouldBe true
+            gui.isInventoryLoading(mockk()) shouldBe false
+        }
+
+        @Test
+        fun `should return false if the inventory is not loading`() = runTest {
+            val gui = createNonFillGUI()
+            val (player, client) = registerPlayer()
+            gui.openClient(client) shouldBe true
+
+            val inventory = player.openInventory.topInventory
+            gui.isInventoryLoading(inventory) shouldBe false
+        }
+
+        @Test
+        fun `should return true if the inventory is loading`() {
+            runBlocking {
+                val delay = 50.milliseconds
+                val gui = createFillGUI(emptyArray(), delay = delay)
+                val (player, client) = registerPlayer()
+                gui.openClient(client) shouldBe true
+
+                val inventory = player.openInventory.topInventory
+                gui.isInventoryLoading(inventory) shouldBe true
+
+                delay(delay * 2)
+
+                gui.isInventoryLoading(inventory) shouldBe false
             }
         }
     }
@@ -409,8 +501,8 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
     abstract fun getFillThreadAfterSuspend(gui: GUI<*>): Thread?
 
-    protected suspend fun registerPlayer(): Pair<PlayerMock, Client> {
-        val player = serverMock.addPlayer()
+    protected suspend fun registerPlayer(playerMock: PlayerMock? = null): Pair<PlayerMock, Client> {
+        val player = playerMock?.also { serverMock.addPlayer(it) } ?: serverMock.addPlayer()
         val client = Client(player.uniqueId, CoroutineScope(EmptyCoroutineContext))
         clientManager.put(player, client)
         return player to client

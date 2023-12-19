@@ -26,6 +26,10 @@ public abstract class PlayerGUI(
         return key + SupervisorJob(key.coroutineContext.job)
     }
 
+    override suspend fun update(key: Client, interruptLoading: Boolean): Boolean {
+        return super.updateClient(key, interruptLoading)
+    }
+
     /**
      * Create the inventory for the client.
      * Will translate the title and fill the inventory.

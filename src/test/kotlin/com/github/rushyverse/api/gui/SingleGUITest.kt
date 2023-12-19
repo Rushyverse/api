@@ -101,6 +101,12 @@ class SingleGUITest : AbstractGUITest() {
     inner class UpdateClient : AbstractGUITest.UpdateClient()
 
     @Nested
+    inner class HasInventory : AbstractGUITest.HasInventory()
+
+    @Nested
+    inner class IsInventoryLoading : AbstractGUITest.IsInventoryLoading()
+
+    @Nested
     inner class Close : AbstractGUITest.Close()
 
     @Nested

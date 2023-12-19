@@ -179,7 +179,7 @@ public abstract class GUI<T>(
      * to start a new loading animation.
      * @return True if the inventory was updated, false otherwise.
      */
-    public suspend fun update(key: T, interruptLoading: Boolean = false): Boolean {
+    public open suspend fun update(key: T, interruptLoading: Boolean = false): Boolean {
         return mutex.withLock { unsafeUpdate(key, interruptLoading, null) }
     }
 
