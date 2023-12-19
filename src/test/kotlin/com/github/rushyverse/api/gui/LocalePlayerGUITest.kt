@@ -2,10 +2,14 @@ package com.github.rushyverse.api.gui
 
 import be.seeseemelk.mockbukkit.ServerMock
 import com.github.rushyverse.api.player.Client
+import com.github.rushyverse.api.player.language.LanguageManager
+import com.github.rushyverse.api.translation.SupportedLanguage
 import com.github.shynixn.mccoroutine.bukkit.scope
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.mockk.every
 import io.mockk.mockkStatic
+import java.util.*
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -27,29 +31,37 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
-class SingleGUITest : AbstractGUITest() {
+class LocalePlayerGUITest : AbstractGUITest() {
+
+    private lateinit var languageManager: LanguageManager
 
     @BeforeTest
     override fun onBefore() {
         super.onBefore()
+        languageManager = LanguageManager()
+
+        loadApiTestModule {
+            single { languageManager }
+        }
+
         mockkStatic("com.github.shynixn.mccoroutine.bukkit.MCCoroutineKt")
         every { plugin.scope } returns CoroutineScope(EmptyCoroutineContext)
     }
 
-    override fun createNonFillGUI(inventoryType: InventoryType): GUI<*> {
-        return SingleNonFillGUI(plugin, serverMock, inventoryType)
-    }
-
     override fun createFillGUI(items: Array<ItemStack>, inventoryType: InventoryType, delay: Duration?): GUI<*> {
-        return SingleFillGUI(plugin, serverMock, inventoryType, items, delay)
+        return LocaleFillGUI(plugin, serverMock, inventoryType, items, delay)
     }
 
-    override fun getFillThreadBeforeSuspend(gui: GUI<*>): Thread? {
-        return (gui as SingleFillGUI).calledThread
+    override fun createNonFillGUI(inventoryType: InventoryType): GUI<*> {
+        return LocaleNonFillGUI(plugin, serverMock, inventoryType)
     }
 
     override fun getFillThreadAfterSuspend(gui: GUI<*>): Thread? {
-        return (gui as SingleFillGUI).newThread
+        return (gui as LocaleFillGUI).newThread
+    }
+
+    override fun getFillThreadBeforeSuspend(gui: GUI<*>): Thread? {
+        return (gui as LocaleFillGUI).calledThread
     }
 
     @Nested
@@ -65,18 +77,39 @@ class SingleGUITest : AbstractGUITest() {
     inner class Open : AbstractGUITest.Open() {
 
         @Test
-        fun `should use the same inventory for all clients`() = runTest {
-            val type = InventoryType.ENDER_CHEST
+        fun `should create a new inventory according to the language client`() = runTest {
+            val type = InventoryType.HOPPER
             val gui = createNonFillGUI(type)
-            val inventories = List(5) {
-                val (player, client) = registerPlayer()
-                gui.open(client) shouldBe true
-                player.assertInventoryView(type)
+            val (player, client) = registerPlayer()
+            val (player2, client2) = registerPlayer()
+            languageManager.set(player, SupportedLanguage.ENGLISH)
+            languageManager.set(player2, SupportedLanguage.FRENCH)
 
-                player.openInventory.topInventory
-            }
+            gui.open(client) shouldBe true
+            gui.open(client2) shouldBe true
 
-            inventories.all { it === inventories.first() } shouldBe true
+            player.assertInventoryView(type)
+            player2.assertInventoryView(type)
+
+            player.openInventory.topInventory shouldNotBe player2.openInventory.topInventory
+        }
+
+        @Test
+        fun `should use the same inventory according to the language client`() = runTest {
+            val type = InventoryType.DISPENSER
+            val gui = createNonFillGUI(type)
+            val (player, client) = registerPlayer()
+            val (player2, client2) = registerPlayer()
+            languageManager.set(player, SupportedLanguage.FRENCH)
+            languageManager.set(player2, SupportedLanguage.FRENCH)
+
+            gui.open(client) shouldBe true
+            gui.open(client2) shouldBe true
+
+            player.assertInventoryView(type)
+            player2.assertInventoryView(type)
+
+            player.openInventory.topInventory shouldBe player2.openInventory.topInventory
         }
 
         @Test
@@ -95,6 +128,7 @@ class SingleGUITest : AbstractGUITest() {
 
             player.assertInventoryView(type)
         }
+
     }
 
     @Nested
@@ -107,7 +141,7 @@ class SingleGUITest : AbstractGUITest() {
         @ValueSource(booleans = [true, false])
         fun `should not stop loading the inventory if the client is viewing the GUI`(closeInventory: Boolean) {
             runBlocking {
-                val type = InventoryType.DROPPER
+                val type = InventoryType.HOPPER
                 val gui = createFillGUI(emptyArray(), delay = 10.minutes, inventoryType = type)
                 gui.register()
                 val (player, client) = registerPlayer()
@@ -133,17 +167,16 @@ class SingleGUITest : AbstractGUITest() {
                 }
             }
         }
-
     }
 }
 
-private abstract class AbstractSingleGUITest(
+private abstract class AbstractLocaleGUITest(
     plugin: Plugin,
     val serverMock: ServerMock,
-    val type: InventoryType
-) : SingleGUI(plugin) {
+    val type: InventoryType = InventoryType.HOPPER
+) : LocaleGUI(plugin) {
 
-    override fun createInventory(): Inventory {
+    override fun createInventory(key: Locale): Inventory {
         return serverMock.createInventory(null, type)
     }
 
@@ -155,34 +188,32 @@ private abstract class AbstractSingleGUITest(
     ) {
         error("Should not be called")
     }
-
 }
 
-private class SingleNonFillGUI(
+private class LocaleNonFillGUI(
     plugin: Plugin,
     serverMock: ServerMock,
     type: InventoryType
-) : AbstractSingleGUITest(plugin, serverMock, type) {
+) : AbstractLocaleGUITest(plugin, serverMock, type) {
 
-    override fun getItems(size: Int): Flow<ItemStackIndex> {
+    override fun getItems(key: Locale, size: Int): Flow<ItemStackIndex> {
         return emptyFlow()
     }
-
 }
 
-private class SingleFillGUI(
+private class LocaleFillGUI(
     plugin: Plugin,
     serverMock: ServerMock,
     type: InventoryType,
     val items: Array<ItemStack>,
     val delay: Duration?
-) : AbstractSingleGUITest(plugin, serverMock, type) {
+) : AbstractLocaleGUITest(plugin, serverMock, type) {
 
     var calledThread: Thread? = null
 
     var newThread: Thread? = null
 
-    override fun getItems(size: Int): Flow<ItemStackIndex> {
+    override fun getItems(key: Locale, size: Int): Flow<ItemStackIndex> {
         calledThread = Thread.currentThread()
         return flow {
             delay?.let { delay(it) }

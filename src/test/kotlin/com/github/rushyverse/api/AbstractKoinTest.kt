@@ -5,6 +5,7 @@ import com.github.rushyverse.api.koin.loadModule
 import com.github.rushyverse.api.utils.randomString
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import org.bukkit.Server
@@ -47,6 +48,7 @@ open class AbstractKoinTest {
     open fun onAfter() {
         CraftContext.stopKoin(pluginId)
         CraftContext.stopKoin(APIPlugin.ID_API)
+        unmockkAll()
     }
 
     fun loadTestModule(moduleDeclaration: ModuleDeclaration): Module =
