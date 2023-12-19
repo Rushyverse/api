@@ -211,14 +211,14 @@ public abstract class GUI<T>(
      * @return The job that can be cancelled to stop the loading animation.
      */
     private suspend fun startLoadingInventory(key: T, inventory: Inventory): Job {
+        val size = inventory.size
+        // Empty the inventory, there is no effect if the inventory is new
+        // But avoid conflicts with old items if the inventory is updated.
+        inventory.contents = arrayOfNulls(size)
+
         // If no suspend operation is used in the flow, the fill will be done in the same thread & tick.
         // That's why we start with unconfined dispatcher.
         return fillScope(key).launch(Dispatchers.Unconfined) {
-            val size = inventory.size
-            // Empty the inventory, there is no effect if the inventory is new
-            // But avoid conflicts with old items if the inventory is updated.
-            inventory.contents = arrayOfNulls(size)
-
             val inventoryFlowItems = getItems(key, size).cancellable()
 
             if (loadingAnimation == null) {
