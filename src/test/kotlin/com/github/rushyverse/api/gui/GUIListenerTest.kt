@@ -27,14 +27,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
-import net.kyori.adventure.text.Component
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.junit.jupiter.api.Nested
@@ -80,7 +78,7 @@ class GUIListenerTest : AbstractKoinTest() {
             }
 
             callEvent(true, player, ItemStack { type = Material.DIRT }, player.inventory)
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
         }
 
         @Test
@@ -92,7 +90,7 @@ class GUIListenerTest : AbstractKoinTest() {
 
             suspend fun callEvent(item: ItemStack?) {
                 val event = callEvent(false, player, item, player.inventory)
-                coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+                coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
                 verify(exactly = 0) { event.cancel() }
             }
 
@@ -114,7 +112,7 @@ class GUIListenerTest : AbstractKoinTest() {
             val item = ItemStack { type = Material.DIRT }
             callEvent(false, player, item, mockk())
 
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
             verify(exactly = 0) { pluginManager.callSuspendingEvent(any(), plugin) }
         }
 
@@ -136,7 +134,7 @@ class GUIListenerTest : AbstractKoinTest() {
             val item = ItemStack { type = Material.DIRT }
 
             callEvent(false, player, item, player.inventory)
-            coVerify(exactly = 0) { gui.onClick(any(), any(), any()) }
+            coVerify(exactly = 0) { gui.onClick(any(), any(), any(), any()) }
             verify(exactly = 1) { pluginManager.callSuspendingEvent(any(), plugin) }
             jobs.forEach { it.isCompleted shouldBe true }
 
@@ -153,13 +151,13 @@ class GUIListenerTest : AbstractKoinTest() {
             val inventory = mockk<Inventory>()
             val gui = registerGUI {
                 coEvery { contains(client) } returns true
-                coEvery { onClick(client, any(), any()) } returns Unit
+                coEvery { onClick(client, any(), any(), any()) } returns Unit
                 coEvery { hasInventory(inventory) } returns true
             }
 
             val item = ItemStack { type = Material.DIRT }
             val event = callEvent(false, player, item, inventory)
-            coVerify(exactly = 1) { gui.onClick(client, item, event) }
+            coVerify(exactly = 1) { gui.onClick(client, inventory, item, event) }
             verify(exactly = 1) { event.cancel() }
         }
 
@@ -183,7 +181,8 @@ class GUIListenerTest : AbstractKoinTest() {
 
     }
 
-    abstract inner class CloseGUIDuringEvent {
+    @Nested
+    inner class OnInventoryClose {
 
         @Test
         fun `should do nothing if client doesn't have a GUI opened`() = runTest {
@@ -192,9 +191,7 @@ class GUIListenerTest : AbstractKoinTest() {
                 coEvery { contains(client) } returns false
             }
 
-            val event = PlayerQuitEvent(player, Component.empty(), PlayerQuitEvent.QuitReason.DISCONNECTED)
-            listener.onPlayerQuit(event)
-
+            callEvent(player)
             coVerify(exactly = 0) { gui.close(client, any()) }
         }
 
@@ -216,29 +213,11 @@ class GUIListenerTest : AbstractKoinTest() {
             coVerify(exactly = 0) { gui2.close(client, any()) }
         }
 
-        protected abstract suspend fun callEvent(player: Player)
-
-    }
-
-    @Nested
-    inner class OnInventoryClose : CloseGUIDuringEvent() {
-
-        override suspend fun callEvent(player: Player) {
+        private suspend fun callEvent(player: Player) {
             val event = mockk<InventoryCloseEvent> {
                 every { getPlayer() } returns player
             }
             listener.onInventoryClose(event)
-        }
-    }
-
-    @Nested
-    inner class OnPlayerQuit : CloseGUIDuringEvent() {
-
-        override suspend fun callEvent(player: Player) {
-            val event = mockk<PlayerQuitEvent> {
-                every { getPlayer() } returns player
-            }
-            listener.onPlayerQuit(event)
         }
     }
 
@@ -249,8 +228,8 @@ class GUIListenerTest : AbstractKoinTest() {
         return player to client
     }
 
-    private inline fun registerGUI(block: GUI.() -> Unit): GUI {
-        val gui = mockk<GUI>(block = block)
+    private suspend inline fun registerGUI(block: GUI<*>.() -> Unit): GUI<*> {
+        val gui = mockk<GUI<*>>(block = block)
         guiManager.add(gui)
         return gui
     }

@@ -1,86 +1,71 @@
 package com.github.rushyverse.api.gui
 
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
-import org.bukkit.entity.HumanEntity
+import com.github.shynixn.mccoroutine.bukkit.scope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.job
+import kotlinx.coroutines.plus
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.plugin.Plugin
 
 /**
  * GUI that can be shared by multiple players.
  * Only one inventory is created for all the viewers.
  * @property server Server.
  * @property viewers List of viewers.
- * @property inventory Inventory shared by all the viewers.
  */
-public abstract class SingleGUI : GUI() {
+public abstract class SingleGUI(
+    protected val plugin: Plugin,
+    loadingAnimation: InventoryLoadingAnimation<Any>? = null
+) : GUI<Any>(
+    loadingAnimation = loadingAnimation,
+    initialNumberInventories = 1
+) {
 
-    private var inventory: Inventory? = null
+    public companion object {
+        /**
+         * Unique key for the GUI.
+         * This GUI is shared by all the players, so the key is the same for all of them.
+         * That allows creating a unique inventory.
+         */
+        private val KEY = Any()
+    }
 
-    private val mutex = Mutex()
+    override suspend fun getKey(client: Client): Any {
+        return KEY
+    }
 
-    override suspend fun openGUI(client: Client): Boolean {
-        val player = client.requirePlayer()
-        val inventory = getOrCreateInventory()
-        player.openInventory(inventory)
-        return true
+    override suspend fun fillScope(key: Any): CoroutineScope {
+        val scope = plugin.scope
+        return scope + SupervisorJob(scope.coroutineContext.job)
+    }
+
+    override fun createInventory(key: Any): Inventory {
+        return createInventory()
     }
 
     /**
-     * Get the inventory of the GUI.
-     * If the inventory is not created, create it.
-     * @return The inventory of the GUI.
-     */
-    private suspend fun getOrCreateInventory(): Inventory {
-        return mutex.withLock {
-            inventory ?: createInventory().also {
-                inventory = it
-                fill(it)
-            }
-        }
-    }
-
-    /**
-     * Create the inventory of the GUI.
-     * This function is called only once when the inventory is created.
-     * @return A new inventory.
+     * @see createInventory(key)
      */
     protected abstract fun createInventory(): Inventory
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
         return if (closeInventory && contains(client)) {
-            client.player?.closeInventory()
+            client.player?.closeInventory(InventoryCloseEvent.Reason.PLUGIN)
             true
         } else false
     }
 
-    override suspend fun viewers(): List<HumanEntity> {
-        return mutex.withLock { inventory?.viewers } ?: emptyList()
-    }
-
-    override suspend fun contains(client: Client): Boolean {
-        return client.player?.let { it in viewers() } == true
-    }
-
-    override suspend fun hasInventory(inventory: Inventory): Boolean {
-        return mutex.withLock { this.inventory } == inventory
-    }
-
-    override suspend fun close() {
-        super.close()
-        mutex.withLock {
-            val inventory = inventory
-            if (inventory != null) {
-                inventory.close()
-                this.inventory = null
-            }
-        }
+    override fun getItems(key: Any, size: Int): Flow<ItemStackIndex> {
+        return getItems(size)
     }
 
     /**
-     * Fill the inventory with items for the client.
-     * This function is called when the inventory is created.
-     * @param inventory The inventory to fill.
+     * @see getItems(key, size)
      */
-    protected abstract suspend fun fill(inventory: Inventory)
+    protected abstract fun getItems(size: Int): Flow<ItemStackIndex>
 }

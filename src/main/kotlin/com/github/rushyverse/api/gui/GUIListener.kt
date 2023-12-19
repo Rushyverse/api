@@ -17,7 +17,6 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.PlayerInventory
@@ -42,8 +41,10 @@ public class GUIListener(private val plugin: Plugin) : Listener {
         if (event.isCancelled) return
 
         val item = event.currentItem
+        // If the item is null or air, we should ignore the click
         if (item == null || item.type == Material.AIR) return
 
+        // If the click is not in an inventory, this is not a GUI click
         val clickedInventory = event.clickedInventory ?: return
 
         val player = event.whoClicked
@@ -75,7 +76,7 @@ public class GUIListener(private val plugin: Plugin) : Listener {
 
         // The item in a GUI is not supposed to be moved
         event.cancel()
-        gui.onClick(client, item, event)
+        gui.onClick(client, clickedInventory, item, event)
     }
 
     /**
@@ -116,27 +117,10 @@ public class GUIListener(private val plugin: Plugin) : Listener {
      */
     @EventHandler
     public suspend fun onInventoryClose(event: InventoryCloseEvent) {
-        quitOpenedGUI(event.player)
-    }
-
-    /**
-     * Called when a player quits the server.
-     * If the player has a GUI opened, the GUI is notified that it is closed for this player.
-     * @param event Event of the quit.
-     */
-    @EventHandler
-    public suspend fun onPlayerQuit(event: PlayerQuitEvent) {
-        quitOpenedGUI(event.player)
-    }
-
-    /**
-     * Quit the opened GUI for the player.
-     * @param player Player to quit the GUI for.
-     */
-    private suspend fun quitOpenedGUI(player: HumanEntity) {
-        val client = clients.getClientOrNull(player)
+        val client = clients.getClientOrNull(event.player)
         val gui = client?.gui() ?: return
         // We don't close the inventory because it is closing due to event.
+        // That avoids an infinite loop of events and consequently a stack overflow.
         gui.close(client, false)
     }
 

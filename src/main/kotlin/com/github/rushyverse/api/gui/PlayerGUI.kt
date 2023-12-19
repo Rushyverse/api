@@ -1,8 +1,12 @@
 package com.github.rushyverse.api.gui
 
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.job
+import kotlinx.coroutines.plus
 import kotlinx.coroutines.sync.withLock
-import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 
@@ -10,10 +14,16 @@ import org.bukkit.inventory.InventoryHolder
  * GUI where a new inventory is created for each player.
  * An inventory is created when the player opens the GUI and he is not sharing the GUI with another player.
  */
-public abstract class PlayerGUI : DedicatedGUI<Client>() {
+public abstract class PlayerGUI(
+    loadingAnimation: InventoryLoadingAnimation<Client>? = null
+) : GUI<Client>(loadingAnimation = loadingAnimation) {
 
     override suspend fun getKey(client: Client): Client {
         return client
+    }
+
+    override suspend fun fillScope(key: Client): CoroutineScope {
+        return key + SupervisorJob(key.coroutineContext.job)
     }
 
     /**
@@ -22,7 +32,7 @@ public abstract class PlayerGUI : DedicatedGUI<Client>() {
      * @param key The client to create the inventory for.
      * @return The inventory for the client.
      */
-    override suspend fun createInventory(key: Client): Inventory {
+    override fun createInventory(key: Client): Inventory {
         val player = key.requirePlayer()
         return createInventory(player, key)
     }
@@ -42,11 +52,16 @@ public abstract class PlayerGUI : DedicatedGUI<Client>() {
     }
 
     override suspend fun close(client: Client, closeInventory: Boolean): Boolean {
-        return mutex.withLock { inventories.remove(client) }?.run {
-            if (closeInventory) {
-                client.player?.closeInventory(InventoryCloseEvent.Reason.PLUGIN)
-            }
-            true
-        } == true
+        val (inventory, job) = mutex.withLock { inventories.remove(client) } ?: return false
+
+        job.cancel(GUIClosedForClientException(client))
+        job.join()
+
+        if (closeInventory) {
+            // Call out of the lock to avoid slowing down the mutex.
+            inventory.close()
+        }
+
+        return true
     }
 }

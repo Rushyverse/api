@@ -2,11 +2,16 @@ package com.github.rushyverse.api.gui
 
 import be.seeseemelk.mockbukkit.ServerMock
 import com.github.rushyverse.api.player.Client
+import com.github.shynixn.mccoroutine.bukkit.scope
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNotBe
+import io.mockk.every
+import io.mockk.mockkStatic
+import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -16,13 +21,36 @@ import kotlinx.coroutines.test.runTest
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.Plugin
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
-class PlayerGUITest : AbstractGUITest() {
+class SingleGUITest : AbstractGUITest() {
+
+    @BeforeTest
+    override fun onBefore() {
+        super.onBefore()
+        mockkStatic("com.github.shynixn.mccoroutine.bukkit.MCCoroutineKt")
+        every { plugin.scope } returns CoroutineScope(EmptyCoroutineContext)
+    }
+
+    override fun createNonFillGUI(inventoryType: InventoryType): GUI<*> {
+        return SingleNonFillGUI(plugin, serverMock, inventoryType)
+    }
+
+    override fun createFillGUI(items: Array<ItemStack>, inventoryType: InventoryType, delay: Duration?): GUI<*> {
+        return SingleFillGUI(plugin, serverMock, inventoryType, items, delay)
+    }
+
+    override fun getFillThreadBeforeSuspend(gui: GUI<*>): Thread? {
+        return (gui as SingleFillGUI).calledThread
+    }
+
+    override fun getFillThreadAfterSuspend(gui: GUI<*>): Thread? {
+        return (gui as SingleFillGUI).newThread
+    }
 
     @Nested
     inner class Register : AbstractGUITest.Register()
@@ -37,23 +65,22 @@ class PlayerGUITest : AbstractGUITest() {
     inner class Open : AbstractGUITest.Open() {
 
         @Test
-        fun `should create a new inventory for the client`() = runTest {
+        fun `should use the same inventory for all clients`() = runTest {
             val type = InventoryType.ENDER_CHEST
             val gui = createNonFillGUI(type)
-            val (player, client) = registerPlayer()
-            val (player2, client2) = registerPlayer()
+            val inventories = List(5) {
+                val (player, client) = registerPlayer()
+                gui.open(client) shouldBe true
+                player.assertInventoryView(type)
 
-            gui.open(client) shouldBe true
-            gui.open(client2) shouldBe true
+                player.openInventory.topInventory
+            }
 
-            player.assertInventoryView(type)
-            player2.assertInventoryView(type)
-
-            player.openInventory.topInventory shouldNotBe player2.openInventory.topInventory
+            inventories.all { it === inventories.first() } shouldBe true
         }
 
         @Test
-        fun `should create a new inventory for the same client if previous is closed before`() = runTest {
+        fun `should not create a new inventory for the same client if previously closed`() = runTest {
             val type = InventoryType.BREWING
             val gui = createNonFillGUI(type)
             val (player, client) = registerPlayer()
@@ -64,7 +91,7 @@ class PlayerGUITest : AbstractGUITest() {
             gui.close(client, true) shouldBe true
 
             gui.open(client) shouldBe true
-            player.openInventory.topInventory shouldNotBe firstInventory
+            player.openInventory.topInventory shouldBe firstInventory
 
             player.assertInventoryView(type)
         }
@@ -78,10 +105,10 @@ class PlayerGUITest : AbstractGUITest() {
 
         @ParameterizedTest
         @ValueSource(booleans = [true, false])
-        fun `should stop loading the inventory if the client is viewing the GUI`(closeInventory: Boolean) {
+        fun `should not stop loading the inventory if the client is viewing the GUI`(closeInventory: Boolean) {
             runBlocking {
                 val type = InventoryType.DROPPER
-                val gui = createFillGUI(items = emptyArray(), inventoryType = type, delay = 10.minutes)
+                val gui = createFillGUI(emptyArray(), delay = 10.minutes, inventoryType = type)
                 gui.register()
                 val (player, client) = registerPlayer()
 
@@ -94,58 +121,30 @@ class PlayerGUITest : AbstractGUITest() {
                 val inventory = openInventory.topInventory
                 gui.isInventoryLoading(inventory) shouldBe true
 
-                gui.close(client, closeInventory) shouldBe true
-                gui.isInventoryLoading(inventory) shouldBe false
+                gui.close(client, closeInventory) shouldBe closeInventory
+                gui.isInventoryLoading(inventory) shouldBe true
 
                 if (closeInventory) {
                     player.assertInventoryView(initialInventoryViewType)
+                    gui.contains(client) shouldBe false
                 } else {
                     player.assertInventoryView(type)
+                    gui.contains(client) shouldBe true
                 }
             }
         }
 
-        @Test
-        fun `should remove client inventory without closing it if closeInventory is false`() =
-            runTest {
-                val type = InventoryType.ENDER_CHEST
-                val gui = NonFillGUI(serverMock, type = type)
-                val (player, client) = registerPlayer()
-
-                gui.open(client) shouldBe true
-                player.assertInventoryView(type)
-
-                gui.close(client, false) shouldBe true
-                player.assertInventoryView(type)
-
-                gui.contains(client) shouldBe false
-            }
-    }
-
-    override fun createNonFillGUI(inventoryType: InventoryType): GUI<*> {
-        return NonFillGUI(serverMock, inventoryType)
-    }
-
-    override fun createFillGUI(items: Array<ItemStack>, inventoryType: InventoryType, delay: Duration?): GUI<*> {
-        return FillGUI(serverMock, inventoryType, items, delay)
-    }
-
-    override fun getFillThreadBeforeSuspend(gui: GUI<*>): Thread? {
-        return (gui as FillGUI).calledThread
-    }
-
-    override fun getFillThreadAfterSuspend(gui: GUI<*>): Thread? {
-        return (gui as FillGUI).newThread
     }
 }
 
-private abstract class AbstractPlayerGUITest(
+private abstract class AbstractSingleGUITest(
+    plugin: Plugin,
     val serverMock: ServerMock,
     val type: InventoryType
-) : PlayerGUI() {
+) : SingleGUI(plugin) {
 
-    override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
-        return serverMock.createInventory(owner, type)
+    override fun createInventory(): Inventory {
+        return serverMock.createInventory(null, type)
     }
 
     override suspend fun onClick(
@@ -156,30 +155,34 @@ private abstract class AbstractPlayerGUITest(
     ) {
         error("Should not be called")
     }
+
 }
 
-private class NonFillGUI(
+private class SingleNonFillGUI(
+    plugin: Plugin,
     serverMock: ServerMock,
     type: InventoryType
-) : AbstractPlayerGUITest(serverMock, type) {
+) : AbstractSingleGUITest(plugin, serverMock, type) {
 
-    override fun getItems(key: Client, size: Int): Flow<ItemStackIndex> {
+    override fun getItems(size: Int): Flow<ItemStackIndex> {
         return emptyFlow()
     }
+
 }
 
-private class FillGUI(
+private class SingleFillGUI(
+    plugin: Plugin,
     serverMock: ServerMock,
     type: InventoryType,
     val items: Array<ItemStack>,
     val delay: Duration?
-) : AbstractPlayerGUITest(serverMock, type) {
+) : AbstractSingleGUITest(plugin, serverMock, type) {
 
     var calledThread: Thread? = null
 
     var newThread: Thread? = null
 
-    override fun getItems(key: Client, size: Int): Flow<ItemStackIndex> {
+    override fun getItems(size: Int): Flow<ItemStackIndex> {
         calledThread = Thread.currentThread()
         return flow {
             delay?.let { delay(it) }
