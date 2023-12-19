@@ -56,6 +56,11 @@ public open class GUIException(message: String) : CancellationException(message)
 public class GUIClosedException(message: String) : GUIException(message)
 
 /**
+ * Exception thrown when the GUI is updating.
+ */
+public class GUIUpdatedException(message: String) : GUIException(message)
+
+/**
  * Exception thrown when the GUI is closed for a specific client.
  * @property client Client for which the GUI is closed.
  */
@@ -106,7 +111,7 @@ public abstract class GUI<T>(
      * @param client Client to open the GUI for.
      * @return True if the GUI was opened, false otherwise.
      */
-    public suspend fun open(client: Client): Boolean {
+    public open suspend fun open(client: Client): Boolean {
         requireOpen()
 
         val player = client.player
@@ -137,6 +142,48 @@ public abstract class GUI<T>(
         }
 
         return true
+    }
+
+    /**
+     * Update the opened inventory for the client.
+     *
+     * If the client has the GUI opened, the inventory will be updated.
+     * If the client has another GUI opened, do nothing.
+     *
+     * Call [getItems] to get the new items to fill the inventory.
+     * @param client Client to update the inventory for.
+     * @param interruptLoading If true and if the inventory is loading, the loading will be interrupted
+     * to start a new loading animation.
+     * @return True if the inventory was updated, false otherwise.
+     * @see [getItems]
+     */
+    public open suspend fun update(client: Client, interruptLoading: Boolean = false): Boolean {
+        return mutex.withLock {
+            val key = getKey(client)
+            val inventoryData = inventories[key] ?: return@withLock false
+
+            // If the client doesn't have the GUI opened, do nothing.
+            if (!unsafeContains(client)) return@withLock false
+
+            if (inventoryData.isLoading) {
+                // If we don't want to interrupt the loading and the inventory is loading, do nothing.
+                if (!interruptLoading) return@withLock false
+                else {
+                    // If we want to interrupt the loading, we cancel the loading job.
+                    // We need to wait for the job to be cancelled to avoid conflicts with the new loading animation.
+                    inventoryData.job.apply {
+                        cancel(GUIUpdatedException("The GUI is updating"))
+                        join()
+                    }
+                }
+            }
+
+            val inventory = inventoryData.inventory
+            // Begin a new loading job and replace the old one.
+            val newLoadingJob = startLoadingInventory(key, inventory)
+            inventories[key] = InventoryData(inventory, newLoadingJob)
+            true
+        }
     }
 
     /**
