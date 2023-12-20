@@ -504,14 +504,20 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             val playerClients = List(5) { registerPlayer() }
             val initialInventoryViewType = playerClients.first().first.openInventory.type
 
-            playerClients.forEach { (player, client) ->
+            val inventories = playerClients.map { (player, client) ->
                 player.assertInventoryView(initialInventoryViewType)
                 gui.openClient(client) shouldBe true
                 player.assertInventoryView(type)
                 client.gui() shouldBe gui
+                player.openInventory.topInventory
             }
 
             gui.close()
+
+            inventories.forEach { inventory ->
+                gui.hasInventory(inventory) shouldBe false
+            }
+
             playerClients.forEach { (player, client) ->
                 player.assertInventoryView(initialInventoryViewType)
                 client.gui() shouldBe null
