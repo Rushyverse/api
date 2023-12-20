@@ -23,9 +23,13 @@ import org.bukkit.inventory.ItemStack
  */
 public class ShiftInventoryLoadingAnimation<T>(
     private val initialize: (T) -> Sequence<ItemStack>,
-    private val shift: Int = 1,
-    private val delay: Duration = 100.milliseconds,
+    public val shift: Int = 1,
+    public val delay: Duration = 100.milliseconds,
 ) : InventoryLoadingAnimation<T> {
+
+    init {
+        require(delay > Duration.ZERO) { "Delay must be positive" }
+    }
 
     override suspend fun loading(key: T, inventory: Inventory) {
         val size = inventory.size
@@ -37,9 +41,9 @@ public class ShiftInventoryLoadingAnimation<T>(
             contents[index] = item
         }
 
-        if(shift == 0) {
+        if(shift == 0 || shift == inventory.size) {
             inventory.contents = contents
-            awaitCancellation()
+            return
         }
 
         coroutineScope {
