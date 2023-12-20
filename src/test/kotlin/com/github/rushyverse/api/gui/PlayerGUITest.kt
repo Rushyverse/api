@@ -1,12 +1,14 @@
 package com.github.rushyverse.api.gui
 
 import be.seeseemelk.mockbukkit.ServerMock
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -34,7 +36,7 @@ class PlayerGUITest : AbstractGUITest() {
     inner class Contains : AbstractGUITest.Contains()
 
     @Nested
-    inner class OpenClient : AbstractGUITest.OpenClient() {
+    inner class OpenClient : AbstractGUITest.OpenClient<Client>() {
 
         @Test
         fun `should create a new inventory for the client`() = runTest {
@@ -67,6 +69,24 @@ class PlayerGUITest : AbstractGUITest() {
             player.openInventory.topInventory shouldNotBe firstInventory
 
             player.assertInventoryView(type)
+        }
+
+        override fun createDelayGUI(
+            item1: ItemStack,
+            item2: ItemStack,
+            delay: Duration,
+            inventoryType: InventoryType,
+            loadingAnimation: InventoryLoadingAnimation<Client>?
+        ): GUI<Client> {
+            return object : AbstractPlayerGUITest(serverMock, InventoryType.CHEST, loadingAnimation) {
+                override fun getItems(key: Client, size: Int): Flow<ItemStackIndex> {
+                    return flow {
+                        emit(0 to item1)
+                        delay(1.seconds)
+                        emit(1 to item2)
+                    }
+                }
+            }
         }
     }
 
@@ -150,8 +170,9 @@ class PlayerGUITest : AbstractGUITest() {
 
 private abstract class AbstractPlayerGUITest(
     val serverMock: ServerMock,
-    val type: InventoryType
-) : PlayerGUI() {
+    val type: InventoryType,
+    loadingAnimation: InventoryLoadingAnimation<Client>? = null
+) : PlayerGUI(loadingAnimation) {
 
     override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
         return serverMock.createInventory(owner, type)

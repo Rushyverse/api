@@ -1,6 +1,7 @@
 package com.github.rushyverse.api.gui
 
 import be.seeseemelk.mockbukkit.ServerMock
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import com.github.shynixn.mccoroutine.bukkit.scope
 import io.kotest.matchers.shouldBe
@@ -11,6 +12,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -62,7 +64,7 @@ class SingleGUITest : AbstractGUITest() {
     inner class Contains : AbstractGUITest.Contains()
 
     @Nested
-    inner class OpenClient : AbstractGUITest.OpenClient() {
+    inner class OpenClient : AbstractGUITest.OpenClient<Unit>() {
 
         @Test
         fun `should use the same inventory for all clients`() = runTest {
@@ -94,6 +96,24 @@ class SingleGUITest : AbstractGUITest() {
             player.openInventory.topInventory shouldBe firstInventory
 
             player.assertInventoryView(type)
+        }
+
+        override fun createDelayGUI(
+            item1: ItemStack,
+            item2: ItemStack,
+            delay: Duration,
+            inventoryType: InventoryType,
+            loadingAnimation: InventoryLoadingAnimation<Unit>?
+        ): GUI<Unit> {
+            return object : AbstractSingleGUITest(plugin, serverMock, InventoryType.CHEST, loadingAnimation) {
+                override fun getItems(size: Int): Flow<ItemStackIndex> {
+                    return flow {
+                        emit(0 to item1)
+                        delay(1.seconds)
+                        emit(1 to item2)
+                    }
+                }
+            }
         }
     }
 
@@ -149,8 +169,9 @@ class SingleGUITest : AbstractGUITest() {
 private abstract class AbstractSingleGUITest(
     plugin: Plugin,
     val serverMock: ServerMock,
-    val type: InventoryType
-) : SingleGUI(plugin) {
+    val type: InventoryType,
+    animation: InventoryLoadingAnimation<Unit>? = null
+) : SingleGUI(plugin, animation) {
 
     override fun createInventory(): Inventory {
         return serverMock.createInventory(null, type)

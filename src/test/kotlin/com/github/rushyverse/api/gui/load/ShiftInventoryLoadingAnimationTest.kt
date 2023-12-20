@@ -29,8 +29,8 @@ class ShiftInventoryLoadingAnimationTest {
                 items.forEachIndexed { index, itemStack ->
                     contents[index] = itemStack
                 }
-        }
             }
+        }
     }
 
     @Test

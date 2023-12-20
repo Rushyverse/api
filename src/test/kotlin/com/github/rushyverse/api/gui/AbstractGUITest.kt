@@ -6,6 +6,7 @@ import be.seeseemelk.mockbukkit.ServerMock
 import be.seeseemelk.mockbukkit.entity.PlayerMock
 import com.github.rushyverse.api.AbstractKoinTest
 import com.github.rushyverse.api.extension.ItemStack
+import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
@@ -24,6 +25,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -127,7 +129,7 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
     }
 
-    abstract inner class OpenClient {
+    abstract inner class OpenClient<T> {
 
         @Test
         fun `should open if GUI was closed`() = runTest {
@@ -136,7 +138,6 @@ abstract class AbstractGUITest : AbstractKoinTest() {
             gui.close()
             val (player, client) = registerPlayer()
 
-            val initialInventoryViewType = player.openInventory.type
             gui.openClient(client) shouldBe true
             player.assertInventoryView(type)
         }
@@ -265,8 +266,96 @@ abstract class AbstractGUITest : AbstractKoinTest() {
 
         @Test
         fun `should use loading animation`() {
-            TODO()
+            val loadingItem = ItemStack { type = Material.BARRIER }
+            val item1 = ItemStack { type = Material.APPLE }
+            val item2 = ItemStack { type = Material.BEEF }
+
+            val animation = createAnimation(loadingItem)
+
+            val gui = createDelayGUI(
+                item1,
+                item2,
+                delay = 1.seconds,
+                inventoryType = InventoryType.CHEST,
+                loadingAnimation = animation
+            )
+
+            runBlocking {
+                val (player, client) = registerPlayer()
+                gui.openClient(client) shouldBe true
+                val guiInventory = player.openInventory.topInventory
+
+                // Animation should be called so the real items should not be in the inventory
+                val firstContents = guiInventory.contents
+                firstContents.getOrNull(0) shouldBe loadingItem
+                firstContents.getOrNull(1) shouldBe null
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                delay(100.milliseconds)
+
+                // Until all items are emitted, the inventory should not be filled
+                val secondContents = guiInventory.contents
+                secondContents.getOrNull(0) shouldBe loadingItem
+                secondContents.getOrNull(1) shouldBe null
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                delay(1.seconds)
+
+                // After all items are emitted, the inventory should be filled
+                val thirdContents = guiInventory.contents
+                thirdContents.getOrNull(0) shouldBe item1
+                thirdContents.getOrNull(1) shouldBe item2
+                gui.isInventoryLoading(guiInventory) shouldBe false
+            }
         }
+
+        @Test
+        fun `should set bit by bit if no loading animation`() {
+            val item1 = ItemStack { type = Material.APPLE }
+            val item2 = ItemStack { type = Material.BEEF }
+
+            val gui = createDelayGUI(
+                item1,
+                item2,
+                delay = 1.seconds,
+                inventoryType = InventoryType.CHEST,
+                loadingAnimation = null
+            )
+
+            runBlocking {
+                val (player, client) = registerPlayer()
+                gui.openClient(client) shouldBe true
+                delay(100.milliseconds)
+                val guiInventory = player.openInventory.topInventory
+
+                // Animation should be called so the real items should not be in the inventory
+                val firstContents = guiInventory.contents
+                firstContents.getOrNull(0) shouldBe item1
+                firstContents.getOrNull(1) shouldBe null
+                gui.isInventoryLoading(guiInventory) shouldBe true
+
+                delay(1.seconds)
+
+                // After all items are emitted, the inventory should be filled
+                val secondContents = guiInventory.contents
+                secondContents.getOrNull(0) shouldBe item1
+                secondContents.getOrNull(1) shouldBe item2
+                gui.isInventoryLoading(guiInventory) shouldBe false
+            }
+        }
+
+        private fun createAnimation(loadingItem: ItemStack) =
+            InventoryLoadingAnimation<T> { _, inventory ->
+                inventory.setItem(0, loadingItem)
+            }
+
+        protected abstract fun createDelayGUI(
+            item1: ItemStack,
+            item2: ItemStack,
+            delay: Duration,
+            inventoryType: InventoryType,
+            loadingAnimation: InventoryLoadingAnimation<T>?
+        ): GUI<T>
 
     }
 
