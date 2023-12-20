@@ -7,6 +7,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -264,7 +265,12 @@ public abstract class GUI<T>(
                 // Will fill the inventory bit by bit.
                 inventoryFlowItems.collect { (index, item) -> inventory.setItem(index, item) }
             } else {
-                val loadingAnimationJob = launch { loadingAnimation.loading(key, inventory) }
+                val loadingAnimationJob = launch {
+                    loadingAnimation.loading(key, inventory)
+                    // If the loading function is finished, the "loading" state must be continued
+                    // until the flow is finished.
+                    awaitCancellation()
+                }
 
                 // To avoid conflicts with the loading animation,
                 // we need to store the items in a temporary inventory
