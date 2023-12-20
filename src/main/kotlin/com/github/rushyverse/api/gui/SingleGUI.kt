@@ -32,7 +32,7 @@ public abstract class SingleGUI(
          * This GUI is shared by all the players, so the key is the same for all of them.
          * That allows creating a unique inventory.
          */
-        private val KEY = Unit
+        private val KEY: Unit get() = Unit
     }
 
     override suspend fun getKey(client: Client) {
@@ -49,9 +49,24 @@ public abstract class SingleGUI(
     }
 
     /**
-     * @see createInventory(key)
+     * Create the inventory.
+     * @return New created inventory.
      */
     protected abstract fun createInventory(): Inventory
+
+    /**
+     * Update the inventory.
+     * If the inventory is not loaded, the inventory will be updated.
+     * If the inventory is loading, the inventory will be updated if [interruptLoading] is true.
+     *
+     * Call [getItems] to get the new items to fill the inventory.
+     * @param interruptLoading If true and if the inventory is loading, the loading will be interrupted
+     * to start a new loading animation.
+     * @return True if the inventory was updated, false otherwise.
+     */
+    public suspend fun update(interruptLoading: Boolean = false): Boolean {
+        return super.update(KEY, interruptLoading)
+    }
 
     override suspend fun closeClient(client: Client, closeInventory: Boolean): Boolean {
         return if (closeInventory && contains(client)) {

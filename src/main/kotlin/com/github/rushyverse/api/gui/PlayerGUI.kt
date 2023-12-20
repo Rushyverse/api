@@ -26,8 +26,14 @@ public abstract class PlayerGUI(
         return key + SupervisorJob(key.coroutineContext.job)
     }
 
-    override suspend fun update(key: Client, interruptLoading: Boolean): Boolean {
-        return super.updateClient(key, interruptLoading)
+    override suspend fun updateClient(client: Client, interruptLoading: Boolean): Boolean {
+        // Little optimization to avoid checking if the client is contained in map's values.
+        return super.update(client, interruptLoading)
+    }
+
+    override fun unsafeContains(client: Client): Boolean {
+        // Little optimization to avoid checking if the client is contained in map's values.
+        return inventories.containsKey(client)
     }
 
     /**
@@ -49,11 +55,6 @@ public abstract class PlayerGUI(
      * @return The inventory for the client.
      */
     protected abstract fun createInventory(owner: InventoryHolder, client: Client): Inventory
-
-    override fun unsafeContains(client: Client): Boolean {
-        // Little optimization to avoid searching in the map from values.
-        return inventories.containsKey(client)
-    }
 
     override suspend fun closeClient(client: Client, closeInventory: Boolean): Boolean {
         val (inventory, job) = mutex.withLock { inventories.remove(client) } ?: return false
