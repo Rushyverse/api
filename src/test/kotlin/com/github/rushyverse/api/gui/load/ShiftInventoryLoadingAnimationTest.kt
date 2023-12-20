@@ -133,5 +133,8 @@ class ShiftInventoryLoadingAnimationTest {
         }
 
         job.cancelAndJoin()
+        delay(delay)
+        // The inventory should not have changed after the animation is finished.
+        inventory.contents.toList() shouldContainExactly itemList
     }
 }

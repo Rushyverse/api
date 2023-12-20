@@ -128,13 +128,13 @@ class SingleGUITest : AbstractGUITest() {
 
         @ParameterizedTest
         @ValueSource(booleans = [true, false])
-        fun `should call update function with generic key`(result: Boolean) = runTest {
+        fun `should call update function with generic key`(boolean: Boolean) = runTest {
             val gui = spyk(createNonFillGUI()) {
-                coEvery { update(Unit, result) } returns result
+                coEvery { update(Unit, boolean) } returns boolean
             }
 
-            gui.update(result) shouldBe result
-            coVerify(exactly = 1) { gui.update(Unit, result) }
+            gui.update(boolean) shouldBe boolean
+            coVerify(exactly = 1) { gui.update(Unit, boolean) }
         }
 
     }
