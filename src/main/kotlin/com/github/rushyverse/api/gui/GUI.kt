@@ -62,9 +62,8 @@ public class GUIClosedException(message: String? = null) : GUIException(message)
 
 /**
  * Exception thrown when the GUI is updating.
- * @property client Client for which the GUI is updating.
  */
-public class GUIUpdatedException(public val client: Client?) : GUIException()
+public class GUIUpdatedException : GUIException()
 
 /**
  * Exception thrown when the GUI is closed for a specific client.
@@ -163,7 +162,7 @@ public abstract class GUI<T>(
         val key = getKey(client)
         return mutex.withLock {
             if (!unsafeContains(client)) return false
-            unsafeUpdate(key, interruptLoading, client)
+            unsafeUpdate(key, interruptLoading)
         }
     }
 
@@ -181,7 +180,7 @@ public abstract class GUI<T>(
      * @return True if the inventory was updated, false otherwise.
      */
     public open suspend fun update(key: T, interruptLoading: Boolean = false): Boolean {
-        return mutex.withLock { unsafeUpdate(key, interruptLoading, null) }
+        return mutex.withLock { unsafeUpdate(key, interruptLoading) }
     }
 
     /**
@@ -199,7 +198,7 @@ public abstract class GUI<T>(
      * to start a new loading animation.
      * @return True if the inventory was updated, false otherwise.
      */
-    private suspend fun unsafeUpdate(key: T, interruptLoading: Boolean = false, cause: Client? = null): Boolean {
+    private suspend fun unsafeUpdate(key: T, interruptLoading: Boolean = false): Boolean {
         val inventoryData = inventories[key] ?: return false
 
         if (inventoryData.isLoading) {
@@ -209,7 +208,7 @@ public abstract class GUI<T>(
                 // If we want to interrupt the loading, we cancel the loading job.
                 // We need to wait for the job to be cancelled to avoid conflicts with the new loading animation.
                 inventoryData.job.apply {
-                    cancel(GUIUpdatedException(cause))
+                    cancel(GUIUpdatedException())
                     join()
                 }
             }
