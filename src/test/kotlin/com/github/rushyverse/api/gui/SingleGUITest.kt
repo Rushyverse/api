@@ -5,8 +5,11 @@ import com.github.rushyverse.api.gui.load.InventoryLoadingAnimation
 import com.github.rushyverse.api.player.Client
 import com.github.shynixn.mccoroutine.bukkit.scope
 import io.kotest.matchers.shouldBe
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockkStatic
+import io.mockk.spyk
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -38,11 +41,11 @@ class SingleGUITest : AbstractGUITest() {
         every { plugin.scope } returns CoroutineScope(EmptyCoroutineContext)
     }
 
-    override fun createNonFillGUI(inventoryType: InventoryType): GUI<*> {
+    override fun createNonFillGUI(inventoryType: InventoryType): SingleGUI {
         return SingleNonFillGUI(plugin, serverMock, inventoryType)
     }
 
-    override fun createFillGUI(items: Array<ItemStack>, inventoryType: InventoryType, delay: Duration?): GUI<*> {
+    override fun createFillGUI(items: Array<ItemStack>, inventoryType: InventoryType, delay: Duration?): SingleGUI {
         return SingleFillGUI(plugin, serverMock, inventoryType, items, delay)
     }
 
@@ -119,6 +122,22 @@ class SingleGUITest : AbstractGUITest() {
 
     @Nested
     inner class UpdateClient : AbstractGUITest.UpdateClient()
+
+    @Nested
+    inner class Update {
+
+        @ParameterizedTest
+        @ValueSource(booleans = [true, false])
+        fun `should call update function with generic key`(result: Boolean) = runTest {
+            val gui = spyk(createNonFillGUI()) {
+                coEvery { update(Unit, result) } returns result
+            }
+
+            gui.update(result) shouldBe result
+            coVerify(exactly = 1) { gui.update(Unit, result) }
+        }
+
+    }
 
     @Nested
     inner class HasInventory : AbstractGUITest.HasInventory()
