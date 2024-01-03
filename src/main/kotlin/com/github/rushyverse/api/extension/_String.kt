@@ -3,14 +3,14 @@
 
 package com.github.rushyverse.api.extension
 
+import java.math.BigInteger
+import java.util.*
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
-import java.math.BigInteger
-import java.util.*
 
 /**
  * MiniMessage instance to deserialize components without strict mode.

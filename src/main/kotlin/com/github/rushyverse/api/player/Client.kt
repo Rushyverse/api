@@ -2,17 +2,19 @@ package com.github.rushyverse.api.player
 
 import com.github.rushyverse.api.delegate.DelegatePlayer
 import com.github.rushyverse.api.extension.asComponent
+import com.github.rushyverse.api.gui.GUI
+import com.github.rushyverse.api.gui.GUIManager
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.player.exception.PlayerNotFoundException
 import com.github.rushyverse.api.player.language.LanguageManager
 import com.github.rushyverse.api.player.scoreboard.ScoreboardManager
 import com.github.rushyverse.api.translation.SupportedLanguage
 import fr.mrmicky.fastboard.adventure.FastBoard
+import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import org.bukkit.entity.Player
-import java.util.*
 
 /**
  * Client to store and manage data about player.
@@ -27,6 +29,8 @@ public open class Client(
     private val scoreboardManager: ScoreboardManager by inject()
 
     private val languageManager: LanguageManager by inject()
+
+    private val guiManager: GUIManager by inject()
 
     public val player: Player? by DelegatePlayer(playerUUID)
 
@@ -60,7 +64,6 @@ public open class Client(
         send(message.asComponent())
     }
 
-
     /**
      * Retrieve the scoreboard of the player.
      * The scoreboard will be created if it doesn't exist.
@@ -73,5 +76,11 @@ public open class Client(
      * @return The language of the player.
      */
     public suspend fun lang(): SupportedLanguage = languageManager.get(requirePlayer())
+
+    /**
+     * Get the opened GUI of the player.
+     * @return The opened GUI of the player.
+     */
+    public suspend fun gui(): GUI<*>? = guiManager.get(this)
 
 }
