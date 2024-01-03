@@ -174,7 +174,7 @@ private abstract class AbstractPlayerGUITest(
     loadingAnimation: InventoryLoadingAnimation<Client>? = null
 ) : PlayerGUI(loadingAnimation) {
 
-    override fun createInventory(owner: InventoryHolder, client: Client): Inventory {
+    override suspend fun createInventory(owner: InventoryHolder, client: Client): Inventory {
         return serverMock.createInventory(owner, type)
     }
 

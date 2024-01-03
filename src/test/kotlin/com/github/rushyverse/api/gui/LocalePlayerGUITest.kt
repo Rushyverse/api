@@ -206,7 +206,7 @@ private abstract class AbstractLocaleGUITest(
     animation: InventoryLoadingAnimation<Locale>? = null
 ) : LocaleGUI(plugin, animation) {
 
-    override fun createInventory(key: Locale): Inventory {
+    override suspend fun createInventory(key: Locale): Inventory {
         return serverMock.createInventory(null, type)
     }
 

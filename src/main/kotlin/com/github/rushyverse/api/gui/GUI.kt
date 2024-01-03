@@ -288,7 +288,7 @@ public abstract class GUI<T>(
      * @param key Key to create the inventory for.
      * @return New created inventory.
      */
-    protected abstract fun createInventory(key: T): Inventory
+    protected abstract suspend fun createInventory(key: T): Inventory
 
     /**
      * Create a new flow of [Item][ItemStack] to fill the inventory with.

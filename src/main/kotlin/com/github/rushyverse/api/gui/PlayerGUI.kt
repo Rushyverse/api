@@ -42,7 +42,7 @@ public abstract class PlayerGUI(
      * @param key The client to create the inventory for.
      * @return The inventory for the client.
      */
-    override fun createInventory(key: Client): Inventory {
+    override suspend fun createInventory(key: Client): Inventory {
         val player = key.requirePlayer()
         return createInventory(player, key)
     }
@@ -54,7 +54,7 @@ public abstract class PlayerGUI(
      * @param client The client to create the inventory for.
      * @return The inventory for the client.
      */
-    protected abstract fun createInventory(owner: InventoryHolder, client: Client): Inventory
+    protected abstract suspend fun createInventory(owner: InventoryHolder, client: Client): Inventory
 
     override suspend fun closeClient(client: Client, closeInventory: Boolean): Boolean {
         val (inventory, job) = mutex.withLock { inventories.remove(client) } ?: return false

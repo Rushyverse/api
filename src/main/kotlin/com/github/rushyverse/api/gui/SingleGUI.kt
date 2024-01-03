@@ -44,7 +44,7 @@ public abstract class SingleGUI(
         return scope + SupervisorJob(scope.coroutineContext.job)
     }
 
-    override fun createInventory(key: Unit): Inventory {
+    override suspend fun createInventory(key: Unit): Inventory {
         return createInventory()
     }
 
@@ -52,7 +52,7 @@ public abstract class SingleGUI(
      * Create the inventory.
      * @return New created inventory.
      */
-    protected abstract fun createInventory(): Inventory
+    protected abstract suspend fun createInventory(): Inventory
 
     /**
      * Update the inventory.

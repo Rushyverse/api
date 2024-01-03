@@ -192,7 +192,7 @@ private abstract class AbstractSingleGUITest(
     animation: InventoryLoadingAnimation<Unit>? = null
 ) : SingleGUI(plugin, animation) {
 
-    override fun createInventory(): Inventory {
+    override suspend fun createInventory(): Inventory {
         return serverMock.createInventory(null, type)
     }
 
