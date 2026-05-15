@@ -30,22 +30,23 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.org/repository/maven-public/")
+    maven("https://repo.mockbukkit.org/repository/maven-public/")
     maven("https://jitpack.io")
 }
 
 dependencies {
-    val kotlinSerializableVersion = "1.6.0"
+    val kotlinSerializableVersion = "1.7.3"
     val kamlVersion = "0.55.0"
-    val coroutineVersion = "1.6.4"
+    val coroutineVersion = "1.8.1"
     val loggingVersion = "3.0.5"
-    val koinVersion = "3.4.3"
-    val mccoroutineVersion = "2.13.0"
-    val paperVersion = "1.20-R0.1-SNAPSHOT"
-    val mockBukkitVersion = "3.19.1"
+    val koinVersion = "3.5.6"
+    val mccoroutineVersion = "2.14.0"
+    val paperVersion = "1.21.11-R0.1-SNAPSHOT"
+    // val mockBukkitVersion = "4.4.0"
     val junitVersion = "5.10.0"
-    val mockkVersion = "1.12.5"
+    val mockkVersion = "1.14.9"
     val fastboardVersion = "2.0.0"
-    val kotestVersion = "5.6.2"
+    val kotestVersion = "5.9.1"
     val icu4jVersion = "73.2"
 
     api(kotlin("stdlib"))
@@ -77,10 +78,10 @@ dependencies {
     // Scoreboard framework
     api("fr.mrmicky:fastboard:$fastboardVersion")
 
-    api("com.github.Rushyverse:core:6ae31a9250")
+    // api("com.github.Rushyverse:core:6ae31a9250")
 
     // Tests
-    testImplementation("com.github.seeseemelk:MockBukkit-v1.20:$mockBukkitVersion")
+    // testImplementation("org.mockbukkit.mockbukkit:mockbukkit-$mockBukkitVersion")
     testImplementation(kotlin("test-junit5"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutineVersion")
     testImplementation("io.kotest:kotest-assertions-core:$kotestVersion")
@@ -94,7 +95,7 @@ dependencies {
     testImplementation("io.mockk:mockk:$mockkVersion")
 }
 
-val javaVersion get() = JavaVersion.VERSION_17
+val javaVersion get() = JavaVersion.VERSION_21
 val javaVersionString get() = javaVersion.toString()
 val javaVersionInt get() = javaVersionString.toInt()
 
@@ -123,7 +124,9 @@ val dokkaOutputDir = "${rootProject.projectDir}/dokka"
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = javaVersionString
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.fromTarget(javaVersionString))
+        }
     }
 
     withType<JavaCompile> {
