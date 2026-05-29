@@ -2,8 +2,10 @@ import io.gitlab.arturbosch.detekt.Detekt
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    embeddedKotlin("jvm")
-    embeddedKotlin("plugin.serialization")
+    //embeddedKotlin("jvm")
+    //embeddedKotlin("plugin.serialization")
+    kotlin("jvm") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.0"
     id("org.jetbrains.dokka") version "1.9.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("io.gitlab.arturbosch.detekt") version "1.23.1"
@@ -27,10 +29,11 @@ jacoco {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://repo.codemc.org/repository/maven-public/")
-    maven("https://repo.mockbukkit.org/repository/maven-public/")
+    // maven("https://repo.mockbukkit.org/repository/maven-public/")
     maven("https://jitpack.io")
 }
 
@@ -45,7 +48,7 @@ dependencies {
     // val mockBukkitVersion = "4.4.0"
     val junitVersion = "5.10.0"
     val mockkVersion = "1.14.9"
-    val fastboardVersion = "2.0.0"
+    val fastboardVersion = "2.1.5"
     val kotestVersion = "5.9.1"
     val icu4jVersion = "73.2"
 
@@ -79,6 +82,11 @@ dependencies {
     api("fr.mrmicky:fastboard:$fastboardVersion")
 
     // api("com.github.Rushyverse:core:6ae31a9250")
+    api("com.github.Rushyverse:core:2.0.0")
+
+    api("org.komapper:komapper-dialect-postgresql-r2dbc:1.12.0")
+    api("io.r2dbc:r2dbc-spi:1.0.0.RELEASE")
+    api("org.postgresql:r2dbc-postgresql:1.0.5.RELEASE")
 
     // Tests
     // testImplementation("org.mockbukkit.mockbukkit:mockbukkit-$mockBukkitVersion")
@@ -164,6 +172,12 @@ tasks {
             html.required.set(true)
             csv.required.set(false)
         }
+    }
+
+    shadowJar {
+        archiveClassifier.set("all")
+        mergeServiceFiles()
+        append("META-INF/services/org.komapper.r2dbc.spi.R2dbcDialectFactory")
     }
 }
 

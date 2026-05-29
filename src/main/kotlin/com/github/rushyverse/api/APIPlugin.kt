@@ -31,6 +31,7 @@ public class APIPlugin : JavaPlugin() {
     }
 
     override fun onEnable() {
+        Thread.currentThread().contextClassLoader = this::class.java.classLoader
         super.onEnable()
         CraftContext.startKoin(ID_API)
         loadModule(ID_API) {
