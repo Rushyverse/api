@@ -7,6 +7,7 @@ import com.github.rushyverse.api.configuration.reader.IFileReader
 import com.github.rushyverse.api.configuration.reader.YamlFileReader
 import com.github.rushyverse.api.extension.asComponent
 import com.github.rushyverse.api.extension.registerListener
+import com.github.rushyverse.api.gui.GUIListener
 import com.github.rushyverse.api.koin.CraftContext
 import com.github.rushyverse.api.koin.inject
 import com.github.rushyverse.api.koin.loadModule
@@ -16,11 +17,21 @@ import com.github.rushyverse.api.player.Client
 import com.github.rushyverse.api.player.ClientManager
 import com.github.rushyverse.api.player.ClientManagerImpl
 import com.github.rushyverse.api.player.language.LanguageManager
-import com.github.rushyverse.api.serializer.*
+import com.github.rushyverse.api.serializer.ComponentSerializer
+import com.github.rushyverse.api.serializer.DyeColorSerializer
+import com.github.rushyverse.api.serializer.EnchantmentSerializer
+import com.github.rushyverse.api.serializer.ItemStackSerializer
+import com.github.rushyverse.api.serializer.LocationSerializer
+import com.github.rushyverse.api.serializer.MaterialSerializer
+import com.github.rushyverse.api.serializer.NamespacedSerializer
+import com.github.rushyverse.api.serializer.PatternSerializer
+import com.github.rushyverse.api.serializer.PatternTypeSerializer
+import com.github.rushyverse.api.serializer.RangeDoubleSerializer
 import com.github.rushyverse.api.translation.ResourceBundleTranslator
 import com.github.rushyverse.api.translation.Translator
 import com.github.rushyverse.api.translation.registerResourceBundleForSupportedLocales
 import com.github.shynixn.mccoroutine.bukkit.SuspendingJavaPlugin
+import java.util.*
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.SerializersModuleBuilder
 import kotlinx.serialization.modules.contextual
@@ -29,7 +40,6 @@ import org.bukkit.entity.Player
 import org.jetbrains.annotations.Blocking
 import org.koin.core.module.Module
 import org.koin.dsl.bind
-import java.util.*
 
 /**
  * Represents the base functionality required to create a plugin.
@@ -70,6 +80,7 @@ public abstract class Plugin(
 
         registerListener { PlayerListener(this) }
         registerListener { VillagerListener(this) }
+        registerListener { GUIListener(this) }
     }
 
     /**

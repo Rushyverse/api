@@ -8,18 +8,10 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import org.bukkit.block.banner.PatternType
 
-/**
- * Serializer for [PatternType].
- */
 public object PatternTypeSerializer : KSerializer<PatternType> {
 
-    private val enumSerializer = EnumSerializer("patternTypeEnum", PatternType.entries)
-
     override val descriptor: SerialDescriptor
-        get() = PrimitiveSerialDescriptor(
-            "patternType",
-            PrimitiveKind.STRING
-        )
+        get() = PrimitiveSerialDescriptor("patternType", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: PatternType) {
         encoder.encodeString(value.identifier)
@@ -27,6 +19,7 @@ public object PatternTypeSerializer : KSerializer<PatternType> {
 
     override fun deserialize(decoder: Decoder): PatternType {
         val key = decoder.decodeString()
-        return PatternType.getByIdentifier(key.lowercase()) ?: enumSerializer.findEnumValue(key)
+        return PatternType.getByIdentifier(key.lowercase())
+            ?: throw IllegalArgumentException("Unknown PatternType: $key")
     }
 }

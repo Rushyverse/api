@@ -13,4 +13,5 @@ public data class GameData(
     val id: Int,
     var players: Int = 0,
     var state: GameState = GameState.WAITING,
+    val permanent: Boolean = false
 )
